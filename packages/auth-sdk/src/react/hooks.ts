@@ -129,9 +129,9 @@ export function useAuth(logger?: AuthLogger) {
     return new Promise(() => {})
   }
 
-  const handleCallback = async (code: string) => {
+  const handleCallback = async (code: string, codeVerifier?: string) => {
     try {
-      const authResult = await client.exchangeCode(code)
+      const authResult = await client.exchangeCode(code, codeVerifier)
 
       if (mode === 'httpOnly') {
         storeApi

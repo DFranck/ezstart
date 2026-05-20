@@ -59,8 +59,10 @@ describe('AuthCallbackPage — defensive localStorage (LOW-1)', () => {
       await new Promise(resolve => setTimeout(resolve, 150))
     })
 
-    // The OAuth exchange ran and succeeded.
-    expect(handleCallbackMock).toHaveBeenCalledWith('valid_oauth_code')
+    // The OAuth exchange ran and succeeded. The PKCE verifier read from
+    // sessionStorage also threw (Safari private mode) and was swallowed →
+    // verifier is undefined (legacy / backward-compat exchange).
+    expect(handleCallbackMock).toHaveBeenCalledWith('valid_oauth_code', undefined)
     // getItem was attempted (and threw) — but the flow swallowed it.
     expect(getItemSpy).toHaveBeenCalledWith('ezauth_redirect_after_login')
     // CRITICAL: no error state surfaced despite the storage throw.

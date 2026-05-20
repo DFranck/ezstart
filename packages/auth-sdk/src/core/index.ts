@@ -15,9 +15,27 @@ export {
 // Token storage
 export { TokenManager, createMemoryStorage, createLocalStorage } from './token-manager.js'
 
-// Defensive localStorage helpers (Safari private mode / SSR / disabled storage)
-export { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage } from './safe-storage.js'
+// Defensive localStorage / sessionStorage helpers (Safari private mode / SSR /
+// disabled storage)
+export {
+  safeGetLocalStorage,
+  safeSetLocalStorage,
+  safeRemoveLocalStorage,
+  safeGetSessionStorage,
+  safeSetSessionStorage,
+  safeRemoveSessionStorage,
+} from './safe-storage.js'
 export type { SafeStorageLogger } from './safe-storage.js'
+
+// PKCE (RFC 7636 / OAuth 2.1) — agnostic verifier/challenge generation
+export {
+  generateCodeVerifier,
+  deriveCodeChallenge,
+  generatePkcePair,
+  PKCE_METHOD_S256,
+  PKCE_VERIFIER_STORAGE_KEY,
+} from './pkce.js'
+export type { PkcePair } from './pkce.js'
 
 // Errors
 export {

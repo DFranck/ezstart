@@ -96,3 +96,78 @@ export function safeRemoveLocalStorage(key: string): void {
     // Storage disabled / quota exceeded / private mode — non-fatal.
   }
 }
+
+// ---------------------------------------------------------------------------
+// sessionStorage — used for the PKCE code_verifier across an OAuth redirect.
+//
+// `sessionStorage` (not `localStorage`) is the right scope for a PKCE verifier:
+// it is per-tab, cleared when the tab closes, and never shared across tabs —
+// so a verifier minted in one tab can't be read by another. The same Safari-
+// private-mode / disabled-storage / SSR throwing concerns apply, hence the
+// same defensive swallow as the localStorage helpers above.
+// ---------------------------------------------------------------------------
+
+/**
+ * Read a value from `sessionStorage` without ever throwing.
+ *
+ * Returns `null` when missing, server-side, or storage is inaccessible. The
+ * caller treats `null` as "no stored verifier" and falls back to the legacy
+ * (no-PKCE) exchange — the auth flow always proceeds.
+ *
+ * @example
+ * ```ts
+ * const verifier = safeGetSessionStorage('ezauth_pkce_verifier')
+ * ```
+ */
+export function safeGetSessionStorage(key: string): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.sessionStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Write a value to `sessionStorage` without ever throwing. Best-effort — a
+ * storage failure surfaces a `warn` through the injected logger (silent no-op
+ * by default) and the caller continues (PKCE simply degrades to no-PKCE).
+ *
+ * @example
+ * ```ts
+ * safeSetSessionStorage('ezauth_pkce_verifier', verifier, log)
+ * ```
+ */
+export function safeSetSessionStorage(
+  key: string,
+  value: string,
+  logger?: SafeStorageLogger
+): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.sessionStorage.setItem(key, value)
+  } catch (err) {
+    logger?.warn?.(
+      `[auth-sdk] could not persist sessionStorage key "${key}"`,
+      err instanceof Error ? err.message : String(err)
+    )
+  }
+}
+
+/**
+ * Remove a key from `sessionStorage` without ever throwing. Used to clear the
+ * PKCE verifier once the exchange completes (single-use hygiene).
+ *
+ * @example
+ * ```ts
+ * safeRemoveSessionStorage('ezauth_pkce_verifier')
+ * ```
+ */
+export function safeRemoveSessionStorage(key: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.sessionStorage.removeItem(key)
+  } catch {
+    // Storage disabled / quota exceeded / private mode — non-fatal.
+  }
+}

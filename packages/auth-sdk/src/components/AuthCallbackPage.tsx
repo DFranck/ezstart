@@ -1,6 +1,12 @@
 'use client'
 import { parseApiError } from '@ezstart/api-sdk'
-import { safeGetLocalStorage, safeRemoveLocalStorage } from '../core/safe-storage.js'
+import {
+  safeGetLocalStorage,
+  safeRemoveLocalStorage,
+  safeGetSessionStorage,
+  safeRemoveSessionStorage,
+} from '../core/safe-storage.js'
+import { PKCE_VERIFIER_STORAGE_KEY } from '../core/pkce.js'
 import { Button, Div, P, Spinner } from '@ezstart/ui/components'
 import { logger } from './internal-logger.js'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -200,7 +206,27 @@ function CallbackContent({
       processingLocks.add(lockKey)
 
       try {
-        await handleCallback(code)
+        // PKCE (RFC 7636) — if a same-origin OAuth/login flow stashed a
+        // `code_verifier` in sessionStorage before the redirect, recover it
+        // now and complete the bound exchange. When absent (cross-origin SSO,
+        // or a code minted without a challenge) the exchange runs the legacy
+        // path — backward compatible.
+        //
+        // MED-2 — the verifier is cleared ONLY AFTER a successful exchange
+        // (see below), never before the `await`. Clearing it up-front meant a
+        // transient failure (network blip, cold start) destroyed the verifier
+        // and made any retry impossible: the re-navigation would find an empty
+        // sessionStorage and the (PKCE-bound) code could never be redeemed.
+        // Keeping it on failure lets a remount/retry recover and complete it.
+        const pkceVerifier = safeGetSessionStorage(PKCE_VERIFIER_STORAGE_KEY) ?? undefined
+
+        await handleCallback(code, pkceVerifier)
+
+        // Exchange succeeded — NOW clear the single-use verifier (hygiene).
+        if (pkceVerifier) {
+          safeRemoveSessionStorage(PKCE_VERIFIER_STORAGE_KEY)
+        }
+
         setStatus('success')
 
         // The session is now established. Everything below is best-effort

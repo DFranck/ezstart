@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import { OAuthButtons } from '../../components/OAuthButtons.js'
 
@@ -28,7 +28,7 @@ describe('OAuthButtons', () => {
     expect(screen.getByText('ou continuer avec')).toBeInTheDocument()
   })
 
-  it('clicking Google button sets location to OAuth URL', () => {
+  it('clicking Google button sets location to OAuth URL', async () => {
     // jsdom doesn't allow spying on window.location.href,
     // but we can use Object.defineProperty to capture the assignment
     let capturedHref = ''
@@ -49,7 +49,12 @@ describe('OAuthButtons', () => {
     const btn = screen.getByText('Continue with Google')
     fireEvent.click(btn)
 
-    expect(capturedHref).toContain('/api/auth/google?')
+    // The click handler is async (it mints a PKCE pair before navigating), so
+    // wait for the navigation to be assigned. Whether PKCE succeeds or falls
+    // back to no-PKCE, the base authorize URL + app/redirect_uri params hold.
+    await waitFor(() => {
+      expect(capturedHref).toContain('/api/auth/google?')
+    })
     expect(capturedHref).toContain('app=myapp')
     expect(capturedHref).toContain('redirect_uri=')
 

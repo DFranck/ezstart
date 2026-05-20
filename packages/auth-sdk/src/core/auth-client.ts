@@ -143,9 +143,12 @@ export class CoreAuthClient {
   /**
    * Exchange an authorization code for tokens.
    * Returns the token response including the user and optional refresh token.
+   *
+   * Pass `codeVerifier` to complete a PKCE flow (RFC 7636) — required when the
+   * authorization request committed to a `code_challenge`.
    */
-  async exchangeCode(code: string): Promise<AuthToken> {
-    return exchangeCode(this.ctx, code)
+  async exchangeCode(code: string, codeVerifier?: string): Promise<AuthToken> {
+    return exchangeCode(this.ctx, code, codeVerifier)
   }
 
   /** Login with httpOnly cookie (direct, no redirect). */

@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { Button, Div, Span, Spinner } from '@ezstart/ui/components'
 import { useAuthContext } from '../react/auth-provider.js'
+import { generatePkcePair, PKCE_VERIFIER_STORAGE_KEY } from '../core/pkce.js'
+import { safeSetSessionStorage } from '../core/safe-storage.js'
+import { logger } from './internal-logger.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -59,6 +62,45 @@ function normalizeOAuthBase(url: string): string {
   return base
 }
 
+/**
+ * Decide whether to commit to PKCE (RFC 7636) for this OAuth redirect.
+ *
+ * PKCE binds the `code_verifier` (stashed in `sessionStorage`) to the
+ * `code_challenge` sent on the authorize URL. `sessionStorage` is
+ * **origin-scoped**, so the verifier is only recoverable when the page that
+ * handles the `?code=` callback lives on the SAME origin as this button:
+ *
+ * - **First-party ezauth login** (no `redirectUri`, or a same-origin one) —
+ *   `OAuthButtons` runs on `ezauth` and the callback also lands on `ezauth`.
+ *   Same origin ⇒ the verifier survives the Google round trip ⇒ mint PKCE.
+ *   This keeps HIGH-1 closed for the first-party flow.
+ * - **Cross-origin SSO** (`redirectUri` on a foreign consumer origin, e.g.
+ *   `green-pulse.xyz/auth/callback`) — `OAuthButtons` runs on `ezauth` but the
+ *   consumer's `AuthCallbackPage` runs on its own origin and CANNOT read this
+ *   verifier. Minting PKCE here would mint a code bound to a challenge the
+ *   consumer can never satisfy ⇒ "Authentication failed". So we skip PKCE: the
+ *   server mints a legacy code and the consumer exchanges it on the legacy path
+ *   (still protected by the `redirect_uri` cross-check — security unchanged vs
+ *   pre-PKCE). Backward compatible.
+ *
+ * This mirrors `SignInForm`'s `isSameOriginRedirect` exact-origin criterion
+ * (scheme + host + port) so password login and OAuth login behave identically.
+ * Returns `false` server-side or when `redirectUri` is present but unparseable,
+ * so the caller falls back to the no-PKCE flow safely.
+ *
+ * @internal
+ */
+function shouldMintOAuthPkce(redirectUri: string | undefined): boolean {
+  if (typeof window === 'undefined') return false
+  // No explicit redirect → first-party ezauth callback on this same origin.
+  if (!redirectUri) return true
+  try {
+    return new URL(redirectUri, window.location.origin).origin === window.location.origin
+  } catch {
+    return false
+  }
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 /**
@@ -100,7 +142,7 @@ export function OAuthButtons({
   const resolvedApiUrl =
     apiUrl ?? providerApiUrl ?? (typeof window !== 'undefined' ? window.location.origin : undefined)
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     if (!resolvedApiUrl || isRedirecting) return
     setIsRedirecting(true)
     const base = normalizeOAuthBase(resolvedApiUrl)
@@ -108,6 +150,35 @@ export function OAuthButtons({
       app: appName,
       ...(redirectUri && { redirect_uri: redirectUri }),
     })
+
+    // PKCE (RFC 7636 / OAuth 2.1) — only commit to PKCE when the page that will
+    // handle the `?code=` callback lives on THIS origin (first-party ezauth
+    // login, or a same-origin redirect). The verifier is stashed in
+    // `sessionStorage`, which is origin-scoped, so a cross-origin SSO consumer
+    // could never recover it — minting a challenge there would hand the
+    // consumer a code it can't redeem. For that case we deliberately skip PKCE
+    // and let the server mint a legacy code (the consumer exchanges it on the
+    // legacy path, still guarded by the `redirect_uri` cross-check). See
+    // `shouldMintOAuthPkce` for the full rationale; this mirrors `SignInForm`.
+    //
+    // When `crypto.subtle` is unavailable (very old browser / non-secure
+    // context) `generatePkcePair` throws and we also fall back to no-PKCE:
+    // no challenge param is sent → the server mints a legacy code → the
+    // exchange runs the legacy path. Backward compatible end-to-end.
+    if (shouldMintOAuthPkce(redirectUri)) {
+      try {
+        const { codeVerifier, codeChallenge, codeChallengeMethod } = await generatePkcePair()
+        safeSetSessionStorage(PKCE_VERIFIER_STORAGE_KEY, codeVerifier, logger)
+        params.set('code_challenge', codeChallenge)
+        params.set('code_challenge_method', codeChallengeMethod)
+      } catch (pkceErr) {
+        logger.warn(
+          'PKCE pair generation unavailable, falling back to no-PKCE OAuth',
+          pkceErr instanceof Error ? pkceErr.message : String(pkceErr)
+        )
+      }
+    }
+
     // Full page redirect — the loading state is for the brief window between
     // click and the browser kicking off navigation (a slow API can stall
     // here for 1-2s on cold starts).
@@ -121,7 +192,7 @@ export function OAuthButtons({
           type="button"
           variant="outline"
           className="w-full cursor-pointer"
-          onClick={handleGoogleLogin}
+          onClick={() => void handleGoogleLogin()}
           disabled={isRedirecting}
           aria-busy={isRedirecting}
         >

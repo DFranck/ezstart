@@ -13,8 +13,17 @@ import { type ClientContext, parseError, parseErrorCode, unwrapEnvelope } from '
 /**
  * Exchange an authorization code for tokens.
  * Returns the token response including the user and optional refresh token.
+ *
+ * When the login/authorize request committed to a PKCE flow (RFC 7636), pass
+ * the original `codeVerifier` here — the server verifies
+ * `BASE64URL(SHA256(verifier))` against the stored challenge. Omit it for
+ * legacy (no-PKCE) codes.
  */
-export async function exchangeCode(ctx: ClientContext, code: string): Promise<AuthToken> {
+export async function exchangeCode(
+  ctx: ClientContext,
+  code: string,
+  codeVerifier?: string
+): Promise<AuthToken> {
   const response = await fetch(`${ctx.apiUrl}/token`, {
     method: 'POST',
     headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
@@ -23,6 +32,9 @@ export async function exchangeCode(ctx: ClientContext, code: string): Promise<Au
       code,
       app: ctx.appName,
       redirect_uri: ctx.redirectUri,
+      // Only include when present — the server treats a missing verifier as
+      // legacy unless the code was minted with a challenge (then it rejects).
+      ...(codeVerifier ? { code_verifier: codeVerifier } : {}),
     }),
   })
 

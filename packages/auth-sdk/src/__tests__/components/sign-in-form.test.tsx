@@ -156,12 +156,65 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
     submit()
 
     await waitFor(() => {
-      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-same-origin')
+      // PKCE (RFC 7636) — same-origin login mints a verifier and forwards it
+      // to the exchange. The first arg is the code; the second is the verifier
+      // (a 43-char base64url string).
+      expect(handleCallbackMock).toHaveBeenCalledWith(
+        'auth-code-same-origin',
+        expect.stringMatching(/^[A-Za-z0-9\-_]{43}$/)
+      )
     })
     // Navigation must happen AFTER the exchange resolved.
     await waitFor(() => {
       expect(hrefSet.value).toBe('http://localhost:6111/en/admin')
     })
+  })
+
+  it('sends a PKCE S256 challenge on /auth/login for same-origin redirects', async () => {
+    setupLocation('http://localhost:6111')
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-pkce' })
+    handleCallbackMock.mockResolvedValueOnce({ id: 'u1', email: 'user@example.com' })
+
+    render(<SignInForm appName="ezauth" redirectUri="http://localhost:6111/en/admin" />)
+
+    submit()
+
+    await waitFor(() => {
+      expect(mockApiCall).toHaveBeenCalledWith(
+        '/auth/login',
+        expect.objectContaining({
+          body: expect.objectContaining({
+            code_challenge: expect.stringMatching(/^[A-Za-z0-9\-_]{43}$/),
+            code_challenge_method: 'S256',
+          }),
+        })
+      )
+    })
+
+    // The verifier forwarded to the exchange MUST be the SHA-256 preimage of
+    // the challenge sent on login (proves the pair is consistent end-to-end).
+    const { deriveCodeChallenge } = await import('../../core/pkce.js')
+    const loginBody = mockApiCall.mock.calls[0]?.[1]?.body as {
+      code_challenge: string
+    }
+    const exchangeVerifier = handleCallbackMock.mock.calls[0]?.[1] as string
+    expect(await deriveCodeChallenge(exchangeVerifier)).toBe(loginBody.code_challenge)
+  })
+
+  it('does NOT send a PKCE challenge on cross-origin login (verifier cannot cross origins)', async () => {
+    setupLocation('http://localhost:6111')
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-xo' })
+
+    render(<SignInForm appName="ezpay" redirectUri="http://localhost:6131/en/auth/callback" />)
+
+    submit()
+
+    await waitFor(() => {
+      expect(mockApiCall).toHaveBeenCalled()
+    })
+    const body = mockApiCall.mock.calls[0]?.[1]?.body as Record<string, unknown>
+    expect(body.code_challenge).toBeUndefined()
+    expect(body.code_challenge_method).toBeUndefined()
   })
 
   it('does NOT call handleCallback on cross-origin redirects', async () => {
@@ -189,7 +242,7 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
     submit()
 
     await waitFor(() => {
-      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-fail')
+      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-fail', expect.anything())
     })
     // Navigation must NOT have happened.
     expect(hrefSet.value).toBeNull()

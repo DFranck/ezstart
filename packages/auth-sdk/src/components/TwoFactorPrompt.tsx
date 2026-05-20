@@ -33,6 +33,14 @@ export interface TwoFactorPromptProps {
   tempToken: string
   /** Redirect URI after successful 2FA verification */
   redirectUri?: string
+  /**
+   * PKCE (RFC 7636) `code_verifier` from the originating same-origin login.
+   * The API carried the matching challenge across the 2FA detour (in the temp
+   * token), so the post-2FA code is still PKCE-bound — pass the verifier here
+   * to complete the same-origin exchange. Undefined for cross-origin / no-PKCE
+   * flows.
+   */
+  codeVerifier?: string
   /** Called when user wants to go back to the login form */
   onBack?: () => void
   /** Called after successful 2FA (if not using redirect) */
@@ -84,6 +92,7 @@ const TOTP_PATTERN = /^\d{6}$/
 export function TwoFactorPrompt({
   tempToken,
   redirectUri,
+  codeVerifier,
   onBack,
   onSuccess,
   locale: propLocale,
@@ -145,7 +154,9 @@ export function TwoFactorPrompt({
 
         if (isSameOrigin) {
           try {
-            await handleCallback(result.code)
+            // Same-origin → exchange here, passing the PKCE verifier (if the
+            // login committed to one) so the bound code is accepted.
+            await handleCallback(result.code, codeVerifier)
           } catch (exchangeError) {
             logger.error(
               '2FA same-origin code exchange failed:',

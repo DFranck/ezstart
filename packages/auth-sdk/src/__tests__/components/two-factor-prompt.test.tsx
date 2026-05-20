@@ -190,7 +190,9 @@ describe('TwoFactorPrompt', () => {
     fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } })
 
     await waitFor(() => {
-      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-same-origin')
+      // No PKCE in this flow — the verifier prop is undefined, so the exchange
+      // receives `(code, undefined)` (PKCE is opt-in / backward compatible).
+      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-same-origin', undefined)
     })
     await waitFor(() => {
       expect(lastHref).toBe('http://localhost:6111/en/admin')

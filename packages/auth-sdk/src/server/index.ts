@@ -198,3 +198,14 @@ export const sendVerificationRequestSchema = SendVerificationRequestSchema
 export const quickSignupRequestSchema = QuickSignupRequestSchema
 export const supportedLocaleSchema = SupportedLocaleSchema
 export const emailOverrideSchema = EmailOverrideSchema
+
+// PKCE (RFC 7636 / OAuth 2.1) building-block schemas — re-exported so
+// services validating PKCE params OUTSIDE the embedded login/register/token
+// schemas (e.g. the OAuth `/google` authorize route validating
+// `code_challenge` / `code_challenge_method` query params) reuse the SAME
+// bounded, charset-restricted schemas instead of re-declaring them.
+export {
+  PkceCodeChallengeSchema,
+  PkceCodeChallengeMethodSchema,
+  PkceCodeVerifierSchema,
+} from '@ezstart/api-contracts'

@@ -8,8 +8,14 @@ import { buildPostLoginRedirect } from '../../postLoginRedirect.js'
 export interface CompleteLoginRedirectOptions {
   resolvedRedirectUri: string
   code: string
+  /**
+   * PKCE (RFC 7636) `code_verifier` for the same-origin exchange. Only set by
+   * the same-origin path (the verifier never crosses origins). Forwarded to
+   * `handleCallback` so the bound code is accepted. Undefined ⇒ no-PKCE.
+   */
+  codeVerifier?: string
   /** `useAuth().handleCallback` — exchanges the auth code for tokens. */
-  handleCallback: (code: string) => Promise<unknown>
+  handleCallback: (code: string, codeVerifier?: string) => Promise<unknown>
   /** Fallback error message when the same-origin exchange throws a non-Error. */
   fallbackError: string
 }
@@ -38,6 +44,7 @@ export interface CompleteLoginRedirectOptions {
 export async function completeLoginRedirect({
   resolvedRedirectUri,
   code,
+  codeVerifier,
   handleCallback,
   fallbackError,
 }: CompleteLoginRedirectOptions): Promise<void> {
@@ -47,7 +54,9 @@ export async function completeLoginRedirect({
 
   if (isSameOrigin) {
     try {
-      await handleCallback(code)
+      // Same-origin → exchange the code here, passing the PKCE verifier (if
+      // the login committed to one) to complete the bound exchange.
+      await handleCallback(code, codeVerifier)
     } catch (exchangeError) {
       logger.error(
         'Same-origin code exchange failed:',

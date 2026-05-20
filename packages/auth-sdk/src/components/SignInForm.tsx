@@ -3,6 +3,7 @@
 import { Button, Div, Form } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
+import { generatePkcePair } from '../core/pkce.js'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { OAuthButtons } from './OAuthButtons.js'
@@ -23,6 +24,27 @@ import { completeLoginRedirect } from './_internal/sign-in-form/complete-login-r
 import { SignInFormFields } from './_internal/sign-in-form/SignInFormFields.js'
 
 export type { SignInFormProps, SignInFormTexts } from './_internal/sign-in-form/types.js'
+
+/**
+ * True when `redirectUri` resolves to the SAME origin as the current page.
+ *
+ * PKCE for password login is only minted in this case: the verifier stays in
+ * the submit-handler closure and the SDK exchanges the code itself
+ * (`handleCallback`) before navigating. A cross-origin redirect hands the code
+ * to a foreign `/auth/callback` that cannot read this verifier, so PKCE is
+ * skipped there (backward-compat). Returns `false` server-side or when the
+ * URI is missing/unparseable so the caller falls back to no-PKCE safely.
+ *
+ * @internal
+ */
+function isSameOriginRedirect(redirectUri: string | undefined): boolean {
+  if (!redirectUri || typeof window === 'undefined') return false
+  try {
+    return new URL(redirectUri, window.location.origin).origin === window.location.origin
+  } catch {
+    return false
+  }
+}
 
 /**
  * Email + password sign-in form with optional 2FA prompt and OAuth
@@ -78,7 +100,11 @@ export function SignInForm({
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
+  const [twoFactorState, setTwoFactorState] = useState<{
+    tempToken: string
+    /** PKCE verifier from the originating same-origin login (RFC 7636). */
+    codeVerifier?: string
+  } | null>(null)
   // Anti-friction Turnstile: only show after the user has failed
   // `turnstileShowAfterFails` consecutive logins. Reset on success.
   const [failedAttempts, setFailedAttempts] = useState(0)
@@ -111,6 +137,33 @@ export function SignInForm({
     setError('')
 
     try {
+      // PKCE (RFC 7636 / OAuth 2.1) — only mint a challenge when THIS SDK will
+      // perform the /token exchange itself, i.e. a same-origin redirect (the
+      // verifier lives in this closure and never crosses an origin boundary).
+      // For a cross-origin SSO redirect the consumer's `/auth/callback` does
+      // the exchange on a different origin and cannot read this verifier, so
+      // we deliberately skip PKCE there (the code is minted without a
+      // challenge → backward-compat path; the redirect_uri cross-check still
+      // protects against authcode injection). When `crypto.subtle` is missing
+      // (very old browser / non-secure context) `generatePkcePair` throws and
+      // we fall back to the no-PKCE flow.
+      let pkceVerifier: string | undefined
+      let pkceChallenge: string | undefined
+      let pkceMethod: 'S256' | undefined
+      if (isSameOriginRedirect(resolvedRedirectUri)) {
+        try {
+          const pair = await generatePkcePair()
+          pkceVerifier = pair.codeVerifier
+          pkceChallenge = pair.codeChallenge
+          pkceMethod = pair.codeChallengeMethod
+        } catch (pkceErr) {
+          logger.warn(
+            'PKCE pair generation unavailable, falling back to no-PKCE login',
+            pkceErr instanceof Error ? pkceErr.message : String(pkceErr)
+          )
+        }
+      }
+
       const result = await apiCall<{
         code?: string
         requires2FA?: boolean
@@ -123,6 +176,9 @@ export function SignInForm({
           password: formData.password,
           app: appName,
           redirect_uri: resolvedRedirectUri || undefined,
+          ...(pkceChallenge
+            ? { code_challenge: pkceChallenge, code_challenge_method: pkceMethod }
+            : {}),
           ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
@@ -134,7 +190,11 @@ export function SignInForm({
 
       // Handle 2FA requirement
       if (result.requires2FA && result.tempToken) {
-        setTwoFactorState({ tempToken: result.tempToken })
+        // The PKCE challenge (if any) was carried into the temp token by the
+        // API, so the post-2FA code stays bound. The verifier survives in
+        // this same closure until the post-2FA exchange (TwoFactorPrompt runs
+        // in this same page), so stash it on the 2FA state.
+        setTwoFactorState({ tempToken: result.tempToken, codeVerifier: pkceVerifier })
         setLoading(false)
         return
       }
@@ -147,6 +207,7 @@ export function SignInForm({
         await completeLoginRedirect({
           resolvedRedirectUri,
           code: result.code,
+          codeVerifier: pkceVerifier,
           handleCallback,
           fallbackError: t.fallbackError,
         })
@@ -200,6 +261,9 @@ export function SignInForm({
         // the SDK only worked when the consumer explicitly passed one,
         // breaking dogfood standalone (e.g. ezauth /login → /dashboard).
         redirectUri={resolvedRedirectUri}
+        // PKCE verifier (same-origin only) — completes the bound exchange
+        // after 2FA. Undefined ⇒ no-PKCE / cross-origin (backward compat).
+        {...(twoFactorState.codeVerifier ? { codeVerifier: twoFactorState.codeVerifier } : {})}
         onBack={() => setTwoFactorState(null)}
         texts={twoFactorTexts}
       />

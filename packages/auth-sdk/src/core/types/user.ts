@@ -83,6 +83,14 @@ export interface LoginRequest {
   password: string
   app: string
   redirect_uri?: string
+  /**
+   * PKCE (RFC 7636 / OAuth 2.1) — BASE64URL(SHA256(code_verifier)). When set,
+   * the /token exchange requires the matching `code_verifier`. Optional for
+   * backward compatibility with non-PKCE flows.
+   */
+  code_challenge?: string
+  /** PKCE method — `'S256'` only (plain is rejected). */
+  code_challenge_method?: 'S256'
 }
 
 export interface RegisterRequest {
@@ -96,12 +104,22 @@ export interface RegisterRequest {
   locale?: string
   promoCode?: string
   utmSource?: string
+  /** PKCE (RFC 7636) — see {@link LoginRequest.code_challenge}. */
+  code_challenge?: string
+  /** PKCE method — `'S256'` only. */
+  code_challenge_method?: 'S256'
 }
 
 export interface TokenRequest {
   code: string
   app: string
   redirect_uri?: string
+  /**
+   * PKCE (RFC 7636 / OAuth 2.1) — the original `code_verifier`. REQUIRED at
+   * runtime only when the auth code was minted with a `code_challenge`.
+   * Optional for legacy (no-PKCE) codes.
+   */
+  code_verifier?: string
 }
 
 export interface QuickSignUpRequest {
