@@ -1,3 +1,4 @@
+import { PlanSchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 
 // Payment schemas
@@ -135,10 +136,32 @@ export const updatePromoSchema = z.object({
   expiresAt: z.string().datetime().nullable().optional(),
 })
 
+// Full Promo entity (mirrors the `Promo` interface in core/types/promos.ts).
+// Defined here rather than re-exported from @ezstart/api-contracts because the
+// promo wire shape has not been hoisted to api-contracts (only Plan has).
+export const promoSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  /** @deprecated Read `applicationId` instead (90-day dual-write window). */
+  appName: z.string(),
+  applicationId: z.string().optional(),
+  discountType: promoDiscountTypeSchema,
+  discountValue: z.number(),
+  currency: z.string().optional(),
+  duration: promoDurationSchema,
+  durationInMonths: z.number().int().optional(),
+  maxUses: z.number().int().optional(),
+  usedCount: z.number().int(),
+  active: z.boolean(),
+  expiresAt: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
 export const promoResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
-    promo: z.any(),
+    promo: promoSchema,
   }),
 })
 
@@ -186,6 +209,8 @@ export const updatePlanSchema = z.object({
 export const planResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
-    plan: z.any(),
+    // Canonical Plan wire shape from @ezstart/api-contracts (integer-cents
+    // amount + ISO 4217 currency validation), reused instead of z.any().
+    plan: PlanSchema,
   }),
 })

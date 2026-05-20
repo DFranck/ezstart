@@ -73,6 +73,7 @@ export {
   promoDurationSchema,
   createPromoSchema,
   updatePromoSchema,
+  promoSchema,
   promoResponseSchema,
   promoValidationResponseSchema,
   planIntervalSchema,
