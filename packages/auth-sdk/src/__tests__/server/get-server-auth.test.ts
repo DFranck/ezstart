@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { getServerAuth } from '../../server/get-server-auth.js'
+import { DEFAULT_GET_SERVER_AUTH_TIMEOUT_MS, getServerAuth } from '../../server/get-server-auth.js'
 import type { AuthUser } from '../../core/types.js'
 
 const userFixture: AuthUser = {
@@ -232,5 +232,115 @@ describe('getServerAuth', () => {
       fetchImpl: fetchImpl as unknown as typeof fetch,
     })
     expect(user).toBeNull()
+  })
+
+  describe('timeout / AbortSignal', () => {
+    /**
+     * Mock fetch that respects the AbortSignal: rejects with an
+     * `AbortError`-shaped exception when the signal aborts, otherwise hangs
+     * up to `hangMs` and then resolves with `userFixture`.
+     */
+    function makeHangingFetch(hangMs: number): typeof fetch {
+      const impl = (_url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+        return new Promise<Response>((resolve, reject) => {
+          const signal = init?.signal
+          const timer = setTimeout(() => {
+            resolve(jsonResponse({ success: true, data: { user: userFixture } }))
+          }, hangMs)
+          if (signal) {
+            const onAbort = () => {
+              clearTimeout(timer)
+              // Match undici's AbortError shape (DOMException with name='AbortError').
+              const err = Object.assign(new Error('The operation was aborted.'), {
+                name: 'AbortError',
+              })
+              reject(err)
+            }
+            if (signal.aborted) {
+              onAbort()
+            } else {
+              signal.addEventListener('abort', onAbort, { once: true })
+            }
+          }
+        })
+      }
+      return impl as unknown as typeof fetch
+    }
+
+    it('default timeout exposes the documented constant', () => {
+      expect(DEFAULT_GET_SERVER_AUTH_TIMEOUT_MS).toBe(1500)
+    })
+
+    it('returns null gracefully when /me hangs beyond timeoutMs and logs a warn', async () => {
+      const warn = vi.fn()
+      const fetchImpl = makeHangingFetch(1000)
+      const user = await getServerAuth({
+        apiUrl: 'https://api.example.com',
+        cookieHeader: 'session=abc',
+        fetchImpl,
+        logger: { warn },
+        timeoutMs: 50,
+      })
+      expect(user).toBeNull()
+      expect(warn).toHaveBeenCalledTimes(1)
+      const [message, ctx] = warn.mock.calls[0] as [string, Record<string, unknown>]
+      expect(message).toContain('[getServerAuth]')
+      expect(message.toLowerCase()).toContain('timeout')
+      expect(ctx).toMatchObject({ timeoutMs: 50 })
+    })
+
+    it('respects a custom timeoutMs passed by the caller', async () => {
+      const start = Date.now()
+      const user = await getServerAuth({
+        apiUrl: 'https://api.example.com',
+        cookieHeader: 'session=abc',
+        fetchImpl: makeHangingFetch(2000),
+        timeoutMs: 100,
+      })
+      const elapsed = Date.now() - start
+      expect(user).toBeNull()
+      // Should abort close to 100 ms, well below the 2000 ms hang and the
+      // 1500 ms default — give a generous CI-friendly upper bound.
+      expect(elapsed).toBeLessThan(800)
+    })
+
+    it('does not abort a response that arrives before the timeout', async () => {
+      const user = await getServerAuth({
+        apiUrl: 'https://api.example.com',
+        cookieHeader: 'session=abc',
+        // Resolves immediately (next microtask) — well before timeout.
+        fetchImpl: makeHangingFetch(0),
+        timeoutMs: 1000,
+      })
+      expect(user).toEqual(userFixture)
+    })
+
+    it('disables the timeout when timeoutMs is 0', async () => {
+      // With a disabled timeout we cannot wait for a real hang, but we can
+      // assert that the signal is NOT passed (or is undefined) by spying on
+      // the fetch call shape.
+      const fetchImpl = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.signal == null).toBe(true)
+        return jsonResponse({ success: true, data: { user: userFixture } })
+      })
+      const user = await getServerAuth({
+        apiUrl: 'https://api.example.com',
+        cookieHeader: 'session=abc',
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+        timeoutMs: 0,
+      })
+      expect(user).toEqual(userFixture)
+    })
+
+    it('does not throw when logger is omitted on timeout', async () => {
+      await expect(
+        getServerAuth({
+          apiUrl: 'https://api.example.com',
+          cookieHeader: 'session=abc',
+          fetchImpl: makeHangingFetch(500),
+          timeoutMs: 25,
+        })
+      ).resolves.toBeNull()
+    })
   })
 })
