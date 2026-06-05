@@ -12,13 +12,15 @@ import {
 import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
 
-// 🔒 Boot-time critical-deps gate (hacker-A8 V3). Mongo + JWT are
-// non-negotiable. GEMINI_API_KEY stays optional — gacha-analyzer
-// degrades gracefully without AI features. Throws in prod, warns in
-// dev. See `.claude/rules/standard-saas-observability.md` §4.
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3 + A8.5 V5). Mongo + JWT
+// are non-negotiable. GEMINI_API_KEY gates the core AI analyzer feature
+// so it MUST be present in prod — without it the /health/deep probe
+// silently skips its check and the status page shows "operational"
+// while the analyzer is broken. Throws in prod, warns in dev. See
+// `.claude/rules/standard-saas-observability.md` §4.
 assertCriticalDeps({
   app: 'gacha-analyzer',
-  required: ['MONGO_URL', 'JWT_SECRET'],
+  required: ['MONGO_URL', 'JWT_SECRET', 'GEMINI_API_KEY'],
   logger,
 })
 

@@ -22,13 +22,17 @@ import routes, { globalRegistry } from './routes/index.js'
 // the handler returns 503 on every call.
 assertWebhookSecretConfigured()
 
-// 🔒 Boot-time critical-deps gate (hacker-A8 V3). WEBHOOK_SIGNING_SECRET
-// is checked separately via `assertWebhookSecretConfigured` above (it has
-// its own fail-closed contract). Mongo + JWT are non-negotiable. AI
-// providers stay optional. Throws in prod, warns in dev.
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3 + A8.5 V5).
+// WEBHOOK_SIGNING_SECRET is checked separately via
+// `assertWebhookSecretConfigured` above (its own fail-closed contract).
+// Mongo + JWT are non-negotiable, plus every outbound AI provider whose
+// /health/deep check is wired below — missing them in prod would
+// silently skip the probe and produce a false-positive "operational"
+// status while the ESG-analysis AI pipeline is dead. Throws in prod,
+// warns in dev.
 assertCriticalDeps({
   app: 'green-pulse',
-  required: ['MONGO_URL', 'JWT_SECRET'],
+  required: ['MONGO_URL', 'JWT_SECRET', 'GEMINI_API_KEY', 'OPENAI_API_KEY'],
   logger,
 })
 

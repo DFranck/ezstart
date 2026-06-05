@@ -13,13 +13,15 @@ import {
 import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
 
-// 🔒 Boot-time critical-deps gate (hacker-A8 V3). EZBill is a consumer of
-// ezauth + ezpay so RESEND_API_KEY is the only outbound integration. Mongo
-// + JWT are non-negotiable. Throws in prod, warns in dev. See
-// `.claude/rules/standard-saas-observability.md` §4.
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3 + A8.5 V5). EZBill is a
+// consumer of ezauth + ezpay so RESEND_API_KEY is the only outbound
+// integration — but it gates email flows (invoice email, reminders) so
+// missing it in prod = silent skip → status page shows "operational"
+// while emails are dead. Mongo + JWT are non-negotiable. Throws in prod,
+// warns in dev. See `.claude/rules/standard-saas-observability.md` §4.
 assertCriticalDeps({
   app: 'ezbill',
-  required: ['MONGO_URL', 'JWT_SECRET'],
+  required: ['MONGO_URL', 'JWT_SECRET', 'RESEND_API_KEY'],
   logger,
 })
 

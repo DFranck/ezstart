@@ -32,13 +32,24 @@ const socketCorsOrigins = getAllowedOrigins('ezstart')
 const healthCheckScheduler = new HealthCheckScheduler()
 setScheduler(healthCheckScheduler)
 
-// 🔒 Boot-time critical-deps gate (hacker-A8 V3). EZStart is the platform
-// hub — Mongo + JWT are non-negotiable, but the AI providers are
-// optional (the hub surfaces whichever are configured). Throws in prod,
-// warns in dev. See `.claude/rules/standard-saas-observability.md` §4.
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3 + A8.5 V5). EZStart is
+// the platform hub — Mongo + JWT are non-negotiable, plus every outbound
+// integration whose /health/deep check is wired below MUST be in this
+// list. Otherwise a missing prod env var silently skips its probe →
+// status page lies. AI providers + Resend (transactional email) are all
+// hub-surfaced features so they're treated as production-critical.
+// Throws in prod, warns in dev. See
+// `.claude/rules/standard-saas-observability.md` §4.
 assertCriticalDeps({
   app: 'ezstart',
-  required: ['MONGO_URL', 'JWT_SECRET'],
+  required: [
+    'MONGO_URL',
+    'JWT_SECRET',
+    'RESEND_API_KEY',
+    'OPENAI_API_KEY',
+    'ANTHROPIC_API_KEY',
+    'GEMINI_API_KEY',
+  ],
   logger,
 })
 

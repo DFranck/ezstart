@@ -60,7 +60,9 @@ export type AssertCriticalDepsOptions = {
 /**
  * Return the subset of `required` env keys that are missing (empty string
  * counts as missing — that's how Railway / Vercel surface an unset var
- * via the CLI).
+ * via the CLI). Whitespace-only values are also treated as missing
+ * (hacker-A8.5 V9 — a copy-paste env var like `MONGO_URL='   '` would
+ * otherwise pass `findMissingDeps` only to blow up later at connect time).
  *
  * Exposed for tests + ad-hoc callers that want the diagnostic without
  * the throw / warn side effect.
@@ -71,7 +73,7 @@ export function findMissingDeps(
 ): string[] {
   return required.filter(key => {
     const value = env[key]
-    return value === undefined || value === ''
+    return value === undefined || value.trim() === ''
   })
 }
 

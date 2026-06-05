@@ -43,6 +43,14 @@ describe('findMissingDeps', () => {
     expect(missing).toEqual(['B'])
   })
 
+  it('treats a whitespace-only string as missing (hacker-A8.5 V9)', () => {
+    // A copy-paste env var like `MONGO_URL='   '` would pass the empty-string
+    // check (length > 0) and let the API boot in prod, only to blow up later
+    // at the first connect call. Trim before comparing closes that vector.
+    const missing = findMissingDeps(['A', 'B', 'C'], { A: '1', B: '   ', C: '\t\n ' })
+    expect(missing).toEqual(['B', 'C'])
+  })
+
   it('handles an empty `required` array gracefully', () => {
     expect(findMissingDeps([], { A: '1' })).toEqual([])
   })
@@ -157,5 +165,18 @@ describe('assertCriticalDeps', () => {
     })
     const [message] = logger.warn.mock.calls[0] as [string, unknown]
     expect(message).toContain('gacha-analyzer')
+  })
+
+  it('THROWS in prod when a required env var is whitespace-only (hacker-A8.5 V9)', () => {
+    const logger = makeLogger()
+    expect(() =>
+      assertCriticalDeps({
+        app: 'ezauth',
+        required: ['MONGO_URL'],
+        logger,
+        env: { MONGO_URL: '   ' },
+        isProd: true,
+      })
+    ).toThrow(/MONGO_URL/)
   })
 })

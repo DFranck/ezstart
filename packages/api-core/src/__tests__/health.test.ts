@@ -333,7 +333,12 @@ describe('runHealthCheck', () => {
     expect(degradedResult.message).toBe('Slow response (3000ms)')
   })
 
-  it('preserves details payload through sanitization (V2)', async () => {
+  it('preserves allowlisted details fields in prod (V6 — factory-supplied safe keys)', async () => {
+    // Factory-supplied checks (createHttpCheck etc.) only ever emit
+    // pre-sanitized fields (`durationMs`, `slowThresholdMs`, `status`, `url`
+    // — the URL is already sanitized at source via sanitizeUrlForPublicOutput).
+    // Those must round-trip through prod sanitization unchanged so the
+    // status page can still surface useful diagnostics.
     const check: HealthCheck = {
       name: 'http',
       check: () => ({
@@ -349,6 +354,109 @@ describe('runHealthCheck', () => {
       status: 500,
       durationMs: 42,
     })
+  })
+
+  it('strips non-allowlisted details keys in prod (hacker-A8.5 V6)', async () => {
+    // Consumer-supplied checks that stash raw error info under arbitrary
+    // keys (`error`, `stack`, `cause`, `query`, etc.) must NOT leak to the
+    // public /health/deep JSON. Only the SAFE_DETAILS_KEYS allowlist
+    // (`durationMs`, `slowThresholdMs`, `status`, `url`) survives.
+    const check: HealthCheck = {
+      name: 'redis',
+      check: () => ({
+        status: 'down',
+        message: 'NOAUTH Authentication required.',
+        details: {
+          error: 'NOAUTH Authentication required.',
+          stack: 'Error: NOAUTH\n  at RedisClient.send_command ...',
+          cause: { code: 'NOAUTH', address: '10.0.0.5:6379' },
+          query: 'AUTH supersecret-password',
+          durationMs: 12,
+          status: 401,
+        },
+      }),
+    }
+    const result = await runHealthCheck(check, true)
+    expect(result.message).toBe("Check 'redis' failed")
+    expect(result.details).toEqual({ durationMs: 12, status: 401 })
+    // Explicit assertions so a future regression that re-adds these keys
+    // is loud, not silent.
+    expect(result.details).not.toHaveProperty('error')
+    expect(result.details).not.toHaveProperty('stack')
+    expect(result.details).not.toHaveProperty('cause')
+    expect(result.details).not.toHaveProperty('query')
+  })
+
+  it('drops details entirely in prod when no key is allowlisted (V6)', async () => {
+    const check: HealthCheck = {
+      name: 'opaque',
+      check: () => ({
+        status: 'down',
+        message: 'something failed',
+        details: { error: 'raw upstream', secret: 'xxx' },
+      }),
+    }
+    const result = await runHealthCheck(check, true)
+    expect(result.message).toBe("Check 'opaque' failed")
+    expect(result.details).toBeUndefined()
+  })
+
+  it('preserves all details fields in dev mode for debuggability (V6)', async () => {
+    // Dev / staging operator needs the full diagnostic blob to triage
+    // failures locally — the sanitizer must only kick in for prod.
+    const check: HealthCheck = {
+      name: 'redis',
+      check: () => ({
+        status: 'down',
+        message: 'NOAUTH Authentication required.',
+        details: {
+          error: 'NOAUTH Authentication required.',
+          stack: 'Error: NOAUTH\n  at RedisClient...',
+          durationMs: 12,
+        },
+      }),
+    }
+    const result = await runHealthCheck(check, false)
+    expect(result.message).toBe('NOAUTH Authentication required.')
+    expect(result.details).toEqual({
+      error: 'NOAUTH Authentication required.',
+      stack: 'Error: NOAUTH\n  at RedisClient...',
+      durationMs: 12,
+    })
+  })
+
+  it('sanitizes Error.cause chain in prod (hacker-A8.5 V7)', async () => {
+    // Node 16+ chained errors: a check that throws
+    // `new Error('wrap', { cause: realStripeError })` would otherwise leak
+    // the underlying SDK error via the catch branch if the formatter
+    // serialized the cause. In prod we unconditionally emit the generic
+    // fallback so neither `err.message` NOR `err.cause.message` can leak.
+    const cause = new Error('STRIPE_SECRET_INVALID: rk_live_LEAKED_TOKEN')
+    const check: HealthCheck = {
+      name: 'stripe',
+      check: () => {
+        throw new Error('Stripe ping failed', { cause })
+      },
+    }
+    const result = await runHealthCheck(check, true)
+    expect(result.status).toBe('down')
+    expect(result.message).toBe("Check 'stripe' failed")
+    expect(result.message).not.toContain('STRIPE_SECRET_INVALID')
+    expect(result.message).not.toContain('rk_live_LEAKED_TOKEN')
+  })
+
+  it('surfaces the full Error.cause chain in dev mode (V7)', async () => {
+    const cause = new Error('ECONNREFUSED 127.0.0.1:6379')
+    const check: HealthCheck = {
+      name: 'redis',
+      check: () => {
+        throw new Error('Connection failed', { cause })
+      },
+    }
+    const result = await runHealthCheck(check, false)
+    expect(result.status).toBe('down')
+    expect(result.message).toContain('Connection failed')
+    expect(result.message).toContain('ECONNREFUSED 127.0.0.1:6379')
   })
 })
 

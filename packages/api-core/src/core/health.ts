@@ -116,15 +116,44 @@ function genericDownMessage(name: string): string {
 }
 
 /**
- * Sanitize a {@link HealthCheckResult} for public output. When `isProd`
- * is true, any `down` status has its `message` replaced with a generic
- * fallback so raw error strings from upstream drivers (Mongoose, Stripe
- * SDK, fetch) never reach the public `/health/deep` JSON snapshot
- * rendered on `<StatusPage>`.
+ * Allowlist of `details` keys safe to surface on `/health/deep` in prod.
+ * Anything else (raw error stacks, cause chains, consumer diagnostic blobs)
+ * is stripped in {@link sanitizeResultForProd}. Factory checks only ever
+ * emit keys from this list; the URL from `createHttpCheck` is already
+ * sanitized at source (see {@link sanitizeUrlForPublicOutput}).
  *
- * The `details` field is preserved as-is — the URL emitted by
- * `createHttpCheck` is already sanitized at source (see
- * {@link sanitizeUrlForPublicOutput} in `deep-health-checks.ts`).
+ * @internal
+ */
+const SAFE_DETAILS_KEYS = new Set(['durationMs', 'slowThresholdMs', 'status', 'url'])
+
+/**
+ * Filter `details` to {@link SAFE_DETAILS_KEYS} (prod). Neutralises hacker-A8.5
+ * V6: a consumer check that stashes raw error info in `details.error` /
+ * `details.stack` / `details.cause` (e.g. a Redis ping with
+ * `{ details: { error: err.message } }`) would otherwise bypass message
+ * sanitization. Returns `undefined` when nothing survives so the JSON
+ * snapshot stays clean.
+ *
+ * @internal
+ */
+function filterDetailsForProd(
+  details: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined {
+  if (!details) return undefined
+  const filtered: Record<string, unknown> = {}
+  for (const key of Object.keys(details)) {
+    if (SAFE_DETAILS_KEYS.has(key)) filtered[key] = details[key]
+  }
+  return Object.keys(filtered).length > 0 ? filtered : undefined
+}
+
+/**
+ * Sanitize a {@link HealthCheckResult} for public output. In prod a `down`
+ * status has its `message` replaced with a generic fallback (so raw error
+ * strings from upstream drivers never reach the public JSON snapshot) and
+ * its `details` filtered through {@link SAFE_DETAILS_KEYS} (so consumer
+ * checks can't smuggle leaks via `details.error` / `details.stack` /
+ * `details.cause` — hacker-A8.5 V6). Dev mode preserves everything.
  *
  * @internal
  */
@@ -134,7 +163,17 @@ function sanitizeResultForProd(
   isProd: boolean
 ): HealthCheckResult {
   if (!isProd || result.status !== 'down') return result
-  return { ...result, message: genericDownMessage(checkName) }
+  const sanitized: HealthCheckResult = {
+    ...result,
+    message: genericDownMessage(checkName),
+  }
+  const filteredDetails = filterDetailsForProd(result.details)
+  if (filteredDetails === undefined) {
+    delete sanitized.details
+  } else {
+    sanitized.details = filteredDetails
+  }
+  return sanitized
 }
 
 /**
@@ -161,12 +200,37 @@ export async function runHealthCheck(
     const sanitized = sanitizeResultForProd(result, check.name, isProd)
     return { ...sanitized, durationMs: Date.now() - start }
   } catch (err) {
-    const message =
-      isProd || !(err instanceof Error)
-        ? genericDownMessage(check.name)
-        : `${check.name}: ${err.message}`
+    // In prod, emit the generic fallback regardless of the error shape so
+    // neither the top-level `err.message` nor any nested `err.cause.message`
+    // (Node 16+ chained errors — hacker-A8.5 V7) can leak. In dev surface
+    // the full chain so the operator sees the real upstream failure.
+    const message = isProd ? genericDownMessage(check.name) : formatErrorChain(check.name, err)
     return { status: 'down', message, durationMs: Date.now() - start }
   }
+}
+
+/**
+ * Format an error and its `cause` chain into a single dev-friendly string.
+ * Used by the {@link runHealthCheck} catch branch when `isProd === false`
+ * so the operator gets full context (e.g. `mongo: connect failed: ECONNREFUSED`).
+ *
+ * Caller is responsible for never invoking this in production — the prod
+ * branch unconditionally emits {@link genericDownMessage} instead.
+ *
+ * @internal
+ */
+function formatErrorChain(checkName: string, err: unknown): string {
+  if (!(err instanceof Error)) return genericDownMessage(checkName)
+  const parts: string[] = [err.message]
+  let cause: unknown = (err as { cause?: unknown }).cause
+  let depth = 0
+  // Cap the chain depth so a self-referential `cause` never loops forever.
+  while (cause instanceof Error && depth < 4) {
+    parts.push(cause.message)
+    cause = (cause as { cause?: unknown }).cause
+    depth += 1
+  }
+  return `${checkName}: ${parts.join(': ')}`
 }
 
 /**
