@@ -120,7 +120,7 @@ Toaster (sonner, hors providers)
 - [ ] Composants `@ezstart/ui/components` (jamais HTML natif, cf. `ui.md`)
 - [ ] Dark mode fonctionnel
 - [ ] Responsive (mobile-first, breakpoints Tailwind)
-- [ ] Zéro URL hardcoded externe (Vercel preview, ancien domaine) — utiliser env vars pour les URLs cross-app (ex: `NEXT_PUBLIC_EZSTART_WEB_URL`)
+- [ ] Zéro URL hardcoded externe (Vercel preview, ancien domaine) — pour les URLs cross-app, utiliser `getWebUrl(app)` from `@ezstart/config` (auto-dérive selon `DEPLOY_ENV`). Les anciennes env vars `NEXT_PUBLIC_EZ*_WEB_URL` sont deprecated (Phase 3+A1+A5 ENV-DIET 2026-06-05).
 
 ### 2.4 SEO
 

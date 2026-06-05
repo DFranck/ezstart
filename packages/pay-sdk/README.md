@@ -336,11 +336,11 @@ The card picks one of four reasons automatically:
 Each reason ships with English defaults (title, description, CTA). Consumers
 override via the component's `notConfiguredTexts` prop.
 
-To build the CTA link, `<PayProvider>` accepts a `payWebUrl` prop pointing
-to the ezpay web origin (e.g. `https://ezpay.ezstart.xyz`). When omitted, it
-auto-detects `http://localhost:6131` for localhost dev; in production the
-consumer MUST pass it explicitly — otherwise the fallback card renders the
-copy without the CTA button.
+To build the CTA link, `<PayProvider>` resolves `payWebUrl` automatically
+via `getWebUrl('ezpay')` from `@ezstart/config` (returns
+`https://ezpay.ezstart.xyz` in production, `http://localhost:6131` in dev).
+The `payWebUrl` prop is optional — pass it explicitly only to override
+(custom domain, multi-tenant white-label, etc.).
 
 ```tsx
 <PayProvider
