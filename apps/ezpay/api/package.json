@@ -22,7 +22,8 @@
     "configure:portal": "tsx src/scripts/configure-stripe-portal.ts",
     "migrate:connected-accounts-to-apps": "tsx src/scripts/migrate-connected-accounts-to-applications.ts",
     "migrate:plans-to-apps": "tsx src/scripts/migrate-plans-to-applications.ts",
-    "migrate:add-is-test-mode": "tsx src/scripts/migrate-add-is-test-mode.ts"
+    "migrate:add-is-test-mode": "tsx src/scripts/migrate-add-is-test-mode.ts",
+    "rotate-keys": "tsx src/scripts/rotate-keys.ts"
   },
   "dependencies": {
     "@ezstart/api-contracts": "workspace:*",
