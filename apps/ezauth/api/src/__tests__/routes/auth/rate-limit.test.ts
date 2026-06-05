@@ -13,6 +13,9 @@
  *   - verify-email    5 req/min  (token validation, default strict)
  *   - sso/authorize  10 req/min  (legitimate cross-app SSO bursts)
  *   - sso/exchange   10 req/min  (legitimate cross-app SSO bursts)
+ *   - login-cookie/csrf 5 req/min  (SDK-CSRF-PRIME-RATELIMIT-001 — prime endpoint
+ *                                   runs crypto.randomBytes(32) on each call, was
+ *                                   unmetered and trivially DoS-able)
  */
 
 import express from 'express'
@@ -25,11 +28,12 @@ import resetPasswordRouter from '../../../routes/auth/reset-password.js'
 import verifyEmailRouter from '../../../routes/auth/verify-email.js'
 import ssoAuthorizeRouter from '../../../routes/auth/sso-authorize.js'
 import ssoExchangeRouter from '../../../routes/auth/sso-exchange.js'
+import loginCookieRouter from '../../../routes/auth/login-cookie.js'
 
 interface RouteRateLimitCase {
   label: string
   router: express.Router
-  method: 'post'
+  method: 'post' | 'get'
   path: string
   body: Record<string, unknown>
   /** Number of requests allowed BEFORE 429 fires (= configured `max`). */
@@ -84,6 +88,17 @@ const CASES: RouteRateLimitCase[] = [
     path: '/sso/exchange',
     body: {},
     max: 10,
+  },
+  {
+    // SDK-CSRF-PRIME-RATELIMIT-001 — CSRF prime endpoint was previously unmetered;
+    // the SDK now hits it on every Provider mount + each 403 retry. Each call runs
+    // `crypto.randomBytes(32)`, so an unmetered endpoint is a trivial DoS vector.
+    label: 'GET /login-cookie/csrf — 5/min',
+    router: loginCookieRouter,
+    method: 'get',
+    path: '/login-cookie/csrf',
+    body: {},
+    max: 5,
   },
 ]
 

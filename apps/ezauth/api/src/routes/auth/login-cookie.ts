@@ -46,6 +46,12 @@ const docRouter = createRouterWithDoc(loginCookieRegistry, router)
 
 // Rate limiting for login-cookie endpoint (5 req/min per IP)
 const loginCookieRateLimiter = createStrictRateLimiter()
+// SDK-CSRF-PRIME-RATELIMIT-001 (2026-06-05) — the CSRF prime endpoint is called
+// on every Provider mount + on each 403 retry by the SDK (see A7 audit). Without
+// a limiter it's a trivial DoS: each call runs `crypto.randomBytes(32)` server-side.
+// `createStrictRateLimiter()` defaults to 5 req/min per bucket (per-user / per-IP),
+// consistent with every other auth route in this app.
+const csrfRateLimiter = createStrictRateLimiter()
 const csrf = createCsrfMiddleware()
 
 // Login with httpOnly cookie (DUAL-MODE)
@@ -137,7 +143,7 @@ const csrfTokenHandler = (_req: Request, res: Response): void => {
   sendSuccess(res, { message: 'CSRF token generated' })
 }
 
-docRouter.get('/login-cookie/csrf', csrf.generateToken, csrfTokenHandler, {
+docRouter.get('/login-cookie/csrf', csrfRateLimiter, csrf.generateToken, csrfTokenHandler, {
   summary: 'Generate CSRF token for login-cookie',
   tags: ['Authentication'],
 })
