@@ -23,6 +23,7 @@ import jwt from 'jsonwebtoken'
 import { createBaseApiServer } from './core/create-server.js'
 import { createAuthMiddleware } from './core/middleware/auth.js'
 import type { RequestHandler } from 'express'
+import type { HealthCheck } from './core/health.js'
 import type {
   ApiServer,
   AuthenticatedUser,
@@ -47,6 +48,17 @@ export type ApiServerOptions = {
   auth?: { verifyToken: TokenVerifier }
   /** DB connector — awaited on `startServer()`. */
   db?: ServerConfig['db']
+  /**
+   * Extra deep-health checks executed on every `/health/deep` poll, in
+   * addition to the built-in DB ping derived from {@link ApiServerOptions.db}.
+   *
+   * See pre-built factories in `@ezstart/api-core` —
+   * {@link createMongoosePingCheck}, {@link createStripeBalanceCheck},
+   * {@link createResendCheck}, {@link createGeminiCheck},
+   * {@link createOpenAICheck}, {@link createAnthropicCheck},
+   * {@link createHttpCheck}.
+   */
+  deepHealthChecks?: HealthCheck[]
   /** Raw body routes (webhooks). */
   rawBodyRoutes?: string[]
   /** Logger override (default: `@ezstart/logger`). */
@@ -149,6 +161,7 @@ export function createApiServer(appName: AppName, options: ApiServerOptions = {}
     rateLimit: options.rateLimit ?? { preset: 'standard' },
     auth: options.auth,
     db: options.db,
+    deepHealthChecks: options.deepHealthChecks,
     rawBodyRoutes: options.rawBodyRoutes,
     logger,
   })

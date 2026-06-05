@@ -1,6 +1,14 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import { bootApi, createVersionedRouter, initSentry } from '@ezstart/api-core'
+import {
+  bootApi,
+  createMongoosePingCheck,
+  createResendCheck,
+  createVersionedRouter,
+  initSentry,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
 
 // Initialize Sentry BEFORE createApiServer so the error-handler middleware
 // can safely capture exceptions. No-op when SENTRY_DSN is unset (caller can
@@ -68,6 +76,16 @@ const COOKIE_AUTH_ALLOWLIST = [
   /^https:\/\/ezauth-git-[a-z0-9-]+-ezstart\.vercel\.app$/,
 ]
 
+// Deep-health checks executed by GET /health/deep. Each dependency is
+// conditional on the corresponding env var so the readiness probe never
+// reports `down` on a dependency that's intentionally unconfigured (e.g.
+// local dev without Resend). See `.claude/rules/standard-saas-observability.md`
+// §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.RESEND_API_KEY) {
+  deepHealthChecks.push(createResendCheck(process.env.RESEND_API_KEY))
+}
+
 // `useDerivedMode: true` enables the Stripe-pattern test/live partition for
 // the API-key endpoints (`/api/keys/*`, `/api/applications/*`, etc.). Cookie-
 // auth dashboard requests fall back to `'live'` by default — superadmin can
@@ -79,6 +97,7 @@ try {
     mongoDbName: 'ezauth',
     cookieAuthRoutes: COOKIE_AUTH_ROUTES,
     cookieAuthAllowlist: COOKIE_AUTH_ALLOWLIST,
+    deepHealthChecks,
     // Raw body capture for the cross-service subscription webhook receiver.
     // The HMAC signature from EZPay is computed over the EXACT bytes sent on
     // the wire — re-serializing via `JSON.stringify(req.body)` is a future

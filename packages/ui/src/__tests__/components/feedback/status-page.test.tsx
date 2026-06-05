@@ -191,3 +191,169 @@ describe('StatusPage', () => {
     }
   })
 })
+
+// ---------------------------------------------------------------------------
+// Deep mode (mode: 'deep' + deepUrl)
+// ---------------------------------------------------------------------------
+
+describe('StatusPage — deep mode', () => {
+  const deepServices = [
+    {
+      name: 'EZPay API',
+      url: 'https://example.test/ezpay/health',
+      deepUrl: 'https://example.test/ezpay/health/deep',
+      mode: 'deep' as const,
+    },
+  ]
+
+  let fetchMock: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('fetches the deepUrl when mode is deep', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          status: 'ok',
+          checks: {
+            db: { status: 'ok', durationMs: 12 },
+            stripe: { status: 'ok', durationMs: 80 },
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    )
+
+    await act(async () => {
+      render(<StatusPage services={deepServices} refreshIntervalMs={0} />)
+    })
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://example.test/ezpay/health/deep',
+        expect.any(Object)
+      )
+    })
+  })
+
+  it('renders the dependency list with status badges', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          status: 'ok',
+          checks: {
+            db: { status: 'ok', durationMs: 12 },
+            stripe: { status: 'degraded', durationMs: 2200, message: 'Slow' },
+            resend: { status: 'ok', durationMs: 40 },
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    )
+
+    await act(async () => {
+      render(
+        <StatusPage
+          services={deepServices}
+          refreshIntervalMs={0}
+          texts={{
+            dependenciesLabel: 'Dependencies',
+            checkStatusOk: 'OK',
+            checkStatusDegraded: 'Slow',
+            checkStatusDown: 'Down',
+          }}
+        />
+      )
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Dependencies')).toBeInTheDocument()
+    })
+    expect(screen.getByText('db')).toBeInTheDocument()
+    expect(screen.getByText('stripe')).toBeInTheDocument()
+    expect(screen.getByText('resend')).toBeInTheDocument()
+    // Slow appears twice — once as the global Degraded label (capital from
+    // default), once as our overridden checkStatusDegraded. Both badges.
+    const slowBadges = screen.getAllByText('Slow')
+    expect(slowBadges.length).toBeGreaterThanOrEqual(1)
+    // Durations rendered
+    expect(screen.getByText('12ms')).toBeInTheDocument()
+    expect(screen.getByText('2200ms')).toBeInTheDocument()
+  })
+
+  it('flips service state to degraded when a check is degraded', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          status: 'degraded',
+          checks: {
+            db: { status: 'ok', durationMs: 12 },
+            stripe: { status: 'degraded', durationMs: 2200 },
+          },
+        }),
+        { status: 200 }
+      )
+    )
+
+    await act(async () => {
+      render(<StatusPage services={deepServices} refreshIntervalMs={0} />)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(defaultStatusPageTexts.summaryDegraded)).toBeInTheDocument()
+    })
+  })
+
+  it('flips service state to down when any check is down (api returns 503)', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          status: 'down',
+          checks: {
+            db: { status: 'down', message: 'Connection refused' },
+          },
+        }),
+        { status: 503 }
+      )
+    )
+
+    await act(async () => {
+      render(<StatusPage services={deepServices} refreshIntervalMs={0} />)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(defaultStatusPageTexts.summaryDown)).toBeInTheDocument()
+    })
+  })
+
+  it('falls back to shallow probe when mode=deep but deepUrl is missing', async () => {
+    fetchMock.mockResolvedValue(new Response('ok', { status: 200 }))
+
+    const servicesWithoutDeepUrl = [
+      {
+        name: 'EZPay API',
+        url: 'https://example.test/ezpay/health',
+        mode: 'deep' as const,
+        // intentionally no deepUrl
+      },
+    ]
+
+    await act(async () => {
+      render(<StatusPage services={servicesWithoutDeepUrl} refreshIntervalMs={0} />)
+    })
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://example.test/ezpay/health',
+        expect.any(Object)
+      )
+    })
+  })
+})

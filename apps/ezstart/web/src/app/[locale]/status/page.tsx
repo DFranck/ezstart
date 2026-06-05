@@ -17,16 +17,22 @@ export default function StatusRoute() {
           name: t('services.ezstartApi'),
           url: `${EZSTART_API_URL}/health`,
           description: t('services.ezstartApiDescription'),
+          mode: 'deep',
+          deepUrl: `${EZSTART_API_URL}/health/deep`,
         },
         {
           name: t('services.ezauthApi'),
           url: `${EZAUTH_API_URL}/health`,
           description: t('services.ezauthApiDescription'),
+          mode: 'deep',
+          deepUrl: `${EZAUTH_API_URL}/health/deep`,
         },
         {
           name: t('services.ezpayApi'),
           url: `${EZPAY_API_URL}/health`,
           description: t('services.ezpayApiDescription'),
+          mode: 'deep',
+          deepUrl: `${EZPAY_API_URL}/health/deep`,
         },
       ]}
       texts={{
@@ -47,6 +53,10 @@ export default function StatusRoute() {
         responseTimeLabel: t('responseTimeLabel'),
         refreshHint: t('refreshHint'),
         refreshButton: t('refreshButton'),
+        dependenciesLabel: t('dependenciesLabel'),
+        checkStatusOk: t('checkStatus.ok'),
+        checkStatusDegraded: t('checkStatus.degraded'),
+        checkStatusDown: t('checkStatus.down'),
       }}
     />
   )

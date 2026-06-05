@@ -9,6 +9,12 @@
     "responseTimeLabel": "Response time",
     "refreshHint": "Auto-refreshes every {{seconds}}s",
     "refreshButton": "Refresh now",
+    "dependenciesLabel": "Dependencies",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Slow",
+      "down": "Down"
+    },
     "summary": {
       "operational": "All systems operational",
       "degraded": "Partial service disruption",

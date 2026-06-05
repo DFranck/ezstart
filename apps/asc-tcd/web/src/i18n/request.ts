@@ -42,6 +42,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/features.json`),
     import(`../messages/${locale}/transplantation.json`),
   ])
+  const status = await import(`../messages/${locale}/status.json`)
 
   return {
     locale,
@@ -58,6 +59,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       libraries.default,
       features.default,
       transplantation.default,
+      status.default,
     ]),
   }
 })

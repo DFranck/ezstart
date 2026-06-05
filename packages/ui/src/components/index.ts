@@ -28,6 +28,7 @@ export * from './effects/typewriter-effect'
 // Feedback
 export * from './feedback/alert-dialog'
 export * from './feedback/confirm-action-dialog'
+export * from './feedback/dependency-list'
 export * from './feedback/error-alert'
 export * from './feedback/maintenance-banner'
 export * from './feedback/progress'

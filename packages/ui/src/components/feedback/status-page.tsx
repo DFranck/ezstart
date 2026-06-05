@@ -26,31 +26,25 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Badge } from '../data-display/badge'
 import { Button } from '../button'
 import { Card, CardContent, CardHeader } from '../data-display/card'
+import { DependencyList } from './dependency-list'
 import { Spinner } from './spinner'
 import { Div, H1, H2, Main, P, Section, Span } from '../tag'
+import { checkOne } from './status-page-check'
+import type {
+  StatusDependency,
+  StatusService,
+  StatusServiceMode,
+  StatusServiceResult,
+  StatusServiceState,
+} from './status-page-types'
 
-export type StatusServiceState = 'operational' | 'degraded' | 'down' | 'checking'
-
-export interface StatusService {
-  /** Display name (e.g. "EZAuth API"). */
-  name: string
-  /** Full URL to a `/health`-style endpoint that returns 2xx when healthy. */
-  url: string
-  /** Optional one-line description shown under the service name. */
-  description?: string
-}
-
-export interface StatusServiceResult {
-  service: StatusService
-  state: StatusServiceState
-  /** Round-trip time in milliseconds (null when network failure). */
-  responseTimeMs: number | null
-  /** HTTP status code returned by the endpoint, when reachable. */
-  statusCode: number | null
-  /** Last check timestamp. */
-  checkedAt: Date | null
-  /** Error message captured from the failed fetch (timeout, network, non-2xx). */
-  error: string | null
+// Re-exports — preserve the existing public surface of this module.
+export type {
+  StatusDependency,
+  StatusService,
+  StatusServiceMode,
+  StatusServiceResult,
+  StatusServiceState,
 }
 
 export interface StatusPageTexts {
@@ -88,6 +82,14 @@ export interface StatusPageTexts {
   refreshHint: string
   /** Manual refresh button label. */
   refreshButton: string
+  /** Heading for the per-service dependency sublist (deep mode). */
+  dependenciesLabel: string
+  /** Dependency status badge label when `status === 'ok'`. */
+  checkStatusOk: string
+  /** Dependency status badge label when `status === 'degraded'`. */
+  checkStatusDegraded: string
+  /** Dependency status badge label when `status === 'down'`. */
+  checkStatusDown: string
 }
 
 export const defaultStatusPageTexts: StatusPageTexts = {
@@ -108,6 +110,10 @@ export const defaultStatusPageTexts: StatusPageTexts = {
   responseTimeLabel: 'Response time',
   refreshHint: 'Auto-refreshes every {{seconds}}s',
   refreshButton: 'Refresh now',
+  dependenciesLabel: 'Dependencies',
+  checkStatusOk: 'OK',
+  checkStatusDegraded: 'Slow',
+  checkStatusDown: 'Down',
 }
 
 export interface StatusPageProps {
@@ -125,62 +131,6 @@ export interface StatusPageProps {
 
 const FETCH_TIMEOUT_DEFAULT = 5_000
 const REFRESH_INTERVAL_DEFAULT = 30_000
-
-interface CheckOutcome {
-  state: StatusServiceState
-  responseTimeMs: number | null
-  statusCode: number | null
-  error: string | null
-}
-
-async function checkOne(url: string, timeoutMs: number): Promise<CheckOutcome> {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  const start = Date.now()
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      signal: controller.signal,
-      cache: 'no-store',
-      credentials: 'omit',
-    })
-    const responseTimeMs = Date.now() - start
-    clearTimeout(timer)
-
-    if (response.ok || (response.status >= 300 && response.status < 400)) {
-      return {
-        state: 'operational',
-        responseTimeMs,
-        statusCode: response.status,
-        error: null,
-      }
-    }
-
-    return {
-      state: 'degraded',
-      responseTimeMs,
-      statusCode: response.status,
-      error: `HTTP ${response.status} ${response.statusText}`,
-    }
-  } catch (error) {
-    clearTimeout(timer)
-    const responseTimeMs = Date.now() - start
-    const isAbort = error instanceof Error && error.name === 'AbortError'
-    const message = isAbort
-      ? `Timeout after ${timeoutMs}ms`
-      : error instanceof Error
-        ? error.message
-        : 'Network error'
-
-    return {
-      state: 'down',
-      responseTimeMs: isAbort ? null : responseTimeMs,
-      statusCode: null,
-      error: message,
-    }
-  }
-}
 
 /**
  * Derive the global page status from individual service results.
@@ -242,15 +192,17 @@ export function StatusPage({
     setIsRefreshing(true)
     const settled = await Promise.all(
       services.map(async service => {
-        const outcome = await checkOne(service.url, fetchTimeoutMs)
-        return {
+        const outcome = await checkOne(service, fetchTimeoutMs)
+        const result: StatusServiceResult = {
           service,
           state: outcome.state,
           responseTimeMs: outcome.responseTimeMs,
           statusCode: outcome.statusCode,
           checkedAt: new Date(),
           error: outcome.error,
-        } satisfies StatusServiceResult
+        }
+        if (outcome.dependencies) result.dependencies = outcome.dependencies
+        return result
       })
     )
     if (isMountedRef.current) {
@@ -348,41 +300,52 @@ export function StatusPage({
                   <Div
                     key={result.service.url}
                     role="listitem"
-                    className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
                   >
-                    <Div className="flex flex-col gap-0.5">
-                      <Span className="font-medium text-foreground">{result.service.name}</Span>
-                      {result.service.description ? (
-                        <Span className="text-xs text-muted-foreground">
-                          {result.service.description}
-                        </Span>
-                      ) : null}
-                      {result.checkedAt ? (
-                        <Span className="text-xs text-muted-foreground">
-                          {texts.lastCheckedLabel}: {dateFormatter.format(result.checkedAt)}
-                          {result.responseTimeMs !== null
-                            ? ` · ${texts.responseTimeLabel}: ${result.responseTimeMs}ms`
-                            : ''}
-                        </Span>
-                      ) : null}
-                      {result.error && result.state !== 'operational' ? (
-                        <Span className="text-xs text-destructive">{result.error}</Span>
-                      ) : null}
+                    <Div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <Div className="flex flex-col gap-0.5">
+                        <Span className="font-medium text-foreground">{result.service.name}</Span>
+                        {result.service.description ? (
+                          <Span className="text-xs text-muted-foreground">
+                            {result.service.description}
+                          </Span>
+                        ) : null}
+                        {result.checkedAt ? (
+                          <Span className="text-xs text-muted-foreground">
+                            {texts.lastCheckedLabel}: {dateFormatter.format(result.checkedAt)}
+                            {result.responseTimeMs !== null
+                              ? ` · ${texts.responseTimeLabel}: ${result.responseTimeMs}ms`
+                              : ''}
+                          </Span>
+                        ) : null}
+                        {result.error && result.state !== 'operational' ? (
+                          <Span className="text-xs text-destructive">{result.error}</Span>
+                        ) : null}
+                      </Div>
+                      <Badge
+                        variant={STATE_BADGE_VARIANT[result.state]}
+                        size="sm"
+                        dot
+                        pulse={result.state === 'checking'}
+                      >
+                        {result.state === 'operational'
+                          ? texts.stateOperational
+                          : result.state === 'degraded'
+                            ? texts.stateDegraded
+                            : result.state === 'down'
+                              ? texts.stateDown
+                              : texts.stateChecking}
+                      </Badge>
                     </Div>
-                    <Badge
-                      variant={STATE_BADGE_VARIANT[result.state]}
-                      size="sm"
-                      dot
-                      pulse={result.state === 'checking'}
-                    >
-                      {result.state === 'operational'
-                        ? texts.stateOperational
-                        : result.state === 'degraded'
-                          ? texts.stateDegraded
-                          : result.state === 'down'
-                            ? texts.stateDown
-                            : texts.stateChecking}
-                    </Badge>
+                    {result.dependencies && result.dependencies.length > 0 ? (
+                      <DependencyList
+                        dependencies={result.dependencies}
+                        label={texts.dependenciesLabel}
+                        okLabel={texts.checkStatusOk}
+                        degradedLabel={texts.checkStatusDegraded}
+                        downLabel={texts.checkStatusDown}
+                      />
+                    ) : null}
                   </Div>
                 ))}
               </Div>

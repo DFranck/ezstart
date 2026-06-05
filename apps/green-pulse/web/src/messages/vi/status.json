@@ -1,7 +1,7 @@
 {
   "status": {
     "title": "Trạng thái",
-    "intro": "Tình trạng hoạt động thời gian thực của tất cả dịch vụ nền tảng EZStart. Tự động làm mới mỗi 30 giây.",
+    "intro": "Tình trạng hoạt động thời gian thực của các dịch vụ nền tảng GreenPulse. Tự động làm mới mỗi 30 giây.",
     "componentsHeading": "Thành phần dịch vụ",
     "incidentsHeading": "Sự cố",
     "incidentsBody": "Không có sự cố nào đang hoạt động.",
@@ -28,12 +28,12 @@
       "checking": "Đang kiểm tra"
     },
     "services": {
+      "greenPulseApi": "GreenPulse API",
+      "greenPulseApiDescription": "Báo cáo ESG, chấm điểm bền vững, webhooks",
       "ezauthApi": "EZAuth API",
       "ezauthApiDescription": "Xác thực, phiên, OAuth, khóa API",
       "ezpayApi": "EZPay API",
-      "ezpayApiDescription": "Gói, đăng ký, thanh toán, Stripe Connect",
-      "ezstartApi": "EZStart API",
-      "ezstartApiDescription": "Trung tâm nền tảng, giám sát, tổng hợp trạng thái"
+      "ezpayApiDescription": "Gói, đăng ký, thanh toán"
     }
   }
 }

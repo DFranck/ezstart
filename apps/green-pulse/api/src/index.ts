@@ -1,7 +1,15 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
-import { bootApi, createVersionedRouter } from '@ezstart/api-core'
+import {
+  bootApi,
+  createGeminiCheck,
+  createMongoosePingCheck,
+  createOpenAICheck,
+  createVersionedRouter,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
 import { ensureEsgWebhookEventIndexes } from './models/EsgWebhookEvent.js'
 import { assertWebhookSecretConfigured } from './services/esg.service.js'
 import routes, { globalRegistry } from './routes/index.js'
@@ -13,12 +21,25 @@ import routes, { globalRegistry } from './routes/index.js'
 // the handler returns 503 on every call.
 assertWebhookSecretConfigured()
 
+// Deep-health checks executed by GET /health/deep. AI providers are gated
+// on their env vars so the readiness probe never reports `down` on an
+// intentionally-unconfigured dependency. See
+// `.claude/rules/standard-saas-observability.md` §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.GEMINI_API_KEY) {
+  deepHealthChecks.push(createGeminiCheck(process.env.GEMINI_API_KEY))
+}
+if (process.env.OPENAI_API_KEY) {
+  deepHealthChecks.push(createOpenAICheck(process.env.OPENAI_API_KEY))
+}
+
 // No cookie-auth routes: green-pulse consumes EZAuth for identity, no own cookies.
 // Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
 let app: import('@ezstart/api-core').Express
 try {
   ;({ app } = await bootApi('green-pulse', {
     mongoDbName: 'greenpulse',
+    deepHealthChecks,
     // Raw body capture for the ESG webhook receiver. The HMAC signature from
     // the upstream ESG SaaS is computed over the EXACT bytes sent on the wire
     // — re-serializing via `JSON.stringify(req.body)` is a future engine

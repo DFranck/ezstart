@@ -1,9 +1,9 @@
 import { StatusPage } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 
+const GREEN_PULSE_API_URL = process.env.NEXT_PUBLIC_GREEN_PULSE_API_URL ?? 'http://localhost:6160'
 const EZAUTH_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
 const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130'
-const EZSTART_API_URL = process.env.NEXT_PUBLIC_EZSTART_API_URL ?? 'http://localhost:6100'
 
 export default function StatusRoute() {
   const t = useTranslations('status')
@@ -13,6 +13,13 @@ export default function StatusRoute() {
     <StatusPage
       locale={locale}
       services={[
+        {
+          name: t('services.greenPulseApi'),
+          url: `${GREEN_PULSE_API_URL}/health`,
+          description: t('services.greenPulseApiDescription'),
+          mode: 'deep',
+          deepUrl: `${GREEN_PULSE_API_URL}/health/deep`,
+        },
         {
           name: t('services.ezauthApi'),
           url: `${EZAUTH_API_URL}/health`,
@@ -26,13 +33,6 @@ export default function StatusRoute() {
           description: t('services.ezpayApiDescription'),
           mode: 'deep',
           deepUrl: `${EZPAY_API_URL}/health/deep`,
-        },
-        {
-          name: t('services.ezstartApi'),
-          url: `${EZSTART_API_URL}/health`,
-          description: t('services.ezstartApiDescription'),
-          mode: 'deep',
-          deepUrl: `${EZSTART_API_URL}/health/deep`,
         },
       ]}
       texts={{

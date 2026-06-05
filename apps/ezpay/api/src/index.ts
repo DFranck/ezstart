@@ -2,7 +2,16 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
-import { bootApi, createVersionedRouter } from '@ezstart/api-core'
+import {
+  bootApi,
+  createMongoosePingCheck,
+  createResendCheck,
+  createStripeBalanceCheck,
+  createVersionedRouter,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
+import Stripe from 'stripe'
 import { ensureWebhookEventIndexes } from './models/WebhookEvent.js'
 import routes, { registries } from './routes/index.js'
 import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
@@ -20,6 +29,22 @@ if (process.env.NODE_ENV === 'production' && !process.env.EZPAY_SERVER_EZAUTH_KE
   )
 }
 
+// Deep-health checks executed by GET /health/deep. Stripe and Resend are
+// gated on their respective env vars so the readiness probe never reports
+// `down` on a dependency that's intentionally unconfigured (e.g. local dev
+// without external credentials). See `.claude/rules/standard-saas-observability.md`
+// §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.STRIPE_SECRET_KEY) {
+  // Stripe instance is dedicated to the health probe — short timeout, no
+  // network retries beyond what the SDK does by default.
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+  deepHealthChecks.push(createStripeBalanceCheck(stripe))
+}
+if (process.env.RESEND_API_KEY) {
+  deepHealthChecks.push(createResendCheck(process.env.RESEND_API_KEY))
+}
+
 // EZPay is a pure Bearer/publishable-key API — it consumes EZAuth JWTs but
 // never sets its own cookies. Tier 1/2 permissive CORS (ACAO: *) applies to
 // every endpoint. See .claude/rules/standard-saas-cors.md.
@@ -34,6 +59,7 @@ try {
     mongoDbName: 'ezpay',
     rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
     cookieAuthRoutes: [],
+    deepHealthChecks,
     useDerivedMode: true,
     onReady: async ({ app }) => {
       // 🔒 Build the WebhookEvent unique `eventId` index BEFORE accepting

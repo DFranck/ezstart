@@ -1,8 +1,22 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
-import { bootApi, createVersionedRouter } from '@ezstart/api-core'
+import {
+  bootApi,
+  createGeminiCheck,
+  createMongoosePingCheck,
+  createVersionedRouter,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
+
+// Deep-health checks executed by GET /health/deep. See
+// `.claude/rules/standard-saas-observability.md` §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.GEMINI_API_KEY) {
+  deepHealthChecks.push(createGeminiCheck(process.env.GEMINI_API_KEY))
+}
 
 // No cookie-auth routes: gacha-analyzer consumes EZAuth for identity, no own cookies.
 // Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
@@ -11,6 +25,7 @@ try {
   ;({ app } = await bootApi('gacha-analyzer', {
     mongoDbName: 'game-analyzer',
     cookieAuthRoutes: [],
+    deepHealthChecks,
     onReady: ({ app }) => {
       // Routes available at /api/* and /api/v1/*
       app.use(createVersionedRouter('/api', routes))

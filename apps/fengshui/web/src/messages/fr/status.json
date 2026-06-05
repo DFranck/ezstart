@@ -1,7 +1,7 @@
 {
   "status": {
     "title": "Statut",
-    "intro": "État en temps réel des services de la plateforme EZStart. Actualisé automatiquement toutes les 30 s.",
+    "intro": "État en temps réel des services amont utilisés par FengShui. Actualisé automatiquement toutes les 30 s.",
     "componentsHeading": "Composants du service",
     "incidentsHeading": "Incidents",
     "incidentsBody": "Aucun incident actif signalé.",
@@ -28,12 +28,10 @@
       "checking": "Vérification"
     },
     "services": {
-      "ezstartApi": "API EZStart",
-      "ezstartApiDescription": "Hub plateforme, monitoring, agrégation des statuts",
       "ezauthApi": "API EZAuth",
       "ezauthApiDescription": "Authentification, sessions, OAuth, clés API",
       "ezpayApi": "API EZPay",
-      "ezpayApiDescription": "Plans, abonnements, paiements, Stripe Connect"
+      "ezpayApiDescription": "Plans, abonnements, paiements"
     }
   }
 }

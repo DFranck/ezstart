@@ -9,6 +9,12 @@
     "responseTimeLabel": "Temps de réponse",
     "refreshHint": "Actualisation automatique toutes les {{seconds}} s",
     "refreshButton": "Actualiser",
+    "dependenciesLabel": "Dépendances",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Lent",
+      "down": "Hors service"
+    },
     "summary": {
       "operational": "Tous les systèmes sont opérationnels",
       "degraded": "Interruption partielle de service",

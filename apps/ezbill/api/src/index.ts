@@ -2,8 +2,22 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
-import { bootApi, createVersionedRouter } from '@ezstart/api-core'
+import {
+  bootApi,
+  createMongoosePingCheck,
+  createResendCheck,
+  createVersionedRouter,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
+
+// Deep-health checks executed by GET /health/deep. See
+// `.claude/rules/standard-saas-observability.md` §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.RESEND_API_KEY) {
+  deepHealthChecks.push(createResendCheck(process.env.RESEND_API_KEY))
+}
 
 // No cookie-auth routes: EZBill consumes EZAuth for identity, no own cookies.
 // Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
@@ -12,6 +26,7 @@ try {
   ;({ app } = await bootApi('ezbill', {
     mongoDbName: 'ezbill',
     cookieAuthRoutes: [],
+    deepHealthChecks,
     onReady: ({ app }) => {
       // Routes available at /api/* and /api/v1/*
       app.use(createVersionedRouter('/api', routes))

@@ -2,7 +2,18 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
-import { bootApi, createSocketServer, createVersionedRouter } from '@ezstart/api-core'
+import {
+  bootApi,
+  createAnthropicCheck,
+  createGeminiCheck,
+  createMongoosePingCheck,
+  createOpenAICheck,
+  createResendCheck,
+  createSocketServer,
+  createVersionedRouter,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries, setScheduler } from './routes/index.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
@@ -20,6 +31,25 @@ const socketCorsOrigins = getAllowedOrigins('ezstart')
 const healthCheckScheduler = new HealthCheckScheduler()
 setScheduler(healthCheckScheduler)
 
+// Deep-health checks executed by GET /health/deep. AI providers are
+// gated on their respective env vars so the readiness probe never reports
+// `down` on a dependency that's intentionally unconfigured. EZStart is the
+// platform hub, so it surfaces the multi-provider AI gateway state on the
+// status page. See `.claude/rules/standard-saas-observability.md` §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.RESEND_API_KEY) {
+  deepHealthChecks.push(createResendCheck(process.env.RESEND_API_KEY))
+}
+if (process.env.OPENAI_API_KEY) {
+  deepHealthChecks.push(createOpenAICheck(process.env.OPENAI_API_KEY))
+}
+if (process.env.ANTHROPIC_API_KEY) {
+  deepHealthChecks.push(createAnthropicCheck(process.env.ANTHROPIC_API_KEY))
+}
+if (process.env.GEMINI_API_KEY) {
+  deepHealthChecks.push(createGeminiCheck(process.env.GEMINI_API_KEY))
+}
+
 // No cookie-auth routes: EZStart hub consumes EZAuth for identity, no own cookies.
 // Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
 let app: import('@ezstart/api-core').Express
@@ -27,6 +57,7 @@ try {
   ;({ app } = await bootApi('ezstart', {
     mongoDbName: 'ezstart',
     cookieAuthRoutes: [],
+    deepHealthChecks,
     onReady: ({ app }) => {
       // Health check endpoint (non-versioned, returns scheduler status too).
       // Mounted BEFORE versioned routes so it wins in the middleware chain.

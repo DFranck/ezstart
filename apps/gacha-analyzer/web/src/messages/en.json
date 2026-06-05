@@ -410,5 +410,40 @@
       "TEST": "Continue upgrading to evaluate",
       "SELL": "Does not meet minimum rarity thresholds"
     }
+  },
+  "status": {
+    "title": "Status",
+    "intro": "Real-time health of Gacha Analyzer platform services. Auto-refreshed every 30s.",
+    "componentsHeading": "Service components",
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "No active incidents reported.",
+    "lastCheckedLabel": "Last checked",
+    "responseTimeLabel": "Response time",
+    "refreshHint": "Auto-refreshes every {{seconds}}s",
+    "refreshButton": "Refresh now",
+    "dependenciesLabel": "Dependencies",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Slow",
+      "down": "Down"
+    },
+    "summary": {
+      "operational": "All systems operational",
+      "degraded": "Partial service disruption",
+      "down": "Major outage",
+      "checking": "Checking services"
+    },
+    "state": {
+      "operational": "Operational",
+      "degraded": "Degraded",
+      "down": "Down",
+      "checking": "Checking"
+    },
+    "services": {
+      "gachaApi": "Gacha Analyzer API",
+      "gachaApiDescription": "Vision scans, history, recommendations",
+      "ezauthApi": "EZAuth API",
+      "ezauthApiDescription": "Authentication, sessions, OAuth, API keys"
+    }
   }
 }

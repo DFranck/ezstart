@@ -48,6 +48,21 @@ export {
   type HealthCheckStatus,
 } from './core/health.js'
 
+// Pre-built health check factories for common dependencies (Mongo, Stripe,
+// Resend, AI providers, generic HTTP).
+export {
+  createAnthropicCheck,
+  createGeminiCheck,
+  createHttpCheck,
+  createMongoosePingCheck,
+  createOpenAICheck,
+  createResendCheck,
+  createStripeBalanceCheck,
+  type DeepHealthCheckOptions,
+  type MongoosePingable,
+  type StripeBalanceClient,
+} from './core/deep-health-checks.js'
+
 // Middlewares
 export {
   createCorsMiddleware,
