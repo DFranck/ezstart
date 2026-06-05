@@ -13,8 +13,16 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
-import { esgService } from '../../services/esg.service.js'
-import { claimEsgWebhookEvent } from '../../models/EsgWebhookEvent.js'
+import {
+  esgService,
+  isLegacyHmacEnabled,
+  ESG_LEGACY_HMAC_SUNSET_DATE,
+} from '../../services/esg.service.js'
+import {
+  claimEsgWebhookEvent,
+  markEsgWebhookEventProcessed,
+  releaseEsgWebhookEventClaim,
+} from '../../models/EsgWebhookEvent.js'
 import { WebhookEventSchema, type WebhookEvent } from '@green-pulse/types'
 
 export const handleEsgReportRegistry = new OpenAPIRegistry()
@@ -148,10 +156,9 @@ handleEsgReportRouter.post(
       // Dual-mode (transition period): if the header carries a timestamp
       // (`t=<unix>,v1=<hex>`) we enforce replay protection via the
       // EZStart-Signature protocol — Stripe-pattern 5-minute tolerance
-      // window. If the header is a bare hex digest, we fall back to the
-      // legacy bare-HMAC verifier so existing integrators keep working
-      // while they migrate. Once all senders are migrated this `else`
-      // branch can be deleted (tracked: BACKLOG ESG-WEBHOOK-LEGACY-SUNSET).
+      // window. If the header is a bare hex digest, the legacy bare-HMAC
+      // verifier is gated behind `ESG_LEGACY_HMAC_ENABLED` (hacker A1b.5
+      // V4) — off by default in production/staging, on in local dev.
       const looksTimestamped = signatureHeader.includes('t=') && signatureHeader.includes('v1=')
       if (looksTimestamped) {
         const result = esgService.verifyTimestampedSignature(rawBytes, signatureHeader)
@@ -163,11 +170,43 @@ handleEsgReportRouter.post(
           return sendError(res, 'Invalid webhook signature', 401)
         }
       } else {
-        // Legacy bare-HMAC path (no replay protection). New integrators
-        // MUST send the timestamped header.
+        // Legacy bare-HMAC path. Captured signatures can be replayed
+        // indefinitely (no timestamp, no replay window) — that's why this
+        // path is gated. New integrators MUST send the timestamped v1
+        // header (cf. ESG-WEBHOOK-LEGACY-SUNSET in BACKLOG, sunset
+        // 2026-12-01).
+        if (!isLegacyHmacEnabled()) {
+          // Audit-trail the attempt so we can spot legacy callers still in
+          // flight when the gate is disabled (typical: staging rollout
+          // testing the cutover BEFORE prod sunset, or a stale integrator
+          // re-delivering after migration).
+          const remoteIp =
+            (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+            req.ip ??
+            'unknown'
+          const userAgent = req.headers['user-agent'] ?? 'unknown'
+          logger.warn(
+            `[LEGACY HMAC BLOCKED] Bare-HMAC webhook rejected (sunset ${ESG_LEGACY_HMAC_SUNSET_DATE}, gate ESG_LEGACY_HMAC_ENABLED=false). ip=${remoteIp} userAgent=${userAgent}`
+          )
+          return sendError(
+            res,
+            'Legacy HMAC format no longer accepted. Use v1 format: t=<unix>,v1=<hex>',
+            401
+          )
+        }
         if (!esgService.verifyWebhookSignature(rawBytes, signatureHeader)) {
           return sendError(res, 'Invalid webhook signature', 401)
         }
+        // Legacy gate is open — log loudly so the integrator (and operator)
+        // sees the migration deadline on every successful legacy delivery.
+        const remoteIp =
+          (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+          req.ip ??
+          'unknown'
+        const userAgent = req.headers['user-agent'] ?? 'unknown'
+        logger.warn(
+          `[LEGACY HMAC] Legacy bare-HMAC webhook accepted (sunset ${ESG_LEGACY_HMAC_SUNSET_DATE}). Migrate to v1 format (t=<unix>,v1=<hex>). ip=${remoteIp} userAgent=${userAgent}`
+        )
       }
 
       // ---- 6. Validate payload shape ------------------------------------
@@ -177,16 +216,16 @@ handleEsgReportRouter.post(
       }
       const event = validation.data
 
-      // ---- 7. Idempotency claim (hacker A1b — E2) -----------------------
-      // Claim the event BEFORE running any side-effect. A duplicate claim
-      // means this delivery is a replay (or an at-least-once redelivery)
-      // — short-circuit to 200 so the upstream stops retrying. The dedup
-      // key is the upstream `job_id` (natural ID) or, as a fallback, a
-      // SHA-256 of the raw signed bytes.
+      // ---- 7. Idempotency claim (hacker A1b — E2 / A1b.5 — E4) ----------
+      // At-least-once semantics: claim BEFORE dispatch, then either mark
+      // processed (success) or release (failure). On crash mid-dispatch
+      // the next retry sees a stale `claimedAt` and recovers — side-effect
+      // is guaranteed to run at least once (handlers must be idempotent at
+      // the business layer: upserts, dedup'd emails by job_id, etc.).
       const eventKey = deriveEventKey(event, rawBytes)
-      let firstSeen: boolean
+      let claimOutcome: Awaited<ReturnType<typeof claimEsgWebhookEvent>>
       try {
-        firstSeen = await claimEsgWebhookEvent(eventKey, { eventType: event.event_type })
+        claimOutcome = await claimEsgWebhookEvent(eventKey, { eventType: event.event_type })
       } catch (claimErr) {
         // Idempotency store unreachable — do NOT process blindly (would
         // re-run side-effects on retry) and do NOT ack (let upstream
@@ -197,28 +236,66 @@ handleEsgReportRouter.post(
         )
         return sendError(res, 'Idempotency store unavailable', 503)
       }
-      if (!firstSeen) {
+      if (claimOutcome === 'duplicate') {
         logger.info(`Duplicate ESG webhook ignored (already processed): ${eventKey}`)
         return sendSuccess(res, { message: 'Webhook already processed', duplicate: true })
       }
+      if (claimOutcome === 'in-flight') {
+        // Another worker is currently processing this event AND its claim
+        // is still fresh. Return 503 so the upstream retries — at worst we
+        // wait for the in-flight worker to finish (which will mark the row
+        // processed) OR for the stale window to expire (which lets us
+        // recover via `'recovered'`).
+        logger.warn(`ESG webhook claim in-flight, returning 503 for retry: ${eventKey}`)
+        return sendError(res, 'Event currently being processed, retry later', 503)
+      }
+      if (claimOutcome === 'recovered') {
+        // Previous worker crashed mid-dispatch (hacker A1b.5 — E4). We
+        // own the claim now; side-effects run again. Handlers MUST be
+        // idempotent at the business layer.
+        logger.warn(
+          `[E4 RECOVERY] Re-dispatching ESG webhook after stale claim recovered: ${eventKey}`
+        )
+      }
 
       // ---- 8. Dispatch --------------------------------------------------
+      // Wrap dispatch in try/catch so a thrown handler RELEASES the claim
+      // (stamps `claimedAt = epoch`) — the next upstream retry then sees
+      // an immediately-stale claim and recovers without waiting for the
+      // 5-min window. On success we MARK the claim processed, closing
+      // future duplicates.
       logger.info(`📥 Webhook received: ${event.event_type} for job ${event.job_id}`)
-      switch (event.event_type) {
-        case 'report.completed':
-          await handleReportCompleted(event)
-          break
+      try {
+        switch (event.event_type) {
+          case 'report.completed':
+            await handleReportCompleted(event)
+            break
 
-        case 'report.failed':
-          await handleReportFailed(event)
-          break
+          case 'report.failed':
+            await handleReportFailed(event)
+            break
 
-        case 'data.processed':
-          await handleDataProcessed(event)
-          break
+          case 'data.processed':
+            await handleDataProcessed(event)
+            break
 
-        default:
-          logger.warn(`Unknown webhook event type: ${event.event_type}`)
+          default:
+            logger.warn(`Unknown webhook event type: ${event.event_type}`)
+        }
+        await markEsgWebhookEventProcessed(eventKey)
+      } catch (dispatchErr) {
+        // Dispatch failed — release the claim so the next retry can pick
+        // it up immediately. Re-throw so the outer catch maps to a 500
+        // (the upstream will retry per its policy).
+        try {
+          await releaseEsgWebhookEventClaim(eventKey)
+        } catch (releaseErr) {
+          logger.error(
+            '[E4 RECOVERY] Failed to release claim after dispatch error — claim will recover via stale window:',
+            releaseErr instanceof Error ? releaseErr : String(releaseErr)
+          )
+        }
+        throw dispatchErr
       }
 
       sendSuccess(res, { message: 'Webhook processed successfully' })

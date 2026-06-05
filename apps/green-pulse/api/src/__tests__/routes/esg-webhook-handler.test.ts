@@ -22,16 +22,32 @@ import type { Request, Response } from 'express'
 // "cannot access before initialization" trap.
 // ----------------------------------------------------------------------------
 vi.mock('../../models/EsgWebhookEvent.js', () => {
-  const claim = vi.fn<(key: string, meta?: { eventType?: string }) => Promise<boolean>>()
+  const claim =
+    vi.fn<
+      (
+        key: string,
+        meta?: { eventType?: string }
+      ) => Promise<'fresh' | 'recovered' | 'duplicate' | 'in-flight'>
+    >()
+  const mark = vi.fn<(key: string) => Promise<void>>()
+  const release = vi.fn<(key: string) => Promise<void>>()
   return {
     claimEsgWebhookEvent: claim,
+    markEsgWebhookEventProcessed: mark,
+    releaseEsgWebhookEventClaim: release,
   }
 })
 
 import handleEsgReportRouter from '../../routes/webhooks/handleEsgReport.js'
-import { claimEsgWebhookEvent } from '../../models/EsgWebhookEvent.js'
+import {
+  claimEsgWebhookEvent,
+  markEsgWebhookEventProcessed,
+  releaseEsgWebhookEventClaim,
+} from '../../models/EsgWebhookEvent.js'
 
 const claimMock = vi.mocked(claimEsgWebhookEvent)
+const markMock = vi.mocked(markEsgWebhookEventProcessed)
+const releaseMock = vi.mocked(releaseEsgWebhookEventClaim)
 
 const TEST_SECRET = 'whsec_handler_e2e_test'
 
@@ -166,12 +182,19 @@ describe('POST /webhooks/esg-report — hardening (V2 / V3 / E1 / E2)', () => {
 
   beforeEach(() => {
     process.env.WEBHOOK_SIGNING_SECRET = TEST_SECRET
+    // V4 default: keep legacy path enabled for backwards-compat tests.
+    // The dedicated V4 tests override this explicitly.
+    process.env.ESG_LEGACY_HMAC_ENABLED = 'true'
     handler = getHandler()
     // Debug — log the router stack structure on first call only
     claimMock.mockReset()
+    markMock.mockReset()
+    releaseMock.mockReset()
     // Default behaviour: every fresh claim succeeds. Individual tests can
     // override this for replay scenarios.
-    claimMock.mockResolvedValue(true)
+    claimMock.mockResolvedValue('fresh')
+    markMock.mockResolvedValue(undefined)
+    releaseMock.mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -180,6 +203,8 @@ describe('POST /webhooks/esg-report — hardening (V2 / V3 / E1 / E2)', () => {
     } else {
       process.env.WEBHOOK_SIGNING_SECRET = originalSecret
     }
+    delete process.env.ESG_LEGACY_HMAC_ENABLED
+    delete process.env.DEPLOY_ENV
   })
 
   // ------------------------------------------------------------------
@@ -310,8 +335,8 @@ describe('POST /webhooks/esg-report — hardening (V2 / V3 / E1 / E2)', () => {
     })
     const captured = makeRes()
 
-    // Simulate "already processed" — claim returns false.
-    claimMock.mockResolvedValue(false)
+    // Simulate "already processed" — claim outcome is 'duplicate'.
+    claimMock.mockResolvedValue('duplicate')
 
     await handler(req, captured.res)
 
@@ -320,6 +345,7 @@ describe('POST /webhooks/esg-report — hardening (V2 / V3 / E1 / E2)', () => {
       success: true,
     })
     expect(claimMock).toHaveBeenCalledTimes(1)
+    expect(markMock).not.toHaveBeenCalled()
   })
 
   it('E2: idempotency store unreachable → 503 (do not ack, let upstream retry)', async () => {
@@ -367,5 +393,200 @@ describe('POST /webhooks/esg-report — hardening (V2 / V3 / E1 / E2)', () => {
 
     expect(captured.statusCode).toBe(401)
     expect(claimMock).not.toHaveBeenCalled()
+  })
+
+  // ------------------------------------------------------------------
+  // V4 — Legacy HMAC gate (hacker A1b.5)
+  // ------------------------------------------------------------------
+  it('V4: legacy bare-HMAC rejected with 401 when ESG_LEGACY_HMAC_ENABLED=false', async () => {
+    process.env.ESG_LEGACY_HMAC_ENABLED = 'false'
+    const body = validPayload('job_legacy_blocked')
+    const req = makeReq({
+      body,
+      signature: bareHmac(TEST_SECRET, body),
+    })
+    const captured = makeRes()
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(401)
+    expect(claimMock).not.toHaveBeenCalled()
+    expect(captured.body).toMatchObject({
+      success: false,
+    })
+  })
+
+  it('V4: legacy bare-HMAC rejected by default in production (NODE_ENV=production)', async () => {
+    delete process.env.ESG_LEGACY_HMAC_ENABLED
+    const originalNodeEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    try {
+      const body = validPayload('job_legacy_prod')
+      const req = makeReq({
+        body,
+        signature: bareHmac(TEST_SECRET, body),
+      })
+      const captured = makeRes()
+
+      await handler(req, captured.res)
+
+      expect(captured.statusCode).toBe(401)
+      expect(claimMock).not.toHaveBeenCalled()
+    } finally {
+      if (originalNodeEnv === undefined) {
+        delete process.env.NODE_ENV
+      } else {
+        process.env.NODE_ENV = originalNodeEnv
+      }
+    }
+  })
+
+  it('V4: legacy bare-HMAC rejected by default in staging (DEPLOY_ENV=staging)', async () => {
+    delete process.env.ESG_LEGACY_HMAC_ENABLED
+    process.env.DEPLOY_ENV = 'staging'
+    const body = validPayload('job_legacy_staging')
+    const req = makeReq({
+      body,
+      signature: bareHmac(TEST_SECRET, body),
+    })
+    const captured = makeRes()
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(401)
+    expect(claimMock).not.toHaveBeenCalled()
+  })
+
+  it('V4: legacy bare-HMAC accepted in local dev (DEPLOY_ENV=local) without explicit opt-in', async () => {
+    delete process.env.ESG_LEGACY_HMAC_ENABLED
+    process.env.DEPLOY_ENV = 'local'
+    const body = validPayload('job_legacy_local')
+    const req = makeReq({
+      body,
+      signature: bareHmac(TEST_SECRET, body),
+    })
+    const captured = makeRes()
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(200)
+    expect(claimMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('V4: legacy bare-HMAC accepted with explicit override ESG_LEGACY_HMAC_ENABLED=true', async () => {
+    process.env.ESG_LEGACY_HMAC_ENABLED = 'true'
+    process.env.DEPLOY_ENV = 'production'
+    const body = validPayload('job_legacy_override')
+    const req = makeReq({
+      body,
+      signature: bareHmac(TEST_SECRET, body),
+    })
+    const captured = makeRes()
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(200)
+    expect(claimMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('V4: timestamped (v1) format works regardless of legacy gate', async () => {
+    process.env.ESG_LEGACY_HMAC_ENABLED = 'false'
+    process.env.DEPLOY_ENV = 'production'
+    const body = validPayload('job_v1_in_prod')
+    const ts = Math.floor(Date.now() / 1000).toString()
+    const req = makeReq({
+      body,
+      signature: timestampedHeader(TEST_SECRET, ts, body),
+    })
+    const captured = makeRes()
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(200)
+    expect(claimMock).toHaveBeenCalledTimes(1)
+  })
+
+  // ------------------------------------------------------------------
+  // E4 — At-least-once idempotency (hacker A1b.5)
+  // ------------------------------------------------------------------
+  it('E4: in-flight claim returns 503 (let upstream retry)', async () => {
+    const body = validPayload('job_in_flight')
+    const ts = Math.floor(Date.now() / 1000).toString()
+    const req = makeReq({
+      body,
+      signature: timestampedHeader(TEST_SECRET, ts, body),
+    })
+    const captured = makeRes()
+
+    claimMock.mockResolvedValue('in-flight')
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(503)
+    expect(markMock).not.toHaveBeenCalled()
+    expect(releaseMock).not.toHaveBeenCalled()
+  })
+
+  it('E4: recovered claim re-runs dispatch (crash mid-dispatch recovery)', async () => {
+    const body = validPayload('job_recovered')
+    const ts = Math.floor(Date.now() / 1000).toString()
+    const req = makeReq({
+      body,
+      signature: timestampedHeader(TEST_SECRET, ts, body),
+    })
+    const captured = makeRes()
+
+    // Simulate a crash recovery — previous claim stale, take over.
+    claimMock.mockResolvedValue('recovered')
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(200)
+    // Dispatch ran AND we marked processed (at-least-once contract).
+    expect(markMock).toHaveBeenCalledTimes(1)
+    expect(releaseMock).not.toHaveBeenCalled()
+  })
+
+  it('E4: dispatch error releases the claim so next retry can recover', async () => {
+    const body = validPayload('job_dispatch_fail')
+    const ts = Math.floor(Date.now() / 1000).toString()
+    const req = makeReq({
+      body,
+      signature: timestampedHeader(TEST_SECRET, ts, body),
+    })
+    const captured = makeRes()
+
+    // Fresh claim, but dispatch will throw inside the handler. We simulate
+    // this by making the mark step throw (the model layer is the only
+    // mockable boundary in this handler harness — but the contract is the
+    // same: any throw inside the dispatch try/catch must release).
+    claimMock.mockResolvedValue('fresh')
+    markMock.mockRejectedValue(new Error('downstream write failed'))
+
+    await handler(req, captured.res)
+
+    // Outer catch maps to 500 (sendError default).
+    expect(captured.statusCode).toBe(500)
+    // Release was attempted (the contract that makes E4 at-least-once).
+    expect(releaseMock).toHaveBeenCalledTimes(1)
+    expect(releaseMock).toHaveBeenCalledWith(expect.stringMatching(/job_dispatch_fail/))
+  })
+
+  it('E4: fresh claim → dispatch → mark processed (happy path closes the at-least-once window)', async () => {
+    const body = validPayload('job_fresh_happy')
+    const ts = Math.floor(Date.now() / 1000).toString()
+    const req = makeReq({
+      body,
+      signature: timestampedHeader(TEST_SECRET, ts, body),
+    })
+    const captured = makeRes()
+
+    claimMock.mockResolvedValue('fresh')
+
+    await handler(req, captured.res)
+
+    expect(captured.statusCode).toBe(200)
+    expect(markMock).toHaveBeenCalledTimes(1)
+    expect(releaseMock).not.toHaveBeenCalled()
   })
 })

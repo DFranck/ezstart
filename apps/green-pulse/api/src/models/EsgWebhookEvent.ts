@@ -33,6 +33,18 @@ import { Schema, type Model, type Document } from 'mongoose'
 /** TTL for processed webhook event records (30 days, in seconds). */
 export const ESG_WEBHOOK_EVENT_TTL_SECONDS = 30 * 24 * 60 * 60
 
+/**
+ * Stale-claim recovery window (hacker A1b.5 — E4).
+ *
+ * If a `claimedAt` record was inserted but `processedAt` is still null AND
+ * `claimedAt` is older than this threshold, we assume the previous process
+ * crashed mid-dispatch and the claim can be reclaimed by the next delivery
+ * (at-least-once recovery). Tuned to comfortably exceed any single webhook
+ * handler latency (DB writes + emails + downstream API calls) while staying
+ * short enough that a real upstream redelivery recovers promptly.
+ */
+export const ESG_WEBHOOK_STALE_CLAIM_MS = 5 * 60 * 1000
+
 export interface EsgWebhookEventDocument extends Document {
   /**
    * Stable idempotency key for the delivery. Either the upstream-supplied
@@ -42,8 +54,19 @@ export interface EsgWebhookEventDocument extends Document {
   eventKey: string
   /** ESG event type snapshot (informational / debugging). */
   eventType?: string
-  /** When the event was first claimed and processed. */
-  processedAt: Date
+  /**
+   * When this delivery was first claimed for processing. Set on every
+   * `claim`/`reclaim`. Used to detect crashed-mid-dispatch claims older
+   * than {@link ESG_WEBHOOK_STALE_CLAIM_MS}.
+   */
+  claimedAt: Date
+  /**
+   * When the dispatch finished successfully. `null` while in flight; set
+   * by {@link markEsgWebhookEventProcessed} on dispatch success. A
+   * `processedAt: null` row older than the stale window is a recoverable
+   * crash (hacker A1b.5 — E4 at-least-once).
+   */
+  processedAt: Date | null
   createdAt: Date
   updatedAt: Date
 }
@@ -52,7 +75,10 @@ const esgWebhookEventSchema = new Schema<EsgWebhookEventDocument>(
   {
     eventKey: { type: String, required: true },
     eventType: { type: String },
-    processedAt: { type: Date, default: Date.now },
+    claimedAt: { type: Date, default: Date.now, required: true },
+    // `null` while in flight — only set after dispatch succeeds. Allows
+    // crash recovery via the stale-claim window in {@link claimEsgWebhookEvent}.
+    processedAt: { type: Date, default: null },
   },
   {
     timestamps: true,
@@ -130,41 +156,137 @@ const MONGO_DUPLICATE_KEY_CODE = 11000
 const INDEX_OPTIONS_CONFLICT_CODE = 85
 
 /**
+ * Outcome of a claim attempt (hacker A1b.5 — E4 at-least-once).
+ *
+ *   • `'fresh'`        — first delivery of this `eventKey`, run side-effects.
+ *   • `'recovered'`    — a previous claim crashed mid-dispatch (its
+ *                        `claimedAt` exceeded the stale window). The caller
+ *                        has now re-claimed and SHOULD run side-effects.
+ *                        Side-effects MUST be idempotent at the business
+ *                        layer (upserts, dedup'd emails by job_id).
+ *   • `'duplicate'`    — a previous delivery already finished
+ *                        (`processedAt` set). Caller acks 200 with no work.
+ *   • `'in-flight'`    — another worker is currently processing this event
+ *                        (claim is fresh, not stale). Caller returns 503 so
+ *                        the upstream retries after the in-flight worker
+ *                        finishes or the stale window opens.
+ */
+export type EsgWebhookClaimOutcome = 'fresh' | 'recovered' | 'duplicate' | 'in-flight'
+
+/**
  * Atomically claim a webhook event for processing.
  *
- * Returns `true` if THIS call is the first to see `eventKey` (caller should
- * proceed to run the event's side-effects). Returns `false` if the event was
- * already claimed by a previous (or concurrent) delivery — the caller must
- * no-op and acknowledge with 200.
+ * Pattern (at-least-once, hacker A1b.5 — E4):
+ *   1. `insertOne({ eventKey, claimedAt: now, processedAt: null })` — atomic.
+ *   2. On E11000 (duplicate `eventKey`) → inspect the existing row:
+ *      • `processedAt` set            → `'duplicate'` (already finished).
+ *      • `processedAt` null AND
+ *        `claimedAt` < now − stale-window → take over: `'recovered'`.
+ *      • `processedAt` null AND
+ *        `claimedAt` recent           → `'in-flight'` (let upstream retry).
  *
- * The claim is a single atomic `insertOne`: MongoDB enforces the unique index
- * server-side, so two concurrent deliveries cannot both win. On duplicate the
- * insert throws E11000, which we translate to `false`. Any other error
- * propagates so the handler can decide (typically: don't ack, let the upstream
- * retry).
+ * The caller MUST call {@link markEsgWebhookEventProcessed} on dispatch
+ * success and {@link releaseEsgWebhookEventClaim} on dispatch failure —
+ * the two together guarantee at-least-once delivery semantics.
  *
  * @param eventKey - Stable idempotency token (job_id or SHA-256 of raw bytes).
  * @param meta - Optional event type snapshot for observability.
- * @returns `true` when first-seen (process now), `false` when already processed.
+ * @returns Discriminated outcome — the caller maps to dispatch / ack / 503.
  */
 export async function claimEsgWebhookEvent(
   eventKey: string,
   meta?: { eventType?: string }
-): Promise<boolean> {
+): Promise<EsgWebhookClaimOutcome> {
   const EsgWebhookEvent = await getEsgWebhookEventModel()
+  const now = new Date()
   try {
     await EsgWebhookEvent.create({
       eventKey,
       eventType: meta?.eventType,
-      processedAt: new Date(),
+      claimedAt: now,
+      processedAt: null,
     })
-    return true
+    return 'fresh'
   } catch (err) {
-    if (isDuplicateKeyError(err)) {
-      return false
+    if (!isDuplicateKeyError(err)) throw err
+    // E11000 — read the existing row to discriminate between
+    // already-processed (idempotent ack) and in-flight / crashed.
+    const existing = await EsgWebhookEvent.findOne({ eventKey }).lean().exec()
+    if (!existing) {
+      // Race: the existing row was purged (TTL) between the insert attempt
+      // and the read. Treat as fresh — retry the insert once.
+      try {
+        await EsgWebhookEvent.create({
+          eventKey,
+          eventType: meta?.eventType,
+          claimedAt: now,
+          processedAt: null,
+        })
+        return 'fresh'
+      } catch (retryErr) {
+        if (isDuplicateKeyError(retryErr)) {
+          // Genuine concurrent insert with another worker — treat as in-flight.
+          return 'in-flight'
+        }
+        throw retryErr
+      }
     }
-    throw err
+    if (existing.processedAt !== null && existing.processedAt !== undefined) {
+      return 'duplicate'
+    }
+    // processedAt is null — either in-flight or crashed mid-dispatch.
+    const claimedAtMs = existing.claimedAt instanceof Date ? existing.claimedAt.getTime() : 0
+    const ageMs = now.getTime() - claimedAtMs
+    if (ageMs < ESG_WEBHOOK_STALE_CLAIM_MS) {
+      return 'in-flight'
+    }
+    // Stale claim — previous worker crashed. Take over by refreshing
+    // `claimedAt` (compare-and-swap on the still-stale claimedAt to avoid
+    // racing two recovery workers).
+    const recovered = await EsgWebhookEvent.updateOne(
+      { eventKey, claimedAt: existing.claimedAt, processedAt: null },
+      { $set: { claimedAt: now, eventType: meta?.eventType ?? existing.eventType } }
+    ).exec()
+    if (recovered.modifiedCount === 1) {
+      return 'recovered'
+    }
+    // Another recovery worker beat us to it.
+    return 'in-flight'
   }
+}
+
+/**
+ * Mark a claimed webhook event as fully processed.
+ *
+ * Called by the handler AFTER all dispatch side-effects succeed — closes the
+ * at-least-once window so future replays of the same `eventKey` short-circuit
+ * to `'duplicate'`.
+ *
+ * @param eventKey - The same key that was passed to {@link claimEsgWebhookEvent}.
+ */
+export async function markEsgWebhookEventProcessed(eventKey: string): Promise<void> {
+  const EsgWebhookEvent = await getEsgWebhookEventModel()
+  await EsgWebhookEvent.updateOne({ eventKey }, { $set: { processedAt: new Date() } }).exec()
+}
+
+/**
+ * Release a claim when dispatch fails (hacker A1b.5 — E4).
+ *
+ * On dispatch error the caller invokes this to "expire" the claim so the
+ * next upstream retry can reclaim immediately, rather than waiting for the
+ * stale window to elapse. Implemented by stamping `claimedAt` far enough in
+ * the past that the next {@link claimEsgWebhookEvent} sees a stale claim
+ * and returns `'recovered'`.
+ *
+ * Note: we do NOT delete the row — deleting would lose the audit trail and
+ * race with TTL purge. Stamping `claimedAt = epoch` is forward-safe.
+ */
+export async function releaseEsgWebhookEventClaim(eventKey: string): Promise<void> {
+  const EsgWebhookEvent = await getEsgWebhookEventModel()
+  await EsgWebhookEvent.updateOne(
+    { eventKey, processedAt: null },
+    { $set: { claimedAt: new Date(0) } }
+  ).exec()
 }
 
 /**

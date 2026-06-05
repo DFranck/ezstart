@@ -161,6 +161,7 @@ export {
   base64urlDecode,
   base64urlEncode,
   buildEzstartSignatureHeader,
+  EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS,
   EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS,
   hmacSign,
   hmacVerify,

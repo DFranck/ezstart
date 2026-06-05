@@ -26,6 +26,7 @@ import {
   base64urlDecode,
   base64urlEncode,
   buildEzstartSignatureHeader,
+  EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS,
   EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS,
   hmacSign,
   hmacVerify,
@@ -274,7 +275,8 @@ describe('verifyEzstartSignature', () => {
     expect(result).toEqual({ ok: false, reason: 'replay' })
   })
 
-  it('rejects with reason "replay" when the timestamp is too far in the future', () => {
+  it('rejects with reason "replay" when the timestamp is too far in the future (hacker A1b.5 — E3)', () => {
+    // 10 min in the future — well past the default 5s forward skew tolerance.
     const header = buildHeader({ timestamp: String(FIXED_NOW_SEC + 600) })
     const result = verifyEzstartSignature({
       header,
@@ -283,6 +285,79 @@ describe('verifyEzstartSignature', () => {
       now: fixedNow,
     })
     expect(result).toEqual({ ok: false, reason: 'replay' })
+  })
+
+  it('rejects with reason "replay" when the timestamp is just past the forward skew (E3 boundary)', () => {
+    // Default forward skew = 5s. A 10s-future signature must be rejected,
+    // a 1s-future signature must be accepted (legitimate NTP drift).
+    const justBeyondSkew = buildHeader({ timestamp: String(FIXED_NOW_SEC + 10) })
+    expect(
+      verifyEzstartSignature({
+        header: justBeyondSkew,
+        secret: SECRET,
+        rawBody: RAW_BODY,
+        now: fixedNow,
+      })
+    ).toEqual({ ok: false, reason: 'replay' })
+
+    const withinSkew = buildHeader({ timestamp: String(FIXED_NOW_SEC + 1) })
+    expect(
+      verifyEzstartSignature({
+        header: withinSkew,
+        secret: SECRET,
+        rawBody: RAW_BODY,
+        now: fixedNow,
+      }).ok
+    ).toBe(true)
+  })
+
+  it('accepts a past timestamp up to the replay window edge (directional window)', () => {
+    // Just inside the past edge (300 - 1 = 299 sec ago) — accepted.
+    const justInside = buildHeader({ timestamp: String(FIXED_NOW_SEC - 299) })
+    expect(
+      verifyEzstartSignature({
+        header: justInside,
+        secret: SECRET,
+        rawBody: RAW_BODY,
+        now: fixedNow,
+      }).ok
+    ).toBe(true)
+
+    // Just past the edge (301 sec ago) — rejected.
+    const justOutside = buildHeader({ timestamp: String(FIXED_NOW_SEC - 301) })
+    expect(
+      verifyEzstartSignature({
+        header: justOutside,
+        secret: SECRET,
+        rawBody: RAW_BODY,
+        now: fixedNow,
+      })
+    ).toEqual({ ok: false, reason: 'replay' })
+  })
+
+  it('honours a custom forwardSkewSec (E3 — tunable per-receiver)', () => {
+    // With explicit 60s forward skew, a 30s-future signature is accepted.
+    const header = buildHeader({ timestamp: String(FIXED_NOW_SEC + 30) })
+    expect(
+      verifyEzstartSignature({
+        header,
+        secret: SECRET,
+        rawBody: RAW_BODY,
+        forwardSkewSec: 60,
+        now: fixedNow,
+      }).ok
+    ).toBe(true)
+
+    // With explicit 0s forward skew, the same signature is rejected.
+    expect(
+      verifyEzstartSignature({
+        header,
+        secret: SECRET,
+        rawBody: RAW_BODY,
+        forwardSkewSec: 0,
+        now: fixedNow,
+      })
+    ).toEqual({ ok: false, reason: 'replay' })
   })
 
   it('honours a custom replayWindowSec', () => {
@@ -311,6 +386,10 @@ describe('verifyEzstartSignature', () => {
 
   it('exports the documented default replay window (5 min)', () => {
     expect(EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS).toBe(5 * 60)
+  })
+
+  it('exports the documented default forward skew (5 sec, hacker A1b.5 — E3)', () => {
+    expect(EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS).toBe(5)
   })
 })
 

@@ -19,6 +19,42 @@ function isDeployedEnvironment(): boolean {
 }
 
 /**
+ * Sunset date for the legacy bare-HMAC webhook signature format. After this
+ * date, the `ESG_LEGACY_HMAC_ENABLED` opt-in escape hatch will be removed
+ * and any legacy-format signature will be rejected unconditionally.
+ *
+ * Surfaced in warn logs so integrators see the deadline every time they
+ * deliver a legacy-format webhook.
+ */
+export const ESG_LEGACY_HMAC_SUNSET_DATE = '2026-12-01'
+
+/**
+ * Gate for the legacy bare-HMAC verification path (hacker A1b.5 — V4).
+ *
+ * Default policy:
+ *   • production (`NODE_ENV=production` OR `DEPLOY_ENV=production`) → **off**
+ *   • staging (`DEPLOY_ENV=staging`)                                → **off**
+ *   • local / dev (`DEPLOY_ENV=local` or unset)                    → **on**
+ *
+ * Override via env: `ESG_LEGACY_HMAC_ENABLED=true|false`. The override exists
+ * to give integrators a controlled transition window — once an integrator
+ * confirms they've migrated to the timestamped v1 format, the env flag can
+ * be flipped off in staging to validate the cutover BEFORE the prod sunset.
+ *
+ * Without this gate, a single captured legacy bare-HMAC signature can be
+ * replayed forever (cf. hacker A1b.5 V4 report). The timestamped v1 format
+ * is replay-protected via the 5-min window in `verifyEzstartSignature`.
+ */
+export function isLegacyHmacEnabled(): boolean {
+  const override = process.env.ESG_LEGACY_HMAC_ENABLED
+  if (override === 'true') return true
+  if (override === 'false') return false
+  // No explicit override → default by environment. Deployed = off (force
+  // integrators to migrate), local = on (preserve dev ergonomics).
+  return !isDeployedEnvironment()
+}
+
+/**
  * Read the configured webhook signing secret. Returns the secret when present
  * and non-empty; returns `null` in dev/test when the env var is unset so the
  * caller can return a 503 (vs. silently signing with `''` and accepting any

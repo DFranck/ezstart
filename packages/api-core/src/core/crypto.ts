@@ -149,9 +149,27 @@ export function hmacVerify(
 
 /**
  * Default replay window for `verifyEzstartSignature`. Matches Stripe's
- * webhook tolerance — 5 minutes either side of `now`.
+ * webhook tolerance — 5 minutes in the past from `now`.
+ *
+ * The window is **directional** (past-only with small forward skew):
+ * a signature is accepted when `now - signedAt` is within
+ * `[−EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS, +EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS]`.
+ * This prevents a captured signature from gaining `2× window` of lifespan
+ * via clock-skew abuse (hacker A1b.5 — E3).
  */
 export const EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS = 5 * 60
+
+/**
+ * Maximum forward clock-skew tolerated by `verifyEzstartSignature`. Allows
+ * a few seconds of legitimate sender-vs-receiver clock drift, but rejects
+ * intentionally-future timestamps (which extend a captured signature's
+ * effective replay window).
+ *
+ * Stripe's reference implementation tolerates "a few seconds" — we pick
+ * 5 seconds, well below NTP-typical skew on managed cloud platforms
+ * (Railway / Vercel sync to NTP < 1s).
+ */
+export const EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS = 5
 
 /** Parsed components of a well-formed `X-EZStart-Signature` header value. */
 export interface EzstartSignatureHeader {
@@ -267,8 +285,15 @@ export function verifyEzstartSignature(opts: {
   secret: string
   /** Raw request body the sender signed (string-equal to the bytes received). */
   rawBody: string
-  /** Replay tolerance in seconds. Defaults to 5 minutes. */
+  /** Replay tolerance in seconds (past direction). Defaults to 5 minutes. */
   replayWindowSec?: number
+  /**
+   * Forward clock-skew tolerance in seconds. Defaults to 5 seconds — enough
+   * to absorb legitimate NTP drift between sender / receiver but small enough
+   * that a captured signature cannot be replayed for an additional `2× window`
+   * by setting a future timestamp (hacker A1b.5 — E3).
+   */
+  forwardSkewSec?: number
   /** Override the clock — used by tests. Returns unix-seconds. */
   now?: () => number
 }): EzstartSignatureVerifyResult {
@@ -283,11 +308,17 @@ export function verifyEzstartSignature(opts: {
     return { ok: false, reason: 'signature' }
   }
 
-  const window = opts.replayWindowSec ?? EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS
+  // Directional replay window (hacker A1b.5 — E3):
+  //   • Accept up to `replayWindowSec` IN THE PAST (default 5 min).
+  //   • Accept up to `forwardSkewSec` IN THE FUTURE (default 5s NTP drift).
+  // Rejects intentionally-future timestamps that would otherwise extend a
+  // captured signature's effective replay window by `2× replayWindowSec`.
+  const replayWindow = opts.replayWindowSec ?? EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS
+  const forwardSkew = opts.forwardSkewSec ?? EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS
   const nowSec = opts.now ? opts.now() : Math.floor(Date.now() / 1000)
-  if (Math.abs(nowSec - signedAtSec) > window) {
-    return { ok: false, reason: 'replay' }
-  }
+  const ageSec = nowSec - signedAtSec
+  if (ageSec < -forwardSkew) return { ok: false, reason: 'replay' } // too far in the future
+  if (ageSec > replayWindow) return { ok: false, reason: 'replay' } // too old
 
   return { ok: true }
 }
