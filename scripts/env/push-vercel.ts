@@ -58,8 +58,20 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import * as readline from 'node:readline'
 import * as dotenv from 'dotenv'
-import { extractEnvFlag, isProtectedEnvKey, parseEnvArg, type TargetEnv } from './shared-flags.js'
+import {
+  detectInlineCommentEmptyValuesFromFile,
+  formatOverrideEmptyDeletePrompt,
+  requireConfirmOverrideEmptyDelete,
+} from './delete-guards.js'
+import {
+  ALL_TARGET_ENVS,
+  extractEnvFlag,
+  isProtectedEnvKey,
+  parseEnvArg,
+  type TargetEnv,
+} from './shared-flags.js'
 
 export type { TargetEnv }
 
@@ -263,10 +275,35 @@ interface ParsedFlags {
    * — see `isProtectedEnvKey()`). Off by default — opt-in only.
    */
   prune: boolean
+  /**
+   * When true, an empty-string cascade entry (`KEY=`) deletes the var from
+   * ALL Vercel target envs (development + preview + production) instead of
+   * only the env this push targets. Off by default — opt-in only. Useful
+   * for post-leak rotation when the operator wants to ensure no env keeps
+   * the rotated value. See V3 in tmp/hack-a3-empty-delete.md.
+   */
+  cascadeDeleteAllEnvs: boolean
+  /**
+   * Explicit operator confirmation for `--override KEY=` (empty value)
+   * DELETE intent in non-interactive contexts. See V5 in
+   * tmp/hack-a3-empty-delete.md.
+   */
+  yesIMeanDelete: boolean
+  /**
+   * Force non-interactive flow (no TTY prompts).
+   */
+  nonInteractive: boolean
 }
 
 export function parseFlags(flags: string[]): ParsedFlags {
-  const result: ParsedFlags = { overrides: {}, dryRun: false, prune: false }
+  const result: ParsedFlags = {
+    overrides: {},
+    dryRun: false,
+    prune: false,
+    cascadeDeleteAllEnvs: false,
+    yesIMeanDelete: false,
+    nonInteractive: false,
+  }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
     if (flag === '--from') {
@@ -293,11 +330,69 @@ export function parseFlags(flags: string[]): ParsedFlags {
       result.dryRun = true
     } else if (flag === '--prune') {
       result.prune = true
+    } else if (flag === '--cascade-delete-all-envs') {
+      result.cascadeDeleteAllEnvs = true
+    } else if (flag === '--yes-i-mean-delete') {
+      result.yesIMeanDelete = true
+    } else if (flag === '--non-interactive') {
+      result.nonInteractive = true
     } else {
       fail(`Unknown flag "${flag}"`)
     }
   }
   return result
+}
+
+/**
+ * Scan other cascade envs (the ones we're NOT pushing right now) to detect
+ * keys that are empty (DELETE intent) here but populated elsewhere. This is
+ * the V3 cross-env scope-mismatch warning: a `KEY=` in `.env.production`
+ * only deletes from Vercel's `production` target. If the same `KEY` is set
+ * in `.env.staging`, the staging-targeted push earlier (or later) keeps
+ * the value alive in Vercel's `preview` target. The operator should know.
+ *
+ * Returns an array of detections; empty when there is no mismatch.
+ */
+export interface CrossEnvScopeDetection {
+  key: string
+  targetEnv: TargetEnv
+  otherEnv: TargetEnv
+  otherValueSample: string
+}
+
+export interface DetectCrossEnvScopeMismatchInput {
+  root: string
+  app: string
+  /** The env currently being pushed. */
+  targetEnv: TargetEnv
+  /** Keys that are EMPTY in this push (slated for DELETE on Vercel). */
+  emptyKeys: readonly string[]
+  /** Function that reads an env file and returns its keys, or null. */
+  readEnv: (absPath: string) => Record<string, string> | null
+}
+
+export function detectCrossEnvScopeMismatch(
+  input: DetectCrossEnvScopeMismatchInput
+): CrossEnvScopeDetection[] {
+  const out: CrossEnvScopeDetection[] = []
+  for (const otherEnv of ALL_TARGET_ENVS) {
+    if (otherEnv === input.targetEnv) continue
+    const otherPath = path.join(input.root, 'apps', input.app, 'web', `.env.${otherEnv}`)
+    const parsed = input.readEnv(otherPath)
+    if (!parsed) continue
+    for (const key of input.emptyKeys) {
+      const otherValue = parsed[key]
+      if (otherValue !== undefined && otherValue !== '') {
+        out.push({
+          key,
+          targetEnv: input.targetEnv,
+          otherEnv,
+          otherValueSample: otherValue,
+        })
+      }
+    }
+  }
+  return out
 }
 
 // ────────────────────────────────────────────────────────────
@@ -371,6 +466,23 @@ function defaultVercelExec(
     status: result.status ?? 1,
     stdout: result.stdout ?? '',
     stderr: result.stderr ?? '',
+  }
+}
+
+/**
+ * Strict yes/no prompt — only the exact lowercase string `yes` confirms.
+ * Anything else (including `y`, blank line, EOF) returns false. Used for the
+ * `--override KEY=` DELETE confirmation gate (V5 in hacker-A3 report).
+ */
+async function promptYesNoStrict(message: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+  try {
+    const answer = await new Promise<string>(resolve => {
+      rl.question(message, resolve)
+    })
+    return answer.trim().toLowerCase() === 'yes'
+  } finally {
+    rl.close()
   }
 }
 
@@ -475,6 +587,75 @@ async function main(): Promise<void> {
     console.info(`   override: ${Object.keys(flags.overrides).join(', ')}`)
   }
   console.info('')
+
+  // ── N1 guard: warn on KEY=#comment lines that dotenv treats as empty ────
+  // dotenv parses `DATABASE_URL=#TODO put real prod URL` as `{ DATABASE_URL:
+  // '' }` (the `#` starts an inline comment), which downstream triggers
+  // DELETE — usually NOT what the operator meant.
+  for (const src of sources) {
+    if (!src.exists) continue
+    const detections = detectInlineCommentEmptyValuesFromFile(src.path)
+    for (const d of detections) {
+      console.warn(
+        `⚠️  ${d.file}:${d.line} — \`${d.raw}\` parses as ${d.key}='' (inline # comment ⇒ empty value ⇒ DELETE).\n` +
+          `   If you meant to keep ${d.key}, quote the value or move the comment to its own line.`
+      )
+    }
+  }
+
+  // ── V3 guard: warn on cross-env scope mismatch ──────────────────────────
+  // `vercel env rm KEY <target>` only deletes from the named target env. If
+  // the same KEY is populated in another env's cascade (e.g. cleared in
+  // production but still set in staging), the value lives on in Vercel for
+  // that other env. Surface this so the operator can choose to cascade.
+  const emptyCascadeKeys = Object.entries(merged)
+    .filter(([, v]) => v === '')
+    .map(([k]) => k)
+  if (emptyCascadeKeys.length > 0) {
+    const mismatches = detectCrossEnvScopeMismatch({
+      root: ROOT,
+      app,
+      targetEnv: env,
+      emptyKeys: emptyCascadeKeys,
+      readEnv: parseEnvFile,
+    })
+    if (mismatches.length > 0 && !flags.cascadeDeleteAllEnvs) {
+      console.warn(`⚠️  Cross-env scope mismatch on ${mismatches.length} DELETE key(s):`)
+      for (const m of mismatches) {
+        console.warn(
+          `     - ${m.key}: empty in ${m.targetEnv} cascade (will DELETE from Vercel ${vercelEnvName(m.targetEnv)})`
+        )
+        console.warn(
+          `       But set in .env.${m.otherEnv} → Vercel ${vercelEnvName(m.otherEnv)} keeps the value.`
+        )
+      }
+      console.warn(
+        `   Pass --cascade-delete-all-envs to remove from ALL Vercel envs (development + preview + production).\n`
+      )
+    }
+  }
+
+  // ── V5 guard: confirm before DELETE via `--override KEY=` (empty value) ──
+  const emptyOverrideKeys = Object.entries(flags.overrides)
+    .filter(([, v]) => v === '')
+    .map(([k]) => k)
+  if (!flags.dryRun && emptyOverrideKeys.length > 0) {
+    const guard = requireConfirmOverrideEmptyDelete({
+      emptyOverrideKeys,
+      yesIMeanDelete: flags.yesIMeanDelete,
+      nonInteractive: flags.nonInteractive,
+    })
+    if (!guard.proceed) {
+      if (guard.requiresInteractivePrompt) {
+        const accepted = await promptYesNoStrict(formatOverrideEmptyDeletePrompt(emptyOverrideKeys))
+        if (!accepted) {
+          fail(`Aborted by operator — type \`yes\` exactly to confirm DELETE intent next time.`)
+        }
+      } else {
+        fail(guard.reason ?? 'Override DELETE intent requires explicit confirmation.')
+      }
+    }
+  }
 
   // At least one layer must exist
   const anyExists = sources.some(s => s.exists)
@@ -608,21 +789,47 @@ async function main(): Promise<void> {
   // exist on the remote — we treat that as idempotent success so push-all
   // doesn't crash when a fresh project hasn't seen the var yet. The stderr
   // signature for "not found" is recognizable enough across CLI versions.
+  //
+  // When `--cascade-delete-all-envs` is set (V3), each empty key is removed
+  // from every Vercel env target (development + preview + production), not
+  // only the env this push targets. The result is reported as the WORST of
+  // the per-target outcomes (a single non-idempotent failure surfaces).
+  const cascadeTargets: ReadonlyArray<'development' | 'preview' | 'production'> =
+    flags.cascadeDeleteAllEnvs
+      ? (['development', 'preview', 'production'] as const)
+      : [vercelTarget]
   const deleteTasks = toDelete.map(k => async () => {
-    const rmArgs = ['env', 'rm', k, vercelTarget]
-    if (gitBranch) rmArgs.push(gitBranch)
-    rmArgs.push('--yes')
-    const result = await vercelSpawn(rmArgs, webDir)
-    const lowerStderr = result.stderr.toLowerCase()
-    const notFound =
-      lowerStderr.includes('not found') ||
-      lowerStderr.includes('does not exist') ||
-      lowerStderr.includes("doesn't exist")
+    let worstStatus = 0
+    let combinedStderr = ''
+    let anyDeleted = false
+    let allIdempotent = true
+    for (const target of cascadeTargets) {
+      const rmArgs = ['env', 'rm', k, target]
+      // Git branch only meaningful for preview target
+      if (target === 'preview' && gitBranch) rmArgs.push(gitBranch)
+      rmArgs.push('--yes')
+      const result = await vercelSpawn(rmArgs, webDir)
+      const lowerStderr = result.stderr.toLowerCase()
+      const notFound =
+        lowerStderr.includes('not found') ||
+        lowerStderr.includes('does not exist') ||
+        lowerStderr.includes("doesn't exist")
+      if (result.status === 0) {
+        anyDeleted = true
+        allIdempotent = false
+      } else if (notFound) {
+        // already absent — fine
+      } else {
+        worstStatus = result.status
+        combinedStderr += `[${target}] ${result.stderr}\n`
+        allIdempotent = false
+      }
+    }
     return {
       key: k,
-      status: result.status === 0 || notFound ? 0 : result.status,
-      stderr: result.stderr,
-      idempotent: notFound,
+      status: worstStatus,
+      stderr: combinedStderr,
+      idempotent: !anyDeleted && allIdempotent,
     }
   })
 

@@ -34,13 +34,26 @@
  *
  * Value semantics (3-way, symmetric with push-vercel.ts):
  *   - `KEY` absent from every cascade layer  → no-op (variable not touched).
- *   - `KEY=` (empty string) in the cascade   → DELETE via
- *                                              `railway variables --remove`.
+ *   - `KEY=` (empty string) in the cascade   → DELETE via per-key
+ *                                              `railway variable delete <KEY>`
+ *                                              (Railway CLI 4.x does NOT have a
+ *                                              batch `--remove`; one CLI call
+ *                                              per key, continue on per-key
+ *                                              failure, exit 1 if any failed
+ *                                              for a non-idempotent reason).
  *                                              Use this to explicitly clear a
  *                                              var on Railway. Idempotent: if
  *                                              the var doesn't exist remotely,
  *                                              the push still succeeds.
  *   - `KEY=value` in the cascade             → upsert via `railway variable set`.
+ *
+ * Safety guards (post-hacker-A3, 2026-06-05):
+ *   - `--override KEY=` (empty value via flag) requires `--yes-i-mean-delete`
+ *     in non-TTY / `--non-interactive` contexts, OR an interactive y/N prompt
+ *     in a TTY. Prevents accidental DELETE on prod from a copy-paste typo.
+ *   - Lines matching `^KEY=#` in any cascade file emit a non-blocking warn
+ *     (dotenv treats `KEY=#TODO comment` as `{KEY: ''}` → DELETE, often
+ *     unintended).
  *
  * Production blocklist: TEST_*, DEBUG_*, _LOCAL_*, DEV_* are filtered out.
  * Override with --include-blocked KEY1,KEY2.
@@ -59,7 +72,14 @@
 import { spawnSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import * as readline from 'node:readline'
 import * as dotenv from 'dotenv'
+import { deleteRailwayKeys } from './railway-delete.js'
+import {
+  detectInlineCommentEmptyValuesFromFile,
+  formatOverrideEmptyDeletePrompt,
+  requireConfirmOverrideEmptyDelete,
+} from './delete-guards.js'
 import { getRailwayAppConfig, type RailwayAppConfig } from './railway-projects.js'
 import { extractEnvFlag, isProtectedEnvKey, parseEnvArg, type TargetEnv } from './shared-flags.js'
 
@@ -218,6 +238,19 @@ interface ParsedFlags {
    * — see `isProtectedEnvKey()`). Off by default — opt-in only.
    */
   prune: boolean
+  /**
+   * Explicit operator confirmation for `--override KEY=` (empty value)
+   * DELETE intent in non-interactive contexts. Required when stdin is not
+   * a TTY OR when `--non-interactive` is set AND `--override KEY=` was
+   * provided. See V5 in tmp/hack-a3-empty-delete.md.
+   */
+  yesIMeanDelete: boolean
+  /**
+   * Force non-interactive flow (no TTY prompts). When combined with
+   * `--override KEY=` (empty), the operator MUST also pass
+   * `--yes-i-mean-delete` or the push aborts.
+   */
+  nonInteractive: boolean
 }
 
 const PRODUCTION_BLOCKLIST = [/^TEST_/, /^DEBUG_/, /^_LOCAL_/, /^DEV_/]
@@ -307,6 +340,8 @@ export function parseFlags(flags: string[]): ParsedFlags {
     includeBlocked: new Set(),
     dryRun: false,
     prune: false,
+    yesIMeanDelete: false,
+    nonInteractive: false,
   }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
@@ -343,6 +378,10 @@ export function parseFlags(flags: string[]): ParsedFlags {
       result.dryRun = true
     } else if (flag === '--prune') {
       result.prune = true
+    } else if (flag === '--yes-i-mean-delete') {
+      result.yesIMeanDelete = true
+    } else if (flag === '--non-interactive') {
+      result.nonInteractive = true
     } else {
       fail(`Unknown flag "${flag}"`)
     }
@@ -432,6 +471,27 @@ function defaultRailwayExec(args: string[]): { status: number; stdout: string; s
   }
 }
 
+/**
+ * Prompt the operator interactively to confirm a DELETE intent triggered
+ * via `--override KEY=` (empty value). Returns true only when the operator
+ * types `yes` (case-insensitive, leading/trailing whitespace stripped).
+ *
+ * Anything else (`y`, `Y`, `YES `, blank line, `no`, Ctrl-C) returns false
+ * and the push aborts. The check is intentionally strict because the
+ * downside is permanent secret deletion on the remote.
+ */
+async function promptYesNoStrict(message: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+  try {
+    const answer = await new Promise<string>(resolve => {
+      rl.question(message, resolve)
+    })
+    return answer.trim().toLowerCase() === 'yes'
+  } finally {
+    rl.close()
+  }
+}
+
 export interface ComputePruneInput {
   /** Keys discovered on the remote (Railway service for the target env). */
   remoteKeys: readonly string[]
@@ -467,7 +527,7 @@ const isDirectRun = (() => {
   }
 })()
 
-if (isDirectRun) {
+async function main(): Promise<void> {
   const [, , app, ...restRaw] = process.argv
   if (!app) {
     fail(
@@ -528,6 +588,48 @@ if (isDirectRun) {
     console.info(`   override: ${Object.keys(flags.overrides).join(', ')}`)
   }
   console.info('')
+
+  // ── N1 guard: warn on KEY=#comment lines that dotenv treats as empty ────
+  // A line like `DATABASE_URL=#TODO put real prod URL` is parsed by dotenv as
+  // `{ DATABASE_URL: '' }` (the `#` starts an inline comment). Downstream that
+  // means DELETE — usually NOT what the operator meant. Scan raw bytes of
+  // every cascade file we read and warn (non-blocking) so the operator can
+  // catch the typo before the push touches production.
+  for (const src of sources) {
+    if (!src.exists) continue
+    const detections = detectInlineCommentEmptyValuesFromFile(src.path)
+    for (const d of detections) {
+      console.warn(
+        `⚠️  ${d.file}:${d.line} — \`${d.raw}\` parses as ${d.key}='' (inline # comment ⇒ empty value ⇒ DELETE).\n` +
+          `   If you meant to keep ${d.key}, quote the value or move the comment to its own line.`
+      )
+    }
+  }
+
+  // ── V5 guard: confirm before DELETE via `--override KEY=` (empty value) ──
+  // `--override KEY=` is a copy-paste-prone surface: missing value → empty
+  // string → DELETE intent. In non-TTY contexts the operator MUST pass
+  // `--yes-i-mean-delete` explicitly. In a TTY we prompt interactively.
+  const emptyOverrideKeys = Object.entries(flags.overrides)
+    .filter(([, v]) => v === '')
+    .map(([k]) => k)
+  if (!flags.dryRun && emptyOverrideKeys.length > 0) {
+    const guard = requireConfirmOverrideEmptyDelete({
+      emptyOverrideKeys,
+      yesIMeanDelete: flags.yesIMeanDelete,
+      nonInteractive: flags.nonInteractive,
+    })
+    if (!guard.proceed) {
+      if (guard.requiresInteractivePrompt) {
+        const accepted = await promptYesNoStrict(formatOverrideEmptyDeletePrompt(emptyOverrideKeys))
+        if (!accepted) {
+          fail(`Aborted by operator — type \`yes\` exactly to confirm DELETE intent next time.`)
+        }
+      } else {
+        fail(guard.reason ?? 'Override DELETE intent requires explicit confirmation.')
+      }
+    }
+  }
 
   // At least one layer must exist
   const anyExists = sources.some(s => s.exists)
@@ -719,46 +821,40 @@ if (isDirectRun) {
 
   // Empty-string entries → DELETE on Railway. Symmetric with the Vercel side
   // (PUSH-VERCEL-EMPTY-AS-DELETE-001). Operator sets `KEY=` (or `KEY=""`) in
-  // the cascade to explicitly clear a var on the remote. Railway's `variables
-  // --remove` is idempotent at the batch level — if a key is absent it surfaces
-  // as a stderr line but the call still exits 0 for the keys it did delete. We
-  // log stderr but treat the call as successful unless the CLI itself errors.
+  // the cascade to explicitly clear a var on the remote.
+  //
+  // 2026-06-05 — post-hacker-A3 fix (V1):
+  //   The previous batch `railway variables --remove K1 K2 ...` call DOES NOT
+  //   EXIST in Railway CLI 4.x — the CLI returns `error: unexpected argument
+  //   '--remove' found` and exits non-zero. Verified empirically against
+  //   `railway --version` = 4.35.0.
+  //
+  //   The correct CLI 4.x API is `railway variable delete <KEY>` (subcommand
+  //   `delete`, singular `variable`, ONE key per call). We loop one CLI call
+  //   per key via deleteRailwayKeys() (see scripts/env/railway-delete.ts).
+  //   Per-key failures are collected; the loop continues so a single bad key
+  //   doesn't block the rest. Process exit code is 1 iff at least one delete
+  //   legitimately failed (NOT counting "already absent" idempotent OKs).
   if (toDelete.length > 0) {
-    const removeArgs = [
-      'variables',
-      '--remove',
-      ...toDelete,
-      '--service',
+    const { deleted, idempotent, failed, results } = deleteRailwayKeys({
+      keys: toDelete,
       service,
-      '--environment',
       env,
-      '--skip-deploys',
-    ]
-    const removeResult = railwaySpawnSync(removeArgs, { stdio: 'pipe' })
-    if (removeResult.status !== 0) {
-      const stderr = (removeResult.stderr ?? '').trim()
-      const lowerStderr = stderr.toLowerCase()
-      // CLI exits non-zero when EVERY requested key was already absent —
-      // treat that as idempotent success (the desired end state is met).
-      const allAlreadyAbsent =
-        lowerStderr.includes('not found') ||
-        lowerStderr.includes('does not exist') ||
-        lowerStderr.includes("doesn't exist")
-      if (allAlreadyAbsent) {
-        console.info(
-          `\n🗑  Deleted 0/${toDelete.length} empty vars from Railway (all ${toDelete.length} already absent)`
-        )
-      } else {
-        console.error(
-          `\n❌ Railway CLI exited with status ${removeResult.status} during batch remove of ${toDelete.length} vars\n` +
-            `  stderr: ${stderr.slice(0, 200)}`
-        )
-        process.exit(1)
-      }
-    } else {
+      exec: defaultRailwayExec,
+    })
+    if (deleted + idempotent > 0) {
+      const idempotentSuffix = idempotent > 0 ? ` (${idempotent} already absent)` : ''
       console.info(
-        `\n🗑  Deleted ${toDelete.length} empty var${toDelete.length === 1 ? '' : 's'} from Railway: ${toDelete.join(', ')}`
+        `\n🗑  Deleted ${deleted + idempotent}/${toDelete.length} empty var${toDelete.length === 1 ? '' : 's'} from Railway${idempotentSuffix}`
       )
+    }
+    if (failed > 0) {
+      console.error(`\n❌ ${failed}/${toDelete.length} Railway deletes failed:`)
+      for (const r of results) {
+        if (r.status === 0) continue
+        console.error(`     ↳ ${r.key} (status ${r.status}): ${r.stderr.trim().slice(0, 200)}`)
+      }
+      process.exit(1)
     }
   }
 
@@ -790,25 +886,38 @@ if (isDirectRun) {
       )
       for (const k of toPrune) console.info(`  - ${k}`)
 
-      // Railway CLI : `variables --remove KEY1 KEY2 ...` removes vars in one call.
-      const removeArgs = [
-        'variables',
-        '--remove',
-        ...toPrune,
-        '--service',
+      // Same per-key delete loop as the empty=DELETE branch above. Railway CLI
+      // 4.x has no batch remove — one `railway variable delete <K>` per key
+      // (see deleteRailwayKeys() in scripts/env/railway-delete.ts).
+      const pruneResult = deleteRailwayKeys({
+        keys: toPrune,
         service,
-        '--environment',
         env,
-        '--skip-deploys',
-      ]
-      const removeResult = railwaySpawnSync(removeArgs, { stdio: 'pipe' })
-      if (removeResult.status !== 0) {
+        exec: defaultRailwayExec,
+      })
+      if (pruneResult.failed > 0) {
         console.error(
-          `\n❌ [prune] railway variables --remove failed (status ${removeResult.status}): ${(removeResult.stderr ?? '').trim().slice(0, 200)}`
+          `\n❌ [prune] ${pruneResult.failed}/${toPrune.length} Railway deletes failed:`
         )
+        for (const r of pruneResult.results) {
+          if (r.status === 0) continue
+          console.error(`     ↳ ${r.key} (status ${r.status}): ${r.stderr.trim().slice(0, 200)}`)
+        }
       } else {
-        console.info(`✅ [prune] Removed ${toPrune.length} remote vars`)
+        const okTotal = pruneResult.deleted + pruneResult.idempotent
+        const idempotentSuffix =
+          pruneResult.idempotent > 0 ? ` (${pruneResult.idempotent} already absent)` : ''
+        console.info(
+          `✅ [prune] Removed ${okTotal}/${toPrune.length} remote vars${idempotentSuffix}`
+        )
       }
     }
   }
+}
+
+if (isDirectRun) {
+  main().catch(err => {
+    console.error('❌ Uncaught error in push-railway:', err)
+    process.exit(1)
+  })
 }
