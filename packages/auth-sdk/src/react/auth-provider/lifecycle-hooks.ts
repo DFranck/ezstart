@@ -126,6 +126,60 @@ export function useKeyConfigFetch(deps: {
 }
 
 /**
+ * Prime the CSRF cookie on Provider mount when the resolved auth mode is
+ * `httpOnly`. Phase 1 of SDK-CSRF-TOKEN-ALWAYS-001 — the SDK now sends
+ * `X-CSRF-Token` on every cookie-auth write, so we need a fresh token
+ * available BEFORE the user triggers their first write (logout, profile
+ * update, etc.).
+ *
+ * Skipped:
+ *  - SSR (`typeof window === 'undefined'`) — `document.cookie` not available.
+ *  - On the OAuth callback page — the cookie ride alongside the callback
+ *    is already set by the server's redirect, no client priming needed.
+ *  - `localStorage` mode — Bearer auth bypasses the CSRF middleware
+ *    server-side, so priming would just be wasted bandwidth.
+ *
+ * Re-primes when the client identity changes (apiUrl / appName rotation),
+ * matching the `useTokenVerification` dependency shape so the two hooks
+ * stay in lockstep on rotation events. cf. `standard-saas-security.md` §6
+ * (HMAC/CSRF) + `core/auth-client/csrf.ts` for the helper contract.
+ */
+export function useCsrfPrime(deps: {
+  effectiveMode: AuthMode
+  client: CoreAuthClient
+  logger: AuthLogger
+}): void {
+  const { effectiveMode, client, logger } = deps
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (effectiveMode !== 'httpOnly') return
+    if (window.location.pathname.includes('/auth/callback')) return
+
+    let cancelled = false
+    client.primeCsrf().then(
+      () => {
+        if (cancelled) return
+        logger.debug('[AuthProvider] CSRF token primed')
+      },
+      err => {
+        if (cancelled) return
+        // The helper itself already swallows errors (cf. csrf.ts) — this
+        // is a defensive log only. The first cookie-auth write will retry
+        // the prime via `cookieWrite` if no token is cached.
+        logger.debug('[AuthProvider] CSRF prime failed (will retry on first write)', {
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+    )
+
+    return () => {
+      cancelled = true
+    }
+  }, [effectiveMode, client, logger])
+}
+
+/**
  * Auto-detect + apply the effective auth mode on mount. When the resolved
  * mode differs from the persisted one and the user is authenticated, re-stamp
  * the session under the new mode. Verbatim from the inline effect.

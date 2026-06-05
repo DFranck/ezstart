@@ -32,6 +32,22 @@ function jsonResponse(status: number, body: unknown): Response {
   } as unknown as Response
 }
 
+/**
+ * The SDK's cookie-auth writes prime the CSRF cookie (`GET /login-cookie/csrf`)
+ * before the actual request when no token is cached. In the jsdom test env
+ * `document.cookie` stays empty, so every cookieWrite consumes TWO mock
+ * fetches: the priming call (mocked to return an empty 200) and the real
+ * method call. This helper mocks the prime + the real response in order.
+ */
+function mockCookieWriteCall(response: Response): void {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    status: 200,
+    json: async () => ({}),
+  } as Response)
+  mockFetch.mockResolvedValueOnce(response)
+}
+
 describe('EMAIL_VERIFICATION_REQUIRED error code', () => {
   beforeEach(() => {
     mockFetch.mockReset()
@@ -47,7 +63,7 @@ describe('EMAIL_VERIFICATION_REQUIRED error code', () => {
   })
 
   it('threads error.code from the 403 envelope into AuthError.code', async () => {
-    mockFetch.mockResolvedValueOnce(
+    mockCookieWriteCall(
       jsonResponse(403, {
         success: false,
         error: { message: 'Email verification required', code: EMAIL_VERIFICATION_REQUIRED },
@@ -70,7 +86,7 @@ describe('EMAIL_VERIFICATION_REQUIRED error code', () => {
   })
 
   it('isEmailVerificationRequiredError narrows the caught error', async () => {
-    mockFetch.mockResolvedValueOnce(
+    mockCookieWriteCall(
       jsonResponse(403, {
         success: false,
         error: { message: 'Email verification required', code: EMAIL_VERIFICATION_REQUIRED },
@@ -103,9 +119,7 @@ describe('EMAIL_VERIFICATION_REQUIRED error code', () => {
   })
 
   it('leaves AuthError.code undefined when the server returns no code', async () => {
-    mockFetch.mockResolvedValueOnce(
-      jsonResponse(400, { success: false, error: { message: 'Bad request' } })
-    )
+    mockCookieWriteCall(jsonResponse(400, { success: false, error: { message: 'Bad request' } }))
 
     const client = new CoreAuthClient({
       apiUrl: 'https://auth.example.com/api/auth',

@@ -11,6 +11,28 @@
  */
 
 /**
+ * Options for {@link ClientContext.cookieWrite} — mirrors the subset of
+ * `RequestInit` cookie-auth writes need (method, body, optional extra
+ * headers, optional AbortSignal).
+ *
+ * @internal
+ */
+export interface CookieWriteInit {
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+  body?: BodyInit | null
+  /** Extra headers merged on top of `baseHeaders()` + the auto-injected CSRF + content-type. */
+  headers?: Record<string, string>
+  /** Optional AbortSignal forwarded to `fetch`. */
+  signal?: AbortSignal
+  /**
+   * Optional override of the default `Content-Type: application/json`.
+   * Pass `null` to omit the header entirely (e.g. for multipart form-data
+   * where the browser sets the boundary itself).
+   */
+  contentType?: string | null
+}
+
+/**
  * Mutable client context shared by every method group. Backed by the
  * `CoreAuthClient` instance so that `setApiUrl` / `setAppName` /
  * `setRedirectUri` mutations are observed live by in-flight method calls.
@@ -26,6 +48,42 @@ export interface ClientContext {
   readonly redirectUri: string | undefined
   /** Build base headers, injecting `X-API-Key` when an API key is configured. */
   baseHeaders(extra?: Record<string, string>): Record<string, string>
+  /**
+   * Prime the CSRF cookie via `GET /login-cookie/csrf`. Called by the
+   * `useCsrfPrime` lifecycle hook on Provider mount + after refresh, and
+   * implicitly by {@link ClientContext.cookieWrite} when no token is cached.
+   *
+   * SSR-safe (no-op when `document` is unavailable).
+   */
+  primeCsrf(): Promise<void>
+  /**
+   * Get the cached CSRF token, primed cookie value. Returns `undefined`
+   * when not yet primed or when running server-side.
+   */
+  getCsrfToken(): string | undefined
+  /**
+   * Discard the cached CSRF state. Called automatically by
+   * {@link ClientContext.cookieWrite} on a 403 mismatch so the retry uses
+   * a freshly minted token.
+   */
+  invalidateCsrfToken(): void
+  /**
+   * Centralized helper for cookie-auth state-changing writes (POST / PUT /
+   * PATCH / DELETE that rely on the `ezauth_token` httpOnly cookie rather
+   * than `Authorization: Bearer`).
+   *
+   * Behavior:
+   *  - Sets `credentials: 'include'` so cookies travel cross-origin.
+   *  - Injects `X-CSRF-Token` from the cached cookie (priming on miss).
+   *  - Defaults `Content-Type: application/json` unless overridden.
+   *  - On `403` with a CSRF mismatch message, invalidates the cache,
+   *    re-primes, and retries ONCE. Subsequent 403s propagate to the caller.
+   *
+   * Bearer-auth writes do NOT need this helper — when the caller passes
+   * `Authorization: Bearer …` in `extra`, the server's `verifyCookieCsrf`
+   * middleware short-circuits and skips the double-submit check.
+   */
+  cookieWrite(path: string, init: CookieWriteInit): Promise<Response>
 }
 
 /**
@@ -92,4 +150,18 @@ export function parseErrorCode(body: Record<string, unknown>): string | undefine
   // Top-level code: { success: false, code: "..." }
   if (typeof body.code === 'string') return body.code
   return undefined
+}
+
+/**
+ * Heuristic — does a 403 response body look like a CSRF mismatch? The
+ * `@ezstart/api-core` `createCsrfMiddleware` emits `'CSRF token mismatch'`
+ * verbatim (cf. `packages/api-core/src/core/middleware/csrf.ts`). Match on
+ * the substring so future tweaks to the message wording stay compatible.
+ *
+ * @internal
+ */
+export function isCsrfMismatch(status: number, body: Record<string, unknown>): boolean {
+  if (status !== 403) return false
+  const message = parseError(body, '').toLowerCase()
+  return message.includes('csrf')
 }

@@ -23,6 +23,8 @@ export async function getOAuthProviders(
   ctx: ClientContext,
   accessToken?: string
 ): Promise<ConnectedOAuthProvider[]> {
+  // GET — no CSRF needed; the server skips the double-submit check on safe
+  // methods regardless.
   const response = await fetch(`${ctx.apiUrl}/me/oauth-providers`, {
     headers: ctx.baseHeaders(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
     credentials: 'include',
@@ -59,10 +61,11 @@ export async function disconnectOAuthProvider(
   provider: string,
   accessToken?: string
 ): Promise<void> {
-  const response = await fetch(`${ctx.apiUrl}/me/oauth-providers/${encodeURIComponent(provider)}`, {
+  const response = await ctx.cookieWrite(`/me/oauth-providers/${encodeURIComponent(provider)}`, {
     method: 'DELETE',
-    headers: ctx.baseHeaders(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
-    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    // No body — pass `null` to skip Content-Type entirely.
+    contentType: null,
   })
 
   if (!response.ok) {

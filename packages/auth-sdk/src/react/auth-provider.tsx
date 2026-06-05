@@ -14,6 +14,7 @@ import { noopLogger } from './auth-provider/logger.js'
 import { type AuthProviderProps, DEFAULT_LOGOUT_TEXTS } from './auth-provider/props.js'
 import {
   useAuthModeSync,
+  useCsrfPrime,
   useKeyConfigFetch,
   useProactiveRefresh,
   useTokenVerification,
@@ -279,6 +280,13 @@ export function AuthProvider({
   })
 
   useAuthModeSync({ effectiveMode, authMode, store, logger })
+
+  // Prime the CSRF cookie when the resolved mode is `httpOnly` — required for
+  // all subsequent cookie-auth writes (logout, refresh, profile, account,
+  // oauth-disconnect). Phase 1 of SDK-CSRF-TOKEN-ALWAYS-001. The hook
+  // no-ops in localStorage mode (Bearer auth bypasses CSRF) and on the
+  // /auth/callback page.
+  useCsrfPrime({ effectiveMode, client, logger })
 
   useTokenVerification({
     accessToken: storeState.accessToken,

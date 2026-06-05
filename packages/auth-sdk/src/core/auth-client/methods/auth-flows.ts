@@ -18,16 +18,17 @@ import { type ClientContext, parseError, parseErrorCode, unwrapEnvelope } from '
  * the original `codeVerifier` here — the server verifies
  * `BASE64URL(SHA256(verifier))` against the stored challenge. Omit it for
  * legacy (no-PKCE) codes.
+ *
+ * `/token` is a cookie-auth write — the SDK routes it through
+ * `ctx.cookieWrite` so the double-submit CSRF token rides along.
  */
 export async function exchangeCode(
   ctx: ClientContext,
   code: string,
   codeVerifier?: string
 ): Promise<AuthToken> {
-  const response = await fetch(`${ctx.apiUrl}/token`, {
+  const response = await ctx.cookieWrite('/token', {
     method: 'POST',
-    headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
-    credentials: 'include',
     body: JSON.stringify({
       code,
       app: ctx.appName,
@@ -64,10 +65,8 @@ export async function loginWithCookie(
   email: string,
   password: string
 ): Promise<AuthUser> {
-  const response = await fetch(`${ctx.apiUrl}/login-cookie`, {
+  const response = await ctx.cookieWrite('/login-cookie', {
     method: 'POST',
-    headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
-    credentials: 'include',
     body: JSON.stringify({
       email,
       password,
@@ -87,6 +86,9 @@ export async function loginWithCookie(
 
 /** Get current user info (dual-mode: httpOnly cookie OR accessToken). */
 export async function getCurrentUser(ctx: ClientContext, accessToken?: string): Promise<AuthUser> {
+  // GET request — no CSRF needed (browsers don't send the cookie on
+  // cross-origin GET that's not a fetch with credentials, and the server
+  // skips the double-submit check on GET methods regardless).
   const response = await fetch(`${ctx.apiUrl}/me`, {
     headers: ctx.baseHeaders(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
     credentials: 'include',
@@ -109,10 +111,8 @@ export async function getCurrentUser(ctx: ClientContext, accessToken?: string): 
 /** Verify token validity. */
 export async function verifyToken(ctx: ClientContext, accessToken: string): Promise<boolean> {
   try {
-    const response = await fetch(`${ctx.apiUrl}/verify`, {
+    const response = await ctx.cookieWrite('/verify', {
       method: 'POST',
-      headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
-      credentials: 'include',
       body: JSON.stringify({
         token: accessToken,
         app: ctx.appName,
@@ -130,10 +130,8 @@ export async function verifyToken(ctx: ClientContext, accessToken: string): Prom
 /** Logout and clear httpOnly cookie. */
 export async function logout(ctx: ClientContext, refreshToken?: string): Promise<void> {
   try {
-    await fetch(`${ctx.apiUrl}/logout`, {
+    await ctx.cookieWrite('/logout', {
       method: 'POST',
-      headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
-      credentials: 'include',
       body: JSON.stringify({ refreshToken }),
     })
   } catch {
@@ -146,10 +144,8 @@ export async function refreshTokens(
   ctx: ClientContext,
   refreshToken: string
 ): Promise<RefreshResult> {
-  const response = await fetch(`${ctx.apiUrl}/refresh`, {
+  const response = await ctx.cookieWrite('/refresh', {
     method: 'POST',
-    headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
-    credentials: 'include',
     body: JSON.stringify({ refreshToken }),
   })
 

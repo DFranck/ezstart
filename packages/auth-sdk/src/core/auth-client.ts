@@ -20,7 +20,9 @@
  * functions), so every existing import path keeps working unchanged.
  */
 
-import type { ClientContext } from './auth-client/context.js'
+import type { ClientContext, CookieWriteInit } from './auth-client/context.js'
+import { cookieWrite } from './auth-client/cookie-write.js'
+import { createCsrfHelper, type CsrfHelper } from './auth-client/csrf.js'
 import {
   exchangeCode,
   getCurrentUser,
@@ -76,6 +78,13 @@ export class CoreAuthClient {
    */
   private readonly ctx: ClientContext
 
+  /**
+   * CSRF token helper — fetches `GET /login-cookie/csrf` on demand, caches
+   * the cookie value, dedupes concurrent prime calls, and invalidates on
+   * 403 mismatch. cf. `auth-client/csrf.ts` for the full contract.
+   */
+  private readonly csrf: CsrfHelper
+
   constructor(config: AuthClientConfig) {
     this.apiUrl = config.apiUrl
     this.appName = config.appName
@@ -87,6 +96,19 @@ export class CoreAuthClient {
     // in-flight method calls) plus a `baseHeaders` delegate. Object-literal
     // getters have their own `this`, so we read the instance fields through
     // arrow functions that close over the constructor's `this`.
+    const baseHeaders = (extra?: Record<string, string>): Record<string, string> =>
+      this.baseHeaders(extra)
+
+    // The CSRF helper needs apiUrl + baseHeaders to call the priming
+    // endpoint. We pass a minimal shim so the helper has no dependency on
+    // the full ClientContext (cleaner test setup + tighter type surface).
+    this.csrf = createCsrfHelper({
+      get apiUrl(): string {
+        return getApiUrl()
+      },
+      baseHeaders,
+    })
+
     this.ctx = {
       get apiUrl(): string {
         return getApiUrl()
@@ -97,7 +119,11 @@ export class CoreAuthClient {
       get redirectUri(): string | undefined {
         return getRedirectUri()
       },
-      baseHeaders: extra => this.baseHeaders(extra),
+      baseHeaders,
+      primeCsrf: () => this.csrf.prime(),
+      getCsrfToken: () => this.csrf.getToken(),
+      invalidateCsrfToken: () => this.csrf.invalidate(),
+      cookieWrite: (path, init) => this.cookieWrite(path, init),
     }
     const getApiUrl = (): string => this.apiUrl
     const getAppName = (): string => this.appName
@@ -112,6 +138,46 @@ export class CoreAuthClient {
     }
     return headers
   }
+
+  /**
+   * Centralized cookie-auth write. Delegates to the extracted helper in
+   * `./auth-client/cookie-write.ts` (cf. that file for the full behaviour
+   * contract). The instance method shape is preserved so the class surface
+   * stays unchanged.
+   */
+  private cookieWrite(path: string, init: CookieWriteInit): Promise<Response> {
+    return cookieWrite(this.cookieWriteDeps, path, init)
+  }
+
+  /**
+   * Stable deps object reused across cookieWrite calls — built lazily on
+   * first use so it observes the live `apiUrl` via the closure-captured
+   * getter (`setApiUrl` mutations stay reflected mid-flight).
+   */
+  private get cookieWriteDeps(): {
+    readonly apiUrl: string
+    baseHeaders(extra?: Record<string, string>): Record<string, string>
+    csrf: CsrfHelper
+  } {
+    if (!this._cookieWriteDeps) {
+      const getApiUrl = (): string => this.apiUrl
+      this._cookieWriteDeps = {
+        get apiUrl(): string {
+          return getApiUrl()
+        },
+        baseHeaders: extra => this.baseHeaders(extra),
+        csrf: this.csrf,
+      }
+    }
+    return this._cookieWriteDeps
+  }
+  private _cookieWriteDeps:
+    | {
+        readonly apiUrl: string
+        baseHeaders(extra?: Record<string, string>): Record<string, string>
+        csrf: CsrfHelper
+      }
+    | undefined
 
   /** Update the redirect URI (useful when it can only be resolved client-side). */
   setRedirectUri(uri: string): void {
@@ -136,6 +202,19 @@ export class CoreAuthClient {
   /** Get the configured API URL. */
   getApiUrl(): string {
     return this.apiUrl
+  }
+
+  /**
+   * Prime the CSRF cookie. Called by the `<AuthProvider>` lifecycle hook on
+   * mount + after refresh so the first cookie-auth write does not race the
+   * priming round-trip.
+   *
+   * No-op when `document` is unavailable (SSR). Safe to call eagerly even
+   * on Bearer-auth pages — the prime endpoint is idempotent and rate-limit-
+   * friendly (one round-trip per Provider mount under normal conditions).
+   */
+  async primeCsrf(): Promise<void> {
+    return this.csrf.prime()
   }
 
   // ── Auth flows ──────────────────────────────────────────────────────────

@@ -16,13 +16,9 @@ export async function updateProfile(
   data: { firstName?: string; lastName?: string; avatar?: string },
   accessToken?: string
 ): Promise<AuthUser> {
-  const response = await fetch(`${ctx.apiUrl}/profile`, {
+  const response = await ctx.cookieWrite('/profile', {
     method: 'PUT',
-    headers: ctx.baseHeaders({
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    }),
-    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: JSON.stringify(data),
   })
 
@@ -46,13 +42,9 @@ export async function changePassword(
   data: { currentPassword?: string; newPassword: string },
   accessToken?: string
 ): Promise<void> {
-  const response = await fetch(`${ctx.apiUrl}/change-password`, {
+  const response = await ctx.cookieWrite('/change-password', {
     method: 'PUT',
-    headers: ctx.baseHeaders({
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    }),
-    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: JSON.stringify(data),
   })
 
@@ -90,13 +82,9 @@ export async function deleteAccount(
   data: { confirmation: string; password?: string },
   accessToken?: string
 ): Promise<{ scheduledDeletionAt: string; gracePeriodDays: number; message: string }> {
-  const response = await fetch(`${ctx.apiUrl}/account`, {
+  const response = await ctx.cookieWrite('/account', {
     method: 'DELETE',
-    headers: ctx.baseHeaders({
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    }),
-    credentials: 'include',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: JSON.stringify(data),
   })
 
@@ -127,10 +115,8 @@ export async function quickSignUp(
   ctx: ClientContext,
   data: QuickSignUpRequest
 ): Promise<QuickSignUpResult> {
-  const response = await fetch(`${ctx.apiUrl}/quick-signup`, {
+  const response = await ctx.cookieWrite('/quick-signup', {
     method: 'POST',
-    headers: ctx.baseHeaders({ 'Content-Type': 'application/json' }),
-    credentials: 'include',
     body: JSON.stringify(data),
   })
 
