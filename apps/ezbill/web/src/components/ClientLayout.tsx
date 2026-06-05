@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
+import { getWebUrl } from '@ezstart/config'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import {
   ClientLayout as BaseClientLayout,
@@ -25,7 +26,7 @@ type ClientLayoutProps = {
   showLogoutButton?: boolean
 }
 
-const EZSTART_WEB_URL = process.env.NEXT_PUBLIC_EZSTART_WEB_URL ?? 'https://ezstart.ezstart.xyz'
+const EZSTART_WEB_URL = getWebUrl('ezstart')
 
 const ClientLayout = ({
   children,

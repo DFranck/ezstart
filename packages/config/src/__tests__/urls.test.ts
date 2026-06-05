@@ -93,6 +93,33 @@ describe('@ezstart/config - URLs', () => {
         expect(() => getWebUrl(app)).not.toThrow()
       })
     })
+
+    it('should return prod URL when no env hints are present (auto-derive default)', () => {
+      // Snapshot + clear env hints that getCurrentEnvironment() inspects
+      const originalDeployEnv = process.env.DEPLOY_ENV
+      const originalVercelEnv = process.env.VERCEL_ENV
+      const originalVercelRef = process.env.VERCEL_GIT_COMMIT_REF
+      const originalNodeEnv = process.env.NODE_ENV
+
+      delete process.env.DEPLOY_ENV
+      delete process.env.VERCEL_ENV
+      delete process.env.VERCEL_GIT_COMMIT_REF
+      process.env.NODE_ENV = 'production'
+
+      try {
+        // With NODE_ENV=production and no Vercel/DEPLOY_ENV hints,
+        // getCurrentEnvironment() returns 'production'
+        const url = getWebUrl('ezstart')
+        expect(url).toBe(URLS.ezstart.web.production)
+        expect(url).toBe('https://www.ezstart.xyz')
+      } finally {
+        // Restore
+        if (originalDeployEnv !== undefined) process.env.DEPLOY_ENV = originalDeployEnv
+        if (originalVercelEnv !== undefined) process.env.VERCEL_ENV = originalVercelEnv
+        if (originalVercelRef !== undefined) process.env.VERCEL_GIT_COMMIT_REF = originalVercelRef
+        if (originalNodeEnv !== undefined) process.env.NODE_ENV = originalNodeEnv
+      }
+    })
   })
 
   describe('getApiUrl', () => {

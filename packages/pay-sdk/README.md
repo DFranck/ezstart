@@ -346,7 +346,7 @@ copy without the CTA button.
 <PayProvider
   applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID}
   config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL }}
-  payWebUrl={process.env.NEXT_PUBLIC_EZPAY_WEB_URL}
+  // payWebUrl is auto-derived from /keys/config — pass explicitly only to override
 >
   <DonationWall projectId="myproject" locale={locale} />
 </PayProvider>
