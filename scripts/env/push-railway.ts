@@ -76,9 +76,10 @@ import * as readline from 'node:readline'
 import * as dotenv from 'dotenv'
 import { deleteRailwayKeys } from './railway-delete.js'
 import {
+  assertNoFailedDeletes,
   detectInlineCommentEmptyValuesFromFile,
-  formatOverrideEmptyDeletePrompt,
-  requireConfirmOverrideEmptyDelete,
+  formatEmptyDeletePrompt,
+  requireConfirmEmptyDelete,
 } from './delete-guards.js'
 import { getRailwayAppConfig, type RailwayAppConfig } from './railway-projects.js'
 import { extractEnvFlag, isProtectedEnvKey, parseEnvArg, type TargetEnv } from './shared-flags.js'
@@ -606,27 +607,40 @@ async function main(): Promise<void> {
     }
   }
 
-  // ── V5 guard: confirm before DELETE via `--override KEY=` (empty value) ──
+  // ── V5 guard: confirm before DELETE for ANY empty-value source ──────────
   // `--override KEY=` is a copy-paste-prone surface: missing value → empty
-  // string → DELETE intent. In non-TTY contexts the operator MUST pass
+  // string → DELETE intent. A bare `KEY=` line in a cascade file is the
+  // EXACT same risk class — a typo committed to .env.production silently
+  // deletes the secret. In non-TTY contexts the operator MUST pass
   // `--yes-i-mean-delete` explicitly. In a TTY we prompt interactively.
+  //
+  // Post hacker-A3.5 (P1a): previously this guard only fired on override
+  // empties, missing the cascade-file equivalent. Now both surfaces gate
+  // identically.
   const emptyOverrideKeys = Object.entries(flags.overrides)
     .filter(([, v]) => v === '')
     .map(([k]) => k)
-  if (!flags.dryRun && emptyOverrideKeys.length > 0) {
-    const guard = requireConfirmOverrideEmptyDelete({
+  const emptyMergedKeys = Object.entries(merged)
+    .filter(([, v]) => v === '')
+    .map(([k]) => k)
+  // Cascade-sourced empties = merged empties minus the ones also flagged via
+  // --override (counted separately in the guard's reason for clarity).
+  const emptyCascadeKeys = emptyMergedKeys.filter(k => !emptyOverrideKeys.includes(k))
+  if (!flags.dryRun && (emptyOverrideKeys.length > 0 || emptyCascadeKeys.length > 0)) {
+    const guard = requireConfirmEmptyDelete({
       emptyOverrideKeys,
+      emptyCascadeKeys,
       yesIMeanDelete: flags.yesIMeanDelete,
       nonInteractive: flags.nonInteractive,
     })
     if (!guard.proceed) {
       if (guard.requiresInteractivePrompt) {
-        const accepted = await promptYesNoStrict(formatOverrideEmptyDeletePrompt(emptyOverrideKeys))
+        const accepted = await promptYesNoStrict(formatEmptyDeletePrompt(guard.allEmptyKeys))
         if (!accepted) {
           fail(`Aborted by operator — type \`yes\` exactly to confirm DELETE intent next time.`)
         }
       } else {
-        fail(guard.reason ?? 'Override DELETE intent requires explicit confirmation.')
+        fail(guard.reason ?? 'Empty-value DELETE intent requires explicit confirmation.')
       }
     }
   }
@@ -849,12 +863,13 @@ async function main(): Promise<void> {
       )
     }
     if (failed > 0) {
-      console.error(`\n❌ ${failed}/${toDelete.length} Railway deletes failed:`)
-      for (const r of results) {
-        if (r.status === 0) continue
-        console.error(`     ↳ ${r.key} (status ${r.status}): ${r.stderr.trim().slice(0, 200)}`)
-      }
-      process.exit(1)
+      assertNoFailedDeletes({
+        failures: results
+          .filter(r => r.status !== 0)
+          .map(r => ({ key: r.key, status: r.status, stderr: r.stderr })),
+        label: '[delete]',
+        totalAttempted: toDelete.length,
+      })
     }
   }
 
@@ -896,13 +911,18 @@ async function main(): Promise<void> {
         exec: defaultRailwayExec,
       })
       if (pruneResult.failed > 0) {
-        console.error(
-          `\n❌ [prune] ${pruneResult.failed}/${toPrune.length} Railway deletes failed:`
-        )
-        for (const r of pruneResult.results) {
-          if (r.status === 0) continue
-          console.error(`     ↳ ${r.key} (status ${r.status}): ${r.stderr.trim().slice(0, 200)}`)
-        }
+        // Post hacker-A3.5 (P0): previously this branch logged the per-key
+        // errors then fell through to a zero exit — CI marked the push as
+        // success while the remote still held variables the cascade said
+        // should be gone. Now we exit 1 symmetric with the empty=DELETE
+        // branch above.
+        assertNoFailedDeletes({
+          failures: pruneResult.results
+            .filter(r => r.status !== 0)
+            .map(r => ({ key: r.key, status: r.status, stderr: r.stderr })),
+          label: '[prune]',
+          totalAttempted: toPrune.length,
+        })
       } else {
         const okTotal = pruneResult.deleted + pruneResult.idempotent
         const idempotentSuffix =

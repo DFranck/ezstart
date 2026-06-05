@@ -61,9 +61,10 @@ import path from 'node:path'
 import * as readline from 'node:readline'
 import * as dotenv from 'dotenv'
 import {
+  assertNoFailedDeletes,
   detectInlineCommentEmptyValuesFromFile,
-  formatOverrideEmptyDeletePrompt,
-  requireConfirmOverrideEmptyDelete,
+  formatEmptyDeletePrompt,
+  requireConfirmEmptyDelete,
 } from './delete-guards.js'
 import {
   ALL_TARGET_ENVS,
@@ -293,6 +294,16 @@ interface ParsedFlags {
    * Force non-interactive flow (no TTY prompts).
    */
   nonInteractive: boolean
+  /**
+   * Acknowledge that the V3 cross-env scope mismatch is intentional. When
+   * the cascade has `KEY=` in the current env but the same KEY is set in
+   * another env's cascade, the push only deletes from the current Vercel
+   * env — the value lives on for the other env. Without this flag, the
+   * mismatch triggers a fail-fast in non-TTY contexts. Use this when the
+   * partial delete is what you actually want (e.g. cycling a prod-only key
+   * while keeping the staging value untouched). Post hacker-A3.5 (P1b).
+   */
+  acceptCrossEnvMismatch: boolean
 }
 
 export function parseFlags(flags: string[]): ParsedFlags {
@@ -303,6 +314,7 @@ export function parseFlags(flags: string[]): ParsedFlags {
     cascadeDeleteAllEnvs: false,
     yesIMeanDelete: false,
     nonInteractive: false,
+    acceptCrossEnvMismatch: false,
   }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
@@ -336,6 +348,8 @@ export function parseFlags(flags: string[]): ParsedFlags {
       result.yesIMeanDelete = true
     } else if (flag === '--non-interactive') {
       result.nonInteractive = true
+    } else if (flag === '--accept-cross-env-mismatch') {
+      result.acceptCrossEnvMismatch = true
     } else {
       fail(`Unknown flag "${flag}"`)
     }
@@ -603,15 +617,24 @@ async function main(): Promise<void> {
     }
   }
 
-  // ── V3 guard: warn on cross-env scope mismatch ──────────────────────────
+  // ── V3 guard: cross-env scope mismatch ─────────────────────────────────
   // `vercel env rm KEY <target>` only deletes from the named target env. If
   // the same KEY is populated in another env's cascade (e.g. cleared in
   // production but still set in staging), the value lives on in Vercel for
-  // that other env. Surface this so the operator can choose to cascade.
+  // that other env.
+  //
+  // Post hacker-A3.5 (P1b): previously this was a `console.warn` then
+  // silently continued — operators with scrolled CI logs got the exact
+  // half-delete state the warning described. Now:
+  //   - In TTY (interactive): prompt the operator to choose abort / continue
+  //     scoped-only / cascade-delete-all-envs.
+  //   - In non-TTY (CI): fail-fast unless either `--cascade-delete-all-envs`
+  //     OR `--accept-cross-env-mismatch` is passed. Make the operator
+  //     deliberately acknowledge the split-state risk.
   const emptyCascadeKeys = Object.entries(merged)
     .filter(([, v]) => v === '')
     .map(([k]) => k)
-  if (emptyCascadeKeys.length > 0) {
+  if (emptyCascadeKeys.length > 0 && !flags.cascadeDeleteAllEnvs) {
     const mismatches = detectCrossEnvScopeMismatch({
       root: ROOT,
       app,
@@ -619,7 +642,7 @@ async function main(): Promise<void> {
       emptyKeys: emptyCascadeKeys,
       readEnv: parseEnvFile,
     })
-    if (mismatches.length > 0 && !flags.cascadeDeleteAllEnvs) {
+    if (mismatches.length > 0) {
       console.warn(`⚠️  Cross-env scope mismatch on ${mismatches.length} DELETE key(s):`)
       for (const m of mismatches) {
         console.warn(
@@ -632,27 +655,51 @@ async function main(): Promise<void> {
       console.warn(
         `   Pass --cascade-delete-all-envs to remove from ALL Vercel envs (development + preview + production).\n`
       )
+      const isTTY = Boolean(process.stdin.isTTY) && !flags.nonInteractive
+      if (!isTTY) {
+        if (!flags.acceptCrossEnvMismatch) {
+          fail(
+            `Cross-env scope mismatch detected in non-interactive context (${mismatches.length} key(s)).\n` +
+              `  Either pass --cascade-delete-all-envs to delete from ALL 3 Vercel envs,\n` +
+              `  OR pass --accept-cross-env-mismatch to delete only from the current env\n` +
+              `  (deliberately accepting that other envs keep the value).`
+          )
+        }
+        // operator explicitly accepted — continue with scoped delete
+      } else if (!flags.acceptCrossEnvMismatch) {
+        const accepted = await promptYesNoStrict(
+          `\n   Continue with scoped delete (only ${vercelEnvName(env)})? (yes/NO): `
+        )
+        if (!accepted) {
+          fail(`Aborted — re-run with --cascade-delete-all-envs OR --accept-cross-env-mismatch.`)
+        }
+      }
     }
   }
 
-  // ── V5 guard: confirm before DELETE via `--override KEY=` (empty value) ──
+  // ── V5 guard: confirm before DELETE for ANY empty-value source ──────────
+  // Post hacker-A3.5 (P1a): extended from override-only to cover cascade-file
+  // empties too (a bare `KEY=` line in .env.production is the same risk class
+  // as a `--override KEY=` typo — both DELETE the secret silently in CI).
   const emptyOverrideKeys = Object.entries(flags.overrides)
     .filter(([, v]) => v === '')
     .map(([k]) => k)
-  if (!flags.dryRun && emptyOverrideKeys.length > 0) {
-    const guard = requireConfirmOverrideEmptyDelete({
+  const cascadeEmptyKeys = emptyCascadeKeys.filter(k => !emptyOverrideKeys.includes(k))
+  if (!flags.dryRun && (emptyOverrideKeys.length > 0 || cascadeEmptyKeys.length > 0)) {
+    const guard = requireConfirmEmptyDelete({
       emptyOverrideKeys,
+      emptyCascadeKeys: cascadeEmptyKeys,
       yesIMeanDelete: flags.yesIMeanDelete,
       nonInteractive: flags.nonInteractive,
     })
     if (!guard.proceed) {
       if (guard.requiresInteractivePrompt) {
-        const accepted = await promptYesNoStrict(formatOverrideEmptyDeletePrompt(emptyOverrideKeys))
+        const accepted = await promptYesNoStrict(formatEmptyDeletePrompt(guard.allEmptyKeys))
         if (!accepted) {
           fail(`Aborted by operator — type \`yes\` exactly to confirm DELETE intent next time.`)
         }
       } else {
-        fail(guard.reason ?? 'Override DELETE intent requires explicit confirmation.')
+        fail(guard.reason ?? 'Empty-value DELETE intent requires explicit confirmation.')
       }
     }
   }
@@ -924,6 +971,30 @@ async function main(): Promise<void> {
       console.info(
         `${prunedFail === 0 ? '✅' : '⚠️ '} [prune] Deleted ${prunedOk}/${pruneResults.length} remote vars`
       )
+      // Post hacker-A3.5 (P0): previously prune failures bumped no counter
+      // and process exited zero — CI marked the push as success while the
+      // remote still held variables the cascade said should be gone. Fold
+      // the prune fail count into the global `failed` so process.exit at
+      // the end correctly signals partial-failure to CI.
+      if (prunedFail > 0) {
+        // Build failure records from the per-task results we have. The
+        // sequential rmArgs we used earlier captures key by index.
+        const pruneFailures: { key: string; status: number; stderr: string }[] = []
+        pruneResults.forEach((r, i) => {
+          if (r.status !== 0) {
+            pruneFailures.push({
+              key: toPrune[i],
+              status: r.status,
+              stderr: r.stderr,
+            })
+          }
+        })
+        assertNoFailedDeletes({
+          failures: pruneFailures,
+          label: '[prune]',
+          totalAttempted: toPrune.length,
+        })
+      }
     }
   }
 
