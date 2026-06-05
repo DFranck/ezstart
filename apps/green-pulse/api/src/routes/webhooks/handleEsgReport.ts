@@ -86,13 +86,51 @@ handleEsgReportRouter.post(
     try {
       // Verify webhook signature
       const signature = req.headers['x-esg-signature'] as string
-      const payload = JSON.stringify(req.body)
-
-      if (!signature || !esgService.verifyWebhookSignature(payload, signature)) {
+      if (!signature) {
         return sendError(res, 'Invalid webhook signature', 401)
       }
 
-      const validation = WebhookEventSchema.safeParse(req.body)
+      // ---- Capture raw bytes + parse body --------------------------------
+      // The route is registered in `rawBodyRoutes` (see `apps/green-pulse/
+      // api/src/index.ts`) so `req.body` is a `Buffer` containing the EXACT
+      // bytes the sender HMAC'd. We parse the JSON ourselves here — a
+      // re-serialization via `JSON.stringify(req.body)` would be a future
+      // engine upgrade time-bomb (any spec drift in V8/Bun/Deno key ordering
+      // would silently break every signature verify). The raw bytes are
+      // passed directly to `verifyWebhookSignature`.
+      //
+      // For backwards compatibility (e.g. tests that mount the router under
+      // an `express.json()` parser) we accept a parsed object and re-derive
+      // the bytes via JSON.stringify — but the production path always
+      // reaches here with a Buffer thanks to `rawBodyRoutes`.
+      let rawPayload: Buffer | string
+      let parsedJson: unknown
+      if (Buffer.isBuffer(req.body)) {
+        rawPayload = req.body
+        try {
+          parsedJson = JSON.parse(req.body.toString('utf8'))
+        } catch {
+          return sendError(res, 'Invalid JSON body', 400)
+        }
+      } else if (typeof req.body === 'string') {
+        rawPayload = req.body
+        try {
+          parsedJson = JSON.parse(req.body)
+        } catch {
+          return sendError(res, 'Invalid JSON body', 400)
+        }
+      } else {
+        // Backwards-compat path (used by some tests that mount the router
+        // behind `express.json()`). Production always uses raw body capture.
+        parsedJson = req.body
+        rawPayload = JSON.stringify(req.body)
+      }
+
+      if (!esgService.verifyWebhookSignature(rawPayload, signature)) {
+        return sendError(res, 'Invalid webhook signature', 401)
+      }
+
+      const validation = WebhookEventSchema.safeParse(parsedJson)
       if (!validation.success) {
         return sendValidationError(res, 'Invalid webhook payload', validation.error.errors, 400)
       }

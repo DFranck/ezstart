@@ -40,7 +40,7 @@ class ESGService {
         throw new Error(`OAuth failed: ${response.statusText}`)
       }
 
-      const data = await response.json() as { access_token: string; expires_in: number }
+      const data = (await response.json()) as { access_token: string; expires_in: number }
       this.accessToken = data.access_token
       // Set expiry to 5 minutes before actual expiry
       this.tokenExpiry = new Date(Date.now() + (data.expires_in - 300) * 1000)
@@ -59,7 +59,7 @@ class ESGService {
     const response = await fetch(`${this.baseUrl}/projects`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Idempotency-Key': crypto.randomUUID(),
       },
@@ -87,7 +87,7 @@ class ESGService {
     const response = await fetch(`${this.baseUrl}/activity-data`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Idempotency-Key': crypto.randomUUID(),
       },
@@ -117,7 +117,7 @@ class ESGService {
     const response = await fetch(`${this.baseUrl}/reports`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -132,7 +132,7 @@ class ESGService {
       throw new Error(`Failed to generate report: ${response.statusText}`)
     }
 
-    const data = await response.json() as { job_id: string }
+    const data = (await response.json()) as { job_id: string }
 
     return {
       job_id: data.job_id,
@@ -150,7 +150,7 @@ class ESGService {
     const response = await fetch(`${this.baseUrl}/reports/${jobId}/status`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
 
@@ -158,7 +158,7 @@ class ESGService {
       throw new Error(`Failed to get report status: ${response.statusText}`)
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       status: 'pending' | 'processing' | 'completed' | 'failed'
       progress?: number
       report_url?: string
@@ -208,18 +208,32 @@ class ESGService {
     }
   }
 
-  // Verify webhook signature
-  verifyWebhookSignature(payload: string, signature: string): boolean {
+  /**
+   * Verify the HMAC-SHA256 signature of an incoming webhook payload.
+   *
+   * Accepts either a `Buffer` (production path — `req.body` is the raw bytes
+   * captured by `express.raw({ type: 'application/json' })` when the route is
+   * listed in `rawBodyRoutes`) or a `string` (test/backwards-compat path).
+   * The HMAC MUST be computed over the EXACT bytes sent on the wire — never
+   * over `JSON.stringify(parsedObject)`, which would drift if the engine ever
+   * changes its object key iteration order.
+   *
+   * Returns `false` (not `throw`) on signature length mismatch, so the caller
+   * can return a uniform 401 without leaking timing info via the error path.
+   */
+  verifyWebhookSignature(payload: Buffer | string, signature: string): boolean {
     const secret = process.env.WEBHOOK_SIGNING_SECRET || ''
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex')
+    const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    )
+    const provided = Buffer.from(signature, 'utf8')
+    const expected = Buffer.from(expectedSignature, 'utf8')
+    // `timingSafeEqual` throws when the two buffers differ in length — guard
+    // explicitly so a truncated/oversized header returns the same uniform
+    // false the caller maps to 401.
+    if (provided.length !== expected.length) {
+      return false
+    }
+    return crypto.timingSafeEqual(provided, expected)
   }
 }
 
