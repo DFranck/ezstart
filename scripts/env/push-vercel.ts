@@ -32,6 +32,16 @@
  * publishable keys, production API URLs, production webhook targets). Missing layers
  * are silently skipped.
  *
+ * Value semantics (3-way, mirrors Stripe / Vercel CLI convention):
+ *   - `KEY` absent from every cascade layer  → no-op (variable not touched).
+ *   - `KEY=` (empty string) in the cascade   → DELETE via `vercel env rm`.
+ *                                              Use this to explicitly clear a
+ *                                              var on Vercel (e.g. after a leak
+ *                                              or rotation). Idempotent: if the
+ *                                              var doesn't exist remotely, the
+ *                                              push still succeeds.
+ *   - `KEY=value` in the cascade             → upsert (rm-then-add) on Vercel.
+ *
  * Flags:
  *   --from <env>        Use a SINGLE source env file (bypass cascade). Useful when
  *                       you want to push exactly what's in .env.local to staging
@@ -485,9 +495,22 @@ async function main(): Promise<void> {
   )
 
   if (flags.dryRun) {
+    let dryRunDeleteCount = 0
+    let dryRunUpsertCount = 0
     for (const [k, v] of Object.entries(merged)) {
       const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
-      console.info(`  ${k}=${mask(v)}${marker}`)
+      if (v === '') {
+        console.info(`  ${k}=<DELETE> (empty in cascade)${marker}`)
+        dryRunDeleteCount++
+      } else {
+        console.info(`  ${k}=${mask(v)}${marker}`)
+        dryRunUpsertCount++
+      }
+    }
+    if (dryRunDeleteCount > 0) {
+      console.info(
+        `\n🗑  Would DELETE ${dryRunDeleteCount} empty var${dryRunDeleteCount === 1 ? '' : 's'} from Vercel`
+      )
     }
     if (flags.prune) {
       // In dry-run we still need to inventory the remote to compute the prune
@@ -520,28 +543,43 @@ async function main(): Promise<void> {
       }
     }
     console.info(
-      `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to "${app}" (${vercelTarget})`
+      `\n✅ Dry-run complete — ${dryRunUpsertCount} var${dryRunUpsertCount === 1 ? '' : 's'} would be upserted` +
+        (dryRunDeleteCount > 0
+          ? ` + ${dryRunDeleteCount} var${dryRunDeleteCount === 1 ? '' : 's'} deleted`
+          : '') +
+        ` on "${app}" (${vercelTarget})`
     )
     process.exit(0)
   }
 
   const gitBranch = vercelGitBranch(env)
-  const skipped: string[] = []
-  // Filter empty values upfront — Vercel `env add` rejects them, and an empty
-  // value in a source file means "intentionally absent" (matches local behavior).
-  const entries = Object.entries(merged).filter(([k, v]) => {
+  // Split entries by intent (3-way partition, mirrors `vercel env` CLI verbs):
+  //   - empty string `''`  → DELETE the var on Vercel (operator explicitly
+  //     cleared the value in the cascade — pattern matches Stripe / Vercel CLI
+  //     convention of `vercel env rm <NAME>` for explicit teardown). Previously
+  //     these were silently skipped, forcing manual cleanup after leaks or
+  //     rotations.
+  //   - value present     → upsert (rm-then-add) the var on Vercel.
+  //   - undefined / absent from cascade  → never reached here (filter is by
+  //     value, and `dotenv.parse()` returns absent keys as missing, not '').
+  const toDelete: string[] = []
+  const entries: Array<[string, string]> = []
+  for (const [k, v] of Object.entries(merged)) {
     if (v === '') {
-      skipped.push(k)
-      return false
+      toDelete.push(k)
+    } else {
+      entries.push([k, v])
     }
-    return true
-  })
+  }
 
   // Log what we're about to push (with masking) — done synchronously BEFORE
   // kicking off parallel tasks so the output is readable.
   for (const [k, v] of entries) {
     const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
     console.info(`  ${k}=${mask(v)}${marker}`)
+  }
+  for (const k of toDelete) {
+    console.info(`  ${k}=<DELETE> (empty in cascade)`)
   }
 
   // Build per-var rm+add tasks and run with bounded concurrency. Each task
@@ -565,12 +603,38 @@ async function main(): Promise<void> {
     return { key: k, status: addResult.status, stderr: addResult.stderr }
   })
 
+  // Delete tasks for vars explicitly cleared in the cascade. Run in parallel
+  // alongside upserts. Vercel `env rm` exits non-zero when the var doesn't
+  // exist on the remote — we treat that as idempotent success so push-all
+  // doesn't crash when a fresh project hasn't seen the var yet. The stderr
+  // signature for "not found" is recognizable enough across CLI versions.
+  const deleteTasks = toDelete.map(k => async () => {
+    const rmArgs = ['env', 'rm', k, vercelTarget]
+    if (gitBranch) rmArgs.push(gitBranch)
+    rmArgs.push('--yes')
+    const result = await vercelSpawn(rmArgs, webDir)
+    const lowerStderr = result.stderr.toLowerCase()
+    const notFound =
+      lowerStderr.includes('not found') ||
+      lowerStderr.includes('does not exist') ||
+      lowerStderr.includes("doesn't exist")
+    return {
+      key: k,
+      status: result.status === 0 || notFound ? 0 : result.status,
+      stderr: result.stderr,
+      idempotent: notFound,
+    }
+  })
+
   const VERCEL_CONCURRENCY = 8
-  const results = await runWithConcurrency(tasks, VERCEL_CONCURRENCY)
+  const [upsertResults, deleteResults] = await Promise.all([
+    runWithConcurrency(tasks, VERCEL_CONCURRENCY),
+    runWithConcurrency(deleteTasks, VERCEL_CONCURRENCY),
+  ])
 
   let pushed = 0
   let failed = 0
-  for (const r of results) {
+  for (const r of upsertResults) {
     if (r.status === 0) {
       pushed++
     } else {
@@ -579,13 +643,33 @@ async function main(): Promise<void> {
     }
   }
 
-  if (skipped.length > 0) {
-    console.info(`\n⏭  Skipped ${skipped.length} empty vars: ${skipped.join(', ')}`)
+  let deleted = 0
+  let deleteIdempotent = 0
+  let deleteFailed = 0
+  for (const r of deleteResults) {
+    if (r.status === 0) {
+      if (r.idempotent) deleteIdempotent++
+      else deleted++
+    } else {
+      deleteFailed++
+      console.error(
+        `     ↳ DELETE ${r.key} failed (status ${r.status}): ${r.stderr.trim().slice(0, 200)}`
+      )
+    }
+  }
+
+  if (toDelete.length > 0) {
+    const idempotentSuffix = deleteIdempotent > 0 ? ` (${deleteIdempotent} already absent)` : ''
+    console.info(
+      `\n🗑  Deleted ${deleted + deleteIdempotent}/${toDelete.length} empty vars from Vercel${idempotentSuffix}`
+    )
   }
 
   console.info(
-    `\n${failed === 0 ? '✅' : '⚠️ '} Pushed ${pushed}/${entries.length} vars to Vercel project "${app}" (parallel concurrency=${VERCEL_CONCURRENCY})`
+    `\n${failed === 0 && deleteFailed === 0 ? '✅' : '⚠️ '} Pushed ${pushed}/${entries.length} vars to Vercel project "${app}" (parallel concurrency=${VERCEL_CONCURRENCY})`
   )
+
+  failed += deleteFailed
 
   // ── Prune (opt-in via --prune) ─────────────────────────────
   // Inventory remote vars after the push, diff against local cascade, delete

@@ -32,6 +32,16 @@
  * Missing layers are silently skipped. Use `--from <env>` to bypass the cascade and
  * force a single source file.
  *
+ * Value semantics (3-way, symmetric with push-vercel.ts):
+ *   - `KEY` absent from every cascade layer  → no-op (variable not touched).
+ *   - `KEY=` (empty string) in the cascade   → DELETE via
+ *                                              `railway variables --remove`.
+ *                                              Use this to explicitly clear a
+ *                                              var on Railway. Idempotent: if
+ *                                              the var doesn't exist remotely,
+ *                                              the push still succeeds.
+ *   - `KEY=value` in the cascade             → upsert via `railway variable set`.
+ *
  * Production blocklist: TEST_*, DEBUG_*, _LOCAL_*, DEV_* are filtered out.
  * Override with --include-blocked KEY1,KEY2.
  *
@@ -579,13 +589,28 @@ if (isDirectRun) {
     `${action} ${Object.keys(merged).length} vars to Railway project="${railwayConfig.project}" service="${service}" env="${env}"...\n`
   )
 
-  // Log (with masking) what we will push before any actual CLI call.
+  // Log (with masking) what we will push before any actual CLI call. Empty
+  // values are flagged as DELETE (operator explicitly cleared them) — see the
+  // PUSH-VERCEL-EMPTY-AS-DELETE-001 fix below for rationale.
+  let dryRunDeleteCount = 0
+  let dryRunUpsertCount = 0
   for (const [k, v] of Object.entries(merged)) {
     const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
-    console.info(`  ${k}=${mask(v)}${marker}`)
+    if (v === '') {
+      console.info(`  ${k}=<DELETE> (empty in cascade)${marker}`)
+      dryRunDeleteCount++
+    } else {
+      console.info(`  ${k}=${mask(v)}${marker}`)
+      dryRunUpsertCount++
+    }
   }
 
   if (flags.dryRun) {
+    if (dryRunDeleteCount > 0) {
+      console.info(
+        `\n🗑  Would DELETE ${dryRunDeleteCount} empty var${dryRunDeleteCount === 1 ? '' : 's'} from Railway`
+      )
+    }
     if (flags.prune) {
       // Inventory remote (read-only) and compute would-be-pruned list.
       try {
@@ -614,8 +639,11 @@ if (isDirectRun) {
       }
     }
     console.info(
-      `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to ` +
-        `project="${railwayConfig.project}" service="${service}" env="${env}"`
+      `\n✅ Dry-run complete — ${dryRunUpsertCount} var${dryRunUpsertCount === 1 ? '' : 's'} would be upserted` +
+        (dryRunDeleteCount > 0
+          ? ` + ${dryRunDeleteCount} var${dryRunDeleteCount === 1 ? '' : 's'} deleted`
+          : '') +
+        ` on project="${railwayConfig.project}" service="${service}" env="${env}"`
     )
     process.exit(0)
   }
@@ -640,49 +668,99 @@ if (isDirectRun) {
   //     Railway redeploy naturally on the next git push, OR the operator can
   //     trigger a redeploy manually. Skipping deploys avoids redundant builds
   //     when push-all.ts runs across many services.
-  //   - Empty values are skipped: Railway rejects them via the CLI. Empty env
-  //     vars in source files represent "intentionally absent" — Railway will
-  //     simply not have that var, matching local behavior.
+  //   - Empty values are 3-way partitioned :
+  //       `v === ''`        → DELETE via `railway variables --remove` (operator
+  //                            explicitly cleared the value in the cascade,
+  //                            symmetric with the Vercel script — see
+  //                            PUSH-VERCEL-EMPTY-AS-DELETE-001 in BACKLOG).
+  //                            Previously empty=skip → manual cleanup required.
+  //       value present     → upsert via `railway variable set KEY=VAL`.
+  //       absent from cascade → never reached (filter is by value).
   //   - Windows command-line max length is ~8KB. With 21 vars × ~250 chars
   //     each we're at ~5KB — safely under the limit. If we ever bump into
   //     the limit, switch to chunking (e.g. 50 vars per call).
   const allEntries = Object.entries(merged)
-  const skipped: string[] = []
-  const entries = allEntries.filter(([k, v]) => {
+  const toDelete: string[] = []
+  const entries: Array<[string, string]> = []
+  for (const [k, v] of allEntries) {
     if (v === '') {
-      skipped.push(k)
-      return false
+      toDelete.push(k)
+    } else {
+      entries.push([k, v])
     }
-    return true
-  })
-  if (skipped.length > 0) {
-    console.info(`\n⏭  Skipped ${skipped.length} empty vars: ${skipped.join(', ')}`)
   }
 
-  if (entries.length === 0) {
-    console.info(`\n⚠️  Nothing to push (all ${allEntries.length} vars were empty).`)
+  if (entries.length === 0 && toDelete.length === 0) {
+    console.info(`\n⚠️  Nothing to push (no vars in cascade).`)
     process.exit(0)
   }
 
   // Build single batch: railway variable set KEY1=VAL1 KEY2=VAL2 ... \
   //   --service <s> --environment <e> --skip-deploys
-  const setArgs: string[] = ['variable', 'set']
-  for (const [k, v] of entries) {
-    setArgs.push(`${k}=${v}`)
-  }
-  setArgs.push('--service', service, '--environment', env, '--skip-deploys')
+  if (entries.length > 0) {
+    const setArgs: string[] = ['variable', 'set']
+    for (const [k, v] of entries) {
+      setArgs.push(`${k}=${v}`)
+    }
+    setArgs.push('--service', service, '--environment', env, '--skip-deploys')
 
-  const result = railwaySpawnSync(setArgs, { stdio: ['pipe', 'inherit', 'inherit'] })
-  if (result.status !== 0) {
-    fail(
-      `Railway CLI exited with status ${result.status} during batch set of ${entries.length} vars\n` +
-        `  Hint: if a single var has invalid content, retry with --dry-run to inspect, or split into smaller batches.`
+    const result = railwaySpawnSync(setArgs, { stdio: ['pipe', 'inherit', 'inherit'] })
+    if (result.status !== 0) {
+      fail(
+        `Railway CLI exited with status ${result.status} during batch set of ${entries.length} vars\n` +
+          `  Hint: if a single var has invalid content, retry with --dry-run to inspect, or split into smaller batches.`
+      )
+    }
+
+    console.info(
+      `\n✅ Pushed ${entries.length} vars to Railway project="${railwayConfig.project}" service="${service}" env="${env}" in 1 batch call`
     )
   }
 
-  console.info(
-    `\n✅ Pushed ${entries.length} vars to Railway project="${railwayConfig.project}" service="${service}" env="${env}" in 1 batch call`
-  )
+  // Empty-string entries → DELETE on Railway. Symmetric with the Vercel side
+  // (PUSH-VERCEL-EMPTY-AS-DELETE-001). Operator sets `KEY=` (or `KEY=""`) in
+  // the cascade to explicitly clear a var on the remote. Railway's `variables
+  // --remove` is idempotent at the batch level — if a key is absent it surfaces
+  // as a stderr line but the call still exits 0 for the keys it did delete. We
+  // log stderr but treat the call as successful unless the CLI itself errors.
+  if (toDelete.length > 0) {
+    const removeArgs = [
+      'variables',
+      '--remove',
+      ...toDelete,
+      '--service',
+      service,
+      '--environment',
+      env,
+      '--skip-deploys',
+    ]
+    const removeResult = railwaySpawnSync(removeArgs, { stdio: 'pipe' })
+    if (removeResult.status !== 0) {
+      const stderr = (removeResult.stderr ?? '').trim()
+      const lowerStderr = stderr.toLowerCase()
+      // CLI exits non-zero when EVERY requested key was already absent —
+      // treat that as idempotent success (the desired end state is met).
+      const allAlreadyAbsent =
+        lowerStderr.includes('not found') ||
+        lowerStderr.includes('does not exist') ||
+        lowerStderr.includes("doesn't exist")
+      if (allAlreadyAbsent) {
+        console.info(
+          `\n🗑  Deleted 0/${toDelete.length} empty vars from Railway (all ${toDelete.length} already absent)`
+        )
+      } else {
+        console.error(
+          `\n❌ Railway CLI exited with status ${removeResult.status} during batch remove of ${toDelete.length} vars\n` +
+            `  stderr: ${stderr.slice(0, 200)}`
+        )
+        process.exit(1)
+      }
+    } else {
+      console.info(
+        `\n🗑  Deleted ${toDelete.length} empty var${toDelete.length === 1 ? '' : 's'} from Railway: ${toDelete.join(', ')}`
+      )
+    }
+  }
 
   // ── Prune (opt-in via --prune) ─────────────────────────────
   // Inventory remote vars after the push, diff against local cascade, delete
