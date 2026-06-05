@@ -1,6 +1,7 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import {
+  assertCriticalDeps,
   bootApi,
   createMongoosePingCheck,
   createResendCheck,
@@ -76,11 +77,23 @@ const COOKIE_AUTH_ALLOWLIST = [
   /^https:\/\/ezauth-git-[a-z0-9-]+-ezstart\.vercel\.app$/,
 ]
 
-// Deep-health checks executed by GET /health/deep. Each dependency is
-// conditional on the corresponding env var so the readiness probe never
-// reports `down` on a dependency that's intentionally unconfigured (e.g.
-// local dev without Resend). See `.claude/rules/standard-saas-observability.md`
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3). In production a missing
+// env var here would silently skip the matching /health/deep probe and
+// cause a false-positive "All systems operational" — RESEND_API_KEY in
+// particular is critical for password-reset / email-verify flows. Throws
+// in prod, warns in dev. See `.claude/rules/standard-saas-observability.md`
 // §4.
+assertCriticalDeps({
+  app: 'ezauth',
+  required: ['MONGO_URL', 'JWT_SECRET', 'RESEND_API_KEY'],
+  logger,
+})
+
+// Deep-health checks executed by GET /health/deep. Each dependency is
+// conditional on the corresponding env var — the boot-time gate above
+// guarantees the production-critical ones are present, while still
+// allowing a local dev API to boot without Resend (the gate downgrades
+// to a warn in non-prod).
 const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
 if (process.env.RESEND_API_KEY) {
   deepHealthChecks.push(createResendCheck(process.env.RESEND_API_KEY))

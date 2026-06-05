@@ -13,6 +13,7 @@ export default function StatusRoute() {
     <StatusPage
       locale={locale}
       services={[
+        // Own API → deep mode (the operator owns the snapshot).
         {
           name: t('services.greenPulseApi'),
           url: `${GREEN_PULSE_API_URL}/health`,
@@ -20,19 +21,21 @@ export default function StatusRoute() {
           mode: 'deep',
           deepUrl: `${GREEN_PULSE_API_URL}/health/deep`,
         },
+        // 🔒 Upstream Tier-1 services → shallow mode (hacker-A8 V4).
+        // Deep snapshots from ezauth / ezpay belong to their respective
+        // status pages — consumer apps only show up/down. See
+        // `.claude/rules/standard-architecture.md` §3.
         {
           name: t('services.ezauthApi'),
           url: `${EZAUTH_API_URL}/health`,
           description: t('services.ezauthApiDescription'),
-          mode: 'deep',
-          deepUrl: `${EZAUTH_API_URL}/health/deep`,
+          mode: 'shallow',
         },
         {
           name: t('services.ezpayApi'),
           url: `${EZPAY_API_URL}/health`,
           description: t('services.ezpayApiDescription'),
-          mode: 'deep',
-          deepUrl: `${EZPAY_API_URL}/health/deep`,
+          mode: 'shallow',
         },
       ]}
       texts={{

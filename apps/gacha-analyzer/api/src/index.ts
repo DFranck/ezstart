@@ -2,6 +2,7 @@
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  assertCriticalDeps,
   bootApi,
   createGeminiCheck,
   createMongoosePingCheck,
@@ -10,6 +11,16 @@ import {
 } from '@ezstart/api-core'
 import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
+
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3). Mongo + JWT are
+// non-negotiable. GEMINI_API_KEY stays optional — gacha-analyzer
+// degrades gracefully without AI features. Throws in prod, warns in
+// dev. See `.claude/rules/standard-saas-observability.md` §4.
+assertCriticalDeps({
+  app: 'gacha-analyzer',
+  required: ['MONGO_URL', 'JWT_SECRET'],
+  logger,
+})
 
 // Deep-health checks executed by GET /health/deep. See
 // `.claude/rules/standard-saas-observability.md` §4.

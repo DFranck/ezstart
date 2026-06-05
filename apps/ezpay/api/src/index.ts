@@ -3,6 +3,7 @@
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  assertCriticalDeps,
   bootApi,
   createMongoosePingCheck,
   createResendCheck,
@@ -17,17 +18,23 @@ import routes, { registries } from './routes/index.js'
 import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
 import { startPayDocsDemoResetScheduler } from './services/pay-docs-demo-reset.service.js'
 
-// Fail-fast in production if the S2S key for ezauth cross-service validation
-// is missing — without it `POST /api/keys` can't validate Applications against
-// ezauth and Phase G seed flows silently 404. In dev/staging a warn is enough.
-if (process.env.NODE_ENV === 'production' && !process.env.EZPAY_SERVER_EZAUTH_KEY) {
-  logger.error('EZPAY_SERVER_EZAUTH_KEY is required in production. Aborting boot.')
-  process.exit(1)
-} else if (!process.env.EZPAY_SERVER_EZAUTH_KEY) {
-  logger.warn(
-    'EZPAY_SERVER_EZAUTH_KEY not set — cross-service Application validation will fail on POST /api/keys'
-  )
-}
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3). In production any missing
+// env var here would silently skip the matching /health/deep probe and
+// cause a false-positive "All systems operational" — Stripe + Resend are
+// both critical for the payment + transactional email flows, and
+// EZPAY_SERVER_EZAUTH_KEY gates the cross-service POST /api/keys
+// validation against ezauth. Throws in prod, warns in dev.
+assertCriticalDeps({
+  app: 'ezpay',
+  required: [
+    'MONGO_URL',
+    'JWT_SECRET',
+    'STRIPE_SECRET_KEY',
+    'RESEND_API_KEY',
+    'EZPAY_SERVER_EZAUTH_KEY',
+  ],
+  logger,
+})
 
 // Deep-health checks executed by GET /health/deep. Stripe and Resend are
 // gated on their respective env vars so the readiness probe never reports

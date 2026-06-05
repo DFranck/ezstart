@@ -3,6 +3,7 @@
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  assertCriticalDeps,
   bootApi,
   createAnthropicCheck,
   createGeminiCheck,
@@ -30,6 +31,16 @@ const socketCorsOrigins = getAllowedOrigins('ezstart')
 // touching module-level mutable state.
 const healthCheckScheduler = new HealthCheckScheduler()
 setScheduler(healthCheckScheduler)
+
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3). EZStart is the platform
+// hub — Mongo + JWT are non-negotiable, but the AI providers are
+// optional (the hub surfaces whichever are configured). Throws in prod,
+// warns in dev. See `.claude/rules/standard-saas-observability.md` §4.
+assertCriticalDeps({
+  app: 'ezstart',
+  required: ['MONGO_URL', 'JWT_SECRET'],
+  logger,
+})
 
 // Deep-health checks executed by GET /health/deep. AI providers are
 // gated on their respective env vars so the readiness probe never reports

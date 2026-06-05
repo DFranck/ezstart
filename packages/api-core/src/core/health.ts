@@ -104,7 +104,45 @@ async function withTimeout<T>(
 }
 
 /**
- * Execute a single check, capturing duration + sanitizing thrown errors.
+ * Build the generic production-safe fallback message for a `down` check.
+ * Centralised so the throw branch + the factory-returned branch produce
+ * the exact same shape (hacker-A8 V2: factory `down` results bypassed
+ * the throw-branch sanitization in `runHealthCheck`).
+ *
+ * @internal
+ */
+function genericDownMessage(name: string): string {
+  return `Check '${name}' failed`
+}
+
+/**
+ * Sanitize a {@link HealthCheckResult} for public output. When `isProd`
+ * is true, any `down` status has its `message` replaced with a generic
+ * fallback so raw error strings from upstream drivers (Mongoose, Stripe
+ * SDK, fetch) never reach the public `/health/deep` JSON snapshot
+ * rendered on `<StatusPage>`.
+ *
+ * The `details` field is preserved as-is — the URL emitted by
+ * `createHttpCheck` is already sanitized at source (see
+ * {@link sanitizeUrlForPublicOutput} in `deep-health-checks.ts`).
+ *
+ * @internal
+ */
+function sanitizeResultForProd(
+  result: HealthCheckResult,
+  checkName: string,
+  isProd: boolean
+): HealthCheckResult {
+  if (!isProd || result.status !== 'down') return result
+  return { ...result, message: genericDownMessage(checkName) }
+}
+
+/**
+ * Execute a single check, capturing duration + sanitizing every `down`
+ * result so raw upstream error strings never leak through the public
+ * `/health/deep` JSON in production. Both throw-branch errors AND
+ * factory-returned `{ status: 'down', message: ... }` shapes are scrubbed
+ * here — single source of truth for the prod sanitization contract.
  *
  * @internal
  */
@@ -120,11 +158,12 @@ export async function runHealthCheck(
       status: 'down',
       message: `Check '${check.name}' timed out after ${timeoutMs}ms`,
     }))
-    return { ...result, durationMs: Date.now() - start }
+    const sanitized = sanitizeResultForProd(result, check.name, isProd)
+    return { ...sanitized, durationMs: Date.now() - start }
   } catch (err) {
     const message =
       isProd || !(err instanceof Error)
-        ? `Check '${check.name}' failed`
+        ? genericDownMessage(check.name)
         : `${check.name}: ${err.message}`
     return { status: 'down', message, durationMs: Date.now() - start }
   }

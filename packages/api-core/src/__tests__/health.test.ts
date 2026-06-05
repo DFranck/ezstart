@@ -282,6 +282,74 @@ describe('runHealthCheck', () => {
     )
     expect(result).toMatchObject({ status: 'ok', message: 'fine' })
   })
+
+  // Hacker-A8 V2 — factories like createMongoosePingCheck /
+  // createStripeBalanceCheck / createHttpCheck catch internally and
+  // RETURN `{ status: 'down', message: err.message }`, bypassing the
+  // throw-branch sanitization. `runHealthCheck` must sanitize those
+  // factory-returned messages in prod too.
+  it('sanitizes factory-returned down messages in production (V2)', async () => {
+    const check: HealthCheck = {
+      name: 'mongo',
+      // Simulate a factory that swallows the SDK error and returns down
+      // with the raw upstream message.
+      check: () => ({
+        status: 'down',
+        message: 'MongoServerError: bad auth: SCRAM-SHA-256: secret-LEAK',
+      }),
+    }
+    const result = await runHealthCheck(check, true)
+    expect(result.status).toBe('down')
+    expect(result.message).toBe("Check 'mongo' failed")
+    expect(result.message).not.toContain('SCRAM')
+    expect(result.message).not.toContain('LEAK')
+  })
+
+  it('preserves the raw factory-returned message in development (V2)', async () => {
+    const check: HealthCheck = {
+      name: 'mongo',
+      check: () => ({
+        status: 'down',
+        message: 'connection refused at 127.0.0.1:27017',
+      }),
+    }
+    const result = await runHealthCheck(check, false)
+    expect(result.status).toBe('down')
+    expect(result.message).toBe('connection refused at 127.0.0.1:27017')
+  })
+
+  it('does NOT sanitize ok / degraded messages even in production (V2)', async () => {
+    const okCheck: HealthCheck = {
+      name: 'fast',
+      check: () => ({ status: 'ok', message: 'all good' }),
+    }
+    const degradedCheck: HealthCheck = {
+      name: 'slow',
+      check: () => ({ status: 'degraded', message: 'Slow response (3000ms)' }),
+    }
+    const okResult = await runHealthCheck(okCheck, true)
+    const degradedResult = await runHealthCheck(degradedCheck, true)
+    expect(okResult.message).toBe('all good')
+    expect(degradedResult.message).toBe('Slow response (3000ms)')
+  })
+
+  it('preserves details payload through sanitization (V2)', async () => {
+    const check: HealthCheck = {
+      name: 'http',
+      check: () => ({
+        status: 'down',
+        message: 'HTTP 500 Internal Server Error',
+        details: { url: 'https://example.com/api', status: 500, durationMs: 42 },
+      }),
+    }
+    const result = await runHealthCheck(check, true)
+    expect(result.message).toBe("Check 'http' failed")
+    expect(result.details).toEqual({
+      url: 'https://example.com/api',
+      status: 500,
+      durationMs: 42,
+    })
+  })
 })
 
 describe('createDbHealthCheck', () => {

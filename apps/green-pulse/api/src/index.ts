@@ -2,6 +2,7 @@
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  assertCriticalDeps,
   bootApi,
   createGeminiCheck,
   createMongoosePingCheck,
@@ -20,6 +21,16 @@ import routes, { globalRegistry } from './routes/index.js'
 // forge ESG webhook signatures. In local dev / test this logs a warn and
 // the handler returns 503 on every call.
 assertWebhookSecretConfigured()
+
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3). WEBHOOK_SIGNING_SECRET
+// is checked separately via `assertWebhookSecretConfigured` above (it has
+// its own fail-closed contract). Mongo + JWT are non-negotiable. AI
+// providers stay optional. Throws in prod, warns in dev.
+assertCriticalDeps({
+  app: 'green-pulse',
+  required: ['MONGO_URL', 'JWT_SECRET'],
+  logger,
+})
 
 // Deep-health checks executed by GET /health/deep. AI providers are gated
 // on their env vars so the readiness probe never reports `down` on an

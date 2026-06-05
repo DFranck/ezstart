@@ -203,15 +203,95 @@ describe('createResendCheck', () => {
 })
 
 describe('createGeminiCheck', () => {
-  it('puts the api key in the query string, URL-encoded', async () => {
+  it('passes the api key via x-goog-api-key header (not query string)', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response('', { status: 200 }))
     vi.stubGlobal('fetch', fetchMock)
-    const check = createGeminiCheck('abc/&?def')
+    const check = createGeminiCheck('gemini-secret-abc')
     await check.check()
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://generativelanguage.googleapis.com/v1beta/models?key=abc%2F%26%3Fdef',
-      expect.objectContaining({ method: 'GET' })
+      'https://generativelanguage.googleapis.com/v1beta/models',
+      expect.objectContaining({
+        method: 'GET',
+        headers: { 'x-goog-api-key': 'gemini-secret-abc' },
+      })
     )
+    vi.unstubAllGlobals()
+  })
+
+  it('never leaks the api key into the request URL (hacker-A8 V1)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createGeminiCheck('TOP_SECRET_KEY')
+    await check.check()
+    const [calledUrl] = fetchMock.mock.calls[0] as [string, unknown]
+    expect(calledUrl).not.toContain('TOP_SECRET_KEY')
+    expect(calledUrl).not.toContain('?key=')
+    vi.unstubAllGlobals()
+  })
+
+  it('does not leak the api key in details.url on 401 from Google (hacker-A8 V1)', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response('', { status: 401, statusText: 'Unauthorized' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createGeminiCheck('TOP_SECRET_KEY')
+    const result = await check.check()
+    expect(result.status).toBe('down')
+    expect(result.message).toMatch(/HTTP 401/)
+    const detailsUrl = (result.details?.url ?? '') as string
+    expect(detailsUrl).not.toContain('TOP_SECRET_KEY')
+    expect(detailsUrl).not.toContain('?')
+    vi.unstubAllGlobals()
+  })
+})
+
+describe('createHttpCheck URL sanitization (hacker-A8 V1 defense-in-depth)', () => {
+  it('strips query params from details.url when a check returns down', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response('', { status: 500, statusText: 'Server Error' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createHttpCheck({
+      name: 'legacy',
+      url: 'https://example.com/api?key=LEAKED_SECRET&foo=bar',
+      method: 'GET',
+    })
+    const result = await check.check()
+    expect(result.status).toBe('down')
+    const detailsUrl = (result.details?.url ?? '') as string
+    expect(detailsUrl).toBe('https://example.com/api')
+    expect(detailsUrl).not.toContain('LEAKED_SECRET')
+    vi.unstubAllGlobals()
+  })
+
+  it('strips embedded userinfo (https://user:pass@host) from details.url', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response('', { status: 503, statusText: 'Down' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createHttpCheck({
+      name: 'inline-creds',
+      url: 'https://admin:HUNTER2@example.com/api',
+      method: 'GET',
+    })
+    const result = await check.check()
+    const detailsUrl = (result.details?.url ?? '') as string
+    expect(detailsUrl).not.toContain('HUNTER2')
+    expect(detailsUrl).not.toContain('admin')
+    vi.unstubAllGlobals()
+  })
+
+  it('preserves the path component of the URL in details.url', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response('', { status: 404, statusText: 'Not Found' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createHttpCheck({
+      name: 'svc',
+      url: 'https://api.example.com/v1/healthz?token=xyz',
+    })
+    const result = await check.check()
+    expect((result.details?.url ?? '') as string).toBe('https://api.example.com/v1/healthz')
     vi.unstubAllGlobals()
   })
 })

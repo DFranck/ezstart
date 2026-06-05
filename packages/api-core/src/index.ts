@@ -63,6 +63,17 @@ export {
   type StripeBalanceClient,
 } from './core/deep-health-checks.js'
 
+// Boot-time gate for the critical-deps contract — see hacker-A8 V3. Use
+// in every API `index.ts` before assembling the deep-health checks so a
+// missing env var fails-fast in prod instead of silently skipping the
+// corresponding readiness check.
+export {
+  assertCriticalDeps,
+  findMissingDeps,
+  type AssertCriticalDepsOptions,
+  type CriticalDepsLogger,
+} from './core/critical-deps.js'
+
 // Middlewares
 export {
   createCorsMiddleware,

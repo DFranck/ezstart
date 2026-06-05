@@ -12,19 +12,23 @@ export default function StatusRoute() {
     <StatusPage
       locale={locale}
       services={[
+        // 🔒 Consumer apps use `mode: 'shallow'` against upstream Tier-1
+        // services (hacker-A8 V4). Deep snapshots expose first-party
+        // dependency internals (Mongo / Stripe / Resend errors) that
+        // unauthenticated visitors of a different product surface have
+        // no business reading. See
+        // `.claude/rules/standard-architecture.md` §3.
         {
           name: t('services.ezauthApi'),
           url: `${EZAUTH_API_URL}/health`,
           description: t('services.ezauthApiDescription'),
-          mode: 'deep',
-          deepUrl: `${EZAUTH_API_URL}/health/deep`,
+          mode: 'shallow',
         },
         {
           name: t('services.ezpayApi'),
           url: `${EZPAY_API_URL}/health`,
           description: t('services.ezpayApiDescription'),
-          mode: 'deep',
-          deepUrl: `${EZPAY_API_URL}/health/deep`,
+          mode: 'shallow',
         },
       ]}
       texts={{

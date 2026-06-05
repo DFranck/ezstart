@@ -225,12 +225,42 @@ export function createStripeBalanceCheck(
 }
 
 /**
+ * Strip query parameters and userinfo from a URL so the public
+ * `/health/deep` response never echoes a secret accidentally embedded in
+ * either segment. Used as defense-in-depth: every dedicated factory in
+ * this module passes auth via headers, but `createHttpCheck` is also
+ * exposed to consumers who may pass a custom URL.
+ *
+ * Returns the original string if URL parsing fails (best-effort — better
+ * to surface the raw URL than to crash the health probe).
+ *
+ * @internal
+ */
+function sanitizeUrlForPublicOutput(rawUrl: string): string {
+  try {
+    const parsed = new URL(rawUrl)
+    parsed.search = ''
+    parsed.username = ''
+    parsed.password = ''
+    return parsed.toString()
+  } catch {
+    return rawUrl
+  }
+}
+
+/**
  * Generic HTTP reachability check. Issues a `HEAD` (default) or `GET`
  * request and treats 2xx/3xx as `ok`, 4xx/5xx as `down`.
  *
  * Use the dedicated factories ({@link createResendCheck},
  * {@link createGeminiCheck}, ...) when available — they encode the
  * provider-specific health endpoint + auth headers.
+ *
+ * Security: the URL exposed in `details.url` is always sanitized via
+ * {@link sanitizeUrlForPublicOutput} so query params / userinfo never
+ * leak through the public `/health/deep` snapshot rendered on the
+ * `<StatusPage>` UI. Always pass credentials via the `headers` option,
+ * never embedded in the URL.
  *
  * @example
  * ```ts
@@ -275,7 +305,14 @@ export function createHttpCheck(opts: {
           return {
             status: 'down',
             message: `HTTP ${response.status} ${response.statusText}`,
-            details: { url: opts.url, status: response.status, durationMs },
+            // 🔒 Strip query params + userinfo so secrets accidentally
+            // embedded in the URL (e.g. legacy `?key=`) never leak to
+            // the public status page. See V1 in hacker-A8 report.
+            details: {
+              url: sanitizeUrlForPublicOutput(opts.url),
+              status: response.status,
+              durationMs,
+            },
           }
         }
         return classifyDuration(durationMs, slowThresholdMs)
@@ -320,9 +357,11 @@ export function createResendCheck(
 
 /**
  * Check Google Gemini API reachability via the public models list. The
- * endpoint accepts the API key as a query param so we don't have to
- * leak the secret in headers (and a 200 response confirms the key is
- * valid for at least one model).
+ * endpoint accepts authentication via the `x-goog-api-key` header (the
+ * documented modern alternative to the legacy `?key=` query param) so
+ * the secret never appears in `details.url` when the upstream returns a
+ * non-2xx response. A 200 response confirms the key is valid for at
+ * least one model.
  *
  * @example
  * ```ts
@@ -335,10 +374,13 @@ export function createGeminiCheck(
 ): HealthCheck {
   return createHttpCheck({
     name: options.name ?? 'gemini',
-    // `encodeURIComponent` defends against an operator accidentally
-    // appending raw query params to the API key in env.
-    url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+    // 🔒 Auth header instead of `?key=` query param — see V1 in hacker-A8
+    // report. The query-string variant leaked the API key into the
+    // `details.url` field rendered publicly on `<StatusPage>` whenever
+    // Google returned a non-2xx (rotated key, quota exceeded, etc.).
+    url: 'https://generativelanguage.googleapis.com/v1beta/models',
     method: 'GET',
+    headers: { 'x-goog-api-key': apiKey },
     timeoutMs: options.timeoutMs,
     slowThresholdMs: options.slowThresholdMs,
   })

@@ -3,6 +3,7 @@
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  assertCriticalDeps,
   bootApi,
   createMongoosePingCheck,
   createResendCheck,
@@ -11,6 +12,16 @@ import {
 } from '@ezstart/api-core'
 import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
+
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3). EZBill is a consumer of
+// ezauth + ezpay so RESEND_API_KEY is the only outbound integration. Mongo
+// + JWT are non-negotiable. Throws in prod, warns in dev. See
+// `.claude/rules/standard-saas-observability.md` §4.
+assertCriticalDeps({
+  app: 'ezbill',
+  required: ['MONGO_URL', 'JWT_SECRET'],
+  logger,
+})
 
 // Deep-health checks executed by GET /health/deep. See
 // `.claude/rules/standard-saas-observability.md` §4.
