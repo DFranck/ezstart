@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import bcrypt from 'bcryptjs'
+import { compare } from '@node-rs/bcrypt'
 import { getAuthUserModel, AuthUserDocument } from '../models/auth-user.js'
 import { getAuthCodeModel } from '../models/auth-code.js'
 import {
@@ -261,7 +261,7 @@ export class AuthService {
       // returns instantly (no bcrypt) while a real account pays the bcrypt
       // cost → timing side-channel that lets attackers enumerate accounts.
       // Result is intentionally discarded.
-      await bcrypt.compare(data.password, DUMMY_BCRYPT_HASH)
+      await compare(data.password, DUMMY_BCRYPT_HASH)
       // Do NOT count toward any account counter — would leak existence.
       throw new Error('Invalid credentials')
     }

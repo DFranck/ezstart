@@ -1,6 +1,6 @@
 import * as OTPAuth from 'otpauth'
 import crypto from 'crypto'
-import bcrypt from 'bcryptjs'
+import { compare, hash } from '@node-rs/bcrypt'
 import { getTotpSecretModel, type TotpSecretDocument } from '../models/totp-secret.js'
 import { getAuthUserModel } from '../models/auth-user.js'
 import {
@@ -122,7 +122,7 @@ export class TotpService {
     for (let i = 0; i < BACKUP_CODE_COUNT; i++) {
       const backupCode = crypto.randomBytes(4).toString('hex') // 8-char hex codes
       plainBackupCodes.push(backupCode)
-      const hashed = await bcrypt.hash(backupCode, 10)
+      const hashed = await hash(backupCode, 10)
       hashedBackupCodes.push(hashed)
     }
 
@@ -315,7 +315,7 @@ export class TotpService {
     for (let i = 0; i < totpDoc.backupCodes.length; i++) {
       const hashedCode = totpDoc.backupCodes[i]
       if (!hashedCode) continue
-      const isMatch = await bcrypt.compare(code, hashedCode)
+      const isMatch = await compare(code, hashedCode)
       if (isMatch) {
         // Remove used backup code (one-shot)
         totpDoc.backupCodes.splice(i, 1)

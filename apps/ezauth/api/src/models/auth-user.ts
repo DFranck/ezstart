@@ -1,6 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model, type Query } from 'mongoose'
-import bcrypt from 'bcryptjs'
+import { compare, genSalt, hash } from '@node-rs/bcrypt'
 import { AuthUser } from '@ezstart/auth-sdk/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 
@@ -243,8 +243,8 @@ const authUserSchema = new Schema<AuthUserDocument>(
 authUserSchema.pre('save', async function (next) {
   if (!this.isModified('passwordHash') || !this.passwordHash) return next()
 
-  const salt = await bcrypt.genSalt(12)
-  this.passwordHash = await bcrypt.hash(this.passwordHash, salt)
+  const salt = await genSalt(12)
+  this.passwordHash = await hash(this.passwordHash, undefined, salt)
   next()
 })
 
@@ -323,7 +323,7 @@ authUserSchema.methods.comparePassword = async function (password: string): Prom
   if (!this.passwordHash) {
     return false // OAuth-only users have no password
   }
-  return bcrypt.compare(password, this.passwordHash)
+  return compare(password, this.passwordHash)
 }
 
 // RBAC methods
