@@ -3,6 +3,7 @@
  * Webhook for ESG report completion
  */
 
+import crypto from 'node:crypto'
 import { logger } from '@ezstart/logger/server'
 import {
   Router,
@@ -13,6 +14,7 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { esgService } from '../../services/esg.service.js'
+import { claimEsgWebhookEvent } from '../../models/EsgWebhookEvent.js'
 import { WebhookEventSchema, type WebhookEvent } from '@green-pulse/types'
 
 export const handleEsgReportRegistry = new OpenAPIRegistry()
@@ -80,65 +82,128 @@ async function handleDataProcessed(event: WebhookEvent) {
   logger.info('Processed data:', processedData)
 }
 
+/**
+ * Derive a stable idempotency key for a verified ESG webhook delivery.
+ *
+ * Prefer the upstream-supplied `job_id` (natural ID, survives across
+ * deliveries of the same logical event). Fall back to a SHA-256 hex digest
+ * of the raw signed bytes when no `job_id` is present — guarantees every
+ * byte-identical replay collapses to a single processed event, even when the
+ * payload schema does not carry a natural id.
+ *
+ * @internal
+ */
+function deriveEventKey(event: WebhookEvent, rawBytes: Buffer): string {
+  if (typeof event.job_id === 'string' && event.job_id.length > 0) {
+    return `job:${event.job_id}:${event.event_type}`
+  }
+  const hash = crypto.createHash('sha256').update(rawBytes).digest('hex')
+  return `sha256:${hash}`
+}
+
 handleEsgReportRouter.post(
   '/',
   async (req, res) => {
     try {
-      // Verify webhook signature
-      const signature = req.headers['x-esg-signature'] as string
-      if (!signature) {
+      // ---- 1. Content-Type gate (hacker A1b — V2) -----------------------
+      // Only accept `application/json`. Any other Content-Type bypasses the
+      // `express.raw({ type: 'application/json' })` capture and would land
+      // on the unsafe re-serialization fallback (the engine-drift bug that
+      // WEBHOOK-RAWBODY-002 fixed). Reject early with 415 — there is no
+      // legitimate sender that delivers ESG webhooks as form-encoded.
+      const contentType = req.headers['content-type']
+      if (typeof contentType !== 'string' || !contentType.includes('application/json')) {
+        return sendError(res, 'Content-Type must be application/json', 415)
+      }
+
+      // ---- 2. Raw body gate (covers hacker A1b — E1) --------------------
+      // After the Content-Type check above and the `rawBodyRoutes`
+      // registration in `index.ts`, the production path ALWAYS reaches
+      // here with a Buffer. Anything else (undefined / parsed object /
+      // string) means the express plumbing was bypassed — refuse with 400
+      // rather than crash later in `crypto.update(undefined)`.
+      if (!Buffer.isBuffer(req.body)) {
+        return sendError(res, 'Invalid request body (raw bytes required)', 400)
+      }
+      const rawBytes = req.body
+
+      // ---- 3. Signature header presence ---------------------------------
+      const signatureHeader = req.headers['x-esg-signature']
+      if (typeof signatureHeader !== 'string' || signatureHeader.length === 0) {
         return sendError(res, 'Invalid webhook signature', 401)
       }
 
-      // ---- Capture raw bytes + parse body --------------------------------
-      // The route is registered in `rawBodyRoutes` (see `apps/green-pulse/
-      // api/src/index.ts`) so `req.body` is a `Buffer` containing the EXACT
-      // bytes the sender HMAC'd. We parse the JSON ourselves here — a
-      // re-serialization via `JSON.stringify(req.body)` would be a future
-      // engine upgrade time-bomb (any spec drift in V8/Bun/Deno key ordering
-      // would silently break every signature verify). The raw bytes are
-      // passed directly to `verifyWebhookSignature`.
-      //
-      // For backwards compatibility (e.g. tests that mount the router under
-      // an `express.json()` parser) we accept a parsed object and re-derive
-      // the bytes via JSON.stringify — but the production path always
-      // reaches here with a Buffer thanks to `rawBodyRoutes`.
-      let rawPayload: Buffer | string
+      // ---- 4. Parse JSON from the verified-shape raw bytes --------------
+      // Done BEFORE signature verification so a malformed body returns 400
+      // (vs. 401), but the bytes used for the HMAC are still the raw
+      // wire-format buffer — we never re-serialize the parsed object.
       let parsedJson: unknown
-      if (Buffer.isBuffer(req.body)) {
-        rawPayload = req.body
-        try {
-          parsedJson = JSON.parse(req.body.toString('utf8'))
-        } catch {
-          return sendError(res, 'Invalid JSON body', 400)
-        }
-      } else if (typeof req.body === 'string') {
-        rawPayload = req.body
-        try {
-          parsedJson = JSON.parse(req.body)
-        } catch {
-          return sendError(res, 'Invalid JSON body', 400)
+      try {
+        parsedJson = JSON.parse(rawBytes.toString('utf8'))
+      } catch {
+        return sendError(res, 'Invalid JSON body', 400)
+      }
+
+      // ---- 5. Signature verification ------------------------------------
+      // Dual-mode (transition period): if the header carries a timestamp
+      // (`t=<unix>,v1=<hex>`) we enforce replay protection via the
+      // EZStart-Signature protocol — Stripe-pattern 5-minute tolerance
+      // window. If the header is a bare hex digest, we fall back to the
+      // legacy bare-HMAC verifier so existing integrators keep working
+      // while they migrate. Once all senders are migrated this `else`
+      // branch can be deleted (tracked: BACKLOG ESG-WEBHOOK-LEGACY-SUNSET).
+      const looksTimestamped = signatureHeader.includes('t=') && signatureHeader.includes('v1=')
+      if (looksTimestamped) {
+        const result = esgService.verifyTimestampedSignature(rawBytes, signatureHeader)
+        if (!result.ok) {
+          // Log the discriminated reason for observability but answer with
+          // a single opaque 401 — don't leak which check failed to the
+          // network (timing / probing surface).
+          logger.warn(`ESG webhook rejected: ${result.reason}`)
+          return sendError(res, 'Invalid webhook signature', 401)
         }
       } else {
-        // Backwards-compat path (used by some tests that mount the router
-        // behind `express.json()`). Production always uses raw body capture.
-        parsedJson = req.body
-        rawPayload = JSON.stringify(req.body)
+        // Legacy bare-HMAC path (no replay protection). New integrators
+        // MUST send the timestamped header.
+        if (!esgService.verifyWebhookSignature(rawBytes, signatureHeader)) {
+          return sendError(res, 'Invalid webhook signature', 401)
+        }
       }
 
-      if (!esgService.verifyWebhookSignature(rawPayload, signature)) {
-        return sendError(res, 'Invalid webhook signature', 401)
-      }
-
+      // ---- 6. Validate payload shape ------------------------------------
       const validation = WebhookEventSchema.safeParse(parsedJson)
       if (!validation.success) {
         return sendValidationError(res, 'Invalid webhook payload', validation.error.errors, 400)
       }
-
       const event = validation.data
-      logger.info(`📥 Webhook received: ${event.event_type} for job ${event.job_id}`)
 
-      // Handle different event types
+      // ---- 7. Idempotency claim (hacker A1b — E2) -----------------------
+      // Claim the event BEFORE running any side-effect. A duplicate claim
+      // means this delivery is a replay (or an at-least-once redelivery)
+      // — short-circuit to 200 so the upstream stops retrying. The dedup
+      // key is the upstream `job_id` (natural ID) or, as a fallback, a
+      // SHA-256 of the raw signed bytes.
+      const eventKey = deriveEventKey(event, rawBytes)
+      let firstSeen: boolean
+      try {
+        firstSeen = await claimEsgWebhookEvent(eventKey, { eventType: event.event_type })
+      } catch (claimErr) {
+        // Idempotency store unreachable — do NOT process blindly (would
+        // re-run side-effects on retry) and do NOT ack (let upstream
+        // retry once the store recovers).
+        logger.error(
+          'ESG webhook idempotency claim failed (store unreachable):',
+          claimErr instanceof Error ? claimErr : String(claimErr)
+        )
+        return sendError(res, 'Idempotency store unavailable', 503)
+      }
+      if (!firstSeen) {
+        logger.info(`Duplicate ESG webhook ignored (already processed): ${eventKey}`)
+        return sendSuccess(res, { message: 'Webhook already processed', duplicate: true })
+      }
+
+      // ---- 8. Dispatch --------------------------------------------------
+      logger.info(`📥 Webhook received: ${event.event_type} for job ${event.job_id}`)
       switch (event.event_type) {
         case 'report.completed':
           await handleReportCompleted(event)

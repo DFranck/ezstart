@@ -1,6 +1,65 @@
 import { logger } from '@ezstart/logger/server'
+import { verifyEzstartSignature, type EzstartSignatureVerifyResult } from '@ezstart/api-core'
 import crypto from 'crypto'
 import type { ESGPayload, ESGReportStatus } from '@green-pulse/types'
+
+/**
+ * True when the current process is a deployed environment (prod / staging /
+ * any non-`local` `DEPLOY_ENV`). Used to fail-closed on missing webhook secret
+ * at boot: in deployed environments the API MUST refuse to start without a
+ * configured `WEBHOOK_SIGNING_SECRET`; in local dev / test it warns and the
+ * webhook handler returns 503 on every call.
+ */
+function isDeployedEnvironment(): boolean {
+  if (process.env.NODE_ENV === 'production') return true
+  const deployEnv = process.env.DEPLOY_ENV
+  // DEPLOY_ENV: 'local' | 'staging' | 'production' (cf. .claude/rules/env.md).
+  // Anything that is NOT `local` (or unset, dev default) is treated as deployed.
+  return typeof deployEnv === 'string' && deployEnv !== '' && deployEnv !== 'local'
+}
+
+/**
+ * Read the configured webhook signing secret. Returns the secret when present
+ * and non-empty; returns `null` in dev/test when the env var is unset so the
+ * caller can return a 503 (vs. silently signing with `''` and accepting any
+ * attacker-forged signature — hacker A1b V1).
+ *
+ * In deployed environments this never returns `null`: {@link assertWebhookSecretConfigured}
+ * is called at boot and throws before any request can reach here.
+ */
+function readWebhookSecret(): string | null {
+  const secret = process.env.WEBHOOK_SIGNING_SECRET
+  if (typeof secret !== 'string' || secret.length === 0) return null
+  return secret
+}
+
+/**
+ * Boot-time fail-closed check for `WEBHOOK_SIGNING_SECRET`.
+ *
+ * In deployed environments (production / staging / any `DEPLOY_ENV !== 'local'`)
+ * this throws when the secret is missing — the API refuses to start, matching
+ * the pattern used by ezpay (`EZPAY_SERVER_EZAUTH_KEY`) and stripe webhook
+ * verifiers. In local dev / test, it logs a warning so the operator notices
+ * but the API still boots (the route handler will return 503 on any call).
+ *
+ * Without this gate, an unset env var (rotation oversight, fresh staging,
+ * misconfigured deploy) makes the empty-string fall through to
+ * `crypto.createHmac('sha256', '')` which any attacker can reproduce →
+ * full HMAC bypass.
+ */
+export function assertWebhookSecretConfigured(): void {
+  if (readWebhookSecret() !== null) return
+  if (isDeployedEnvironment()) {
+    throw new Error(
+      'WEBHOOK_SIGNING_SECRET is required in deployed environments (production/staging). ' +
+        'Refusing to boot — an empty secret would let any attacker forge ESG webhook signatures.'
+    )
+  }
+  logger.warn(
+    '[esg.service] WEBHOOK_SIGNING_SECRET is unset in local/dev. ' +
+      'ESG webhook handler will return 503 until configured.'
+  )
+}
 
 // ESG SaaS Integration Service
 class ESGService {
@@ -211,6 +270,12 @@ class ESGService {
   /**
    * Verify the HMAC-SHA256 signature of an incoming webhook payload.
    *
+   * **Legacy bare-HMAC verifier** — retained for backwards compatibility
+   * with senders that have not yet migrated to the timestamped
+   * `X-EZStart-Signature` format (cf. {@link verifyTimestampedSignature}).
+   * New integrators MUST use the timestamped verifier (replay-protected,
+   * matches the pattern used by ezauth / ezpay / Stripe).
+   *
    * Accepts either a `Buffer` (production path — `req.body` is the raw bytes
    * captured by `express.raw({ type: 'application/json' })` when the route is
    * listed in `rawBodyRoutes`) or a `string` (test/backwards-compat path).
@@ -218,11 +283,27 @@ class ESGService {
    * over `JSON.stringify(parsedObject)`, which would drift if the engine ever
    * changes its object key iteration order.
    *
-   * Returns `false` (not `throw`) on signature length mismatch, so the caller
-   * can return a uniform 401 without leaking timing info via the error path.
+   * Returns `false` (not `throw`) on signature length mismatch OR missing
+   * secret, so the caller can return a uniform 401 without leaking timing
+   * info via the error path.
+   *
+   * **Fail-closed on empty secret (hacker A1b — V1)**: if
+   * `WEBHOOK_SIGNING_SECRET` is unset, this returns `false` immediately
+   * rather than falling through to `crypto.createHmac('sha256', '')` —
+   * which would let any unauthenticated attacker reproduce the signature
+   * and forge any payload.
    */
   verifyWebhookSignature(payload: Buffer | string, signature: string): boolean {
-    const secret = process.env.WEBHOOK_SIGNING_SECRET || ''
+    const secret = readWebhookSecret()
+    if (secret === null) {
+      // Fail-closed: never sign with `''`. Boot-time guard
+      // (`assertWebhookSecretConfigured`) ensures we never reach this branch
+      // in deployed environments — this is the dev/test 503 path.
+      logger.error(
+        '[esg.service] verifyWebhookSignature called with empty WEBHOOK_SIGNING_SECRET — refusing to verify'
+      )
+      return false
+    }
     const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
 
     const provided = Buffer.from(signature, 'utf8')
@@ -234,6 +315,49 @@ class ESGService {
       return false
     }
     return crypto.timingSafeEqual(provided, expected)
+  }
+
+  /**
+   * Verify a timestamped `X-EZStart-Signature` header against the raw
+   * webhook body. Implements replay protection (hacker A1b — V3) via a
+   * 5-minute tolerance window, matching the Stripe / ezauth pattern.
+   *
+   * Header format: `t=<unix-seconds>,v1=<hex-hmac-sha256>` where the HMAC
+   * is computed over `"{timestamp}.{rawBody}"`. The signed prefix prevents
+   * an attacker who captures a legitimate signature from replaying it past
+   * the tolerance window.
+   *
+   * Returns a discriminated result so the caller can log the failure mode
+   * (`malformed` / `signature` / `replay`) but still answer with a single
+   * opaque 401 to the network.
+   *
+   * **Fail-closed on empty secret**: when `WEBHOOK_SIGNING_SECRET` is unset
+   * the result is `{ ok: false, reason: 'signature' }` — never `ok: true`.
+   *
+   * @param rawBody - Exact bytes received on the wire (Buffer or string).
+   *   Will be passed UTF-8 decoded to the verifier.
+   * @param header - Raw value of the `X-Esg-Signature` request header.
+   * @param now - Optional clock override for tests (returns unix-seconds).
+   */
+  verifyTimestampedSignature(
+    rawBody: Buffer | string,
+    header: string | undefined,
+    now?: () => number
+  ): EzstartSignatureVerifyResult {
+    const secret = readWebhookSecret()
+    if (secret === null) {
+      logger.error(
+        '[esg.service] verifyTimestampedSignature called with empty WEBHOOK_SIGNING_SECRET — refusing to verify'
+      )
+      return { ok: false, reason: 'signature' }
+    }
+    const bodyString = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
+    return verifyEzstartSignature({
+      header,
+      secret,
+      rawBody: bodyString,
+      now,
+    })
   }
 }
 
