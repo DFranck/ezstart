@@ -57,6 +57,34 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 - [ ] **A6-BCRYPT-BOOT-SANITY-001** 🟡 P2 (~30min) — Add a one-shot startup sanity check: `bcrypt.compareSync(known_hash, known_plain)` at API boot. If native binary fails to load on a new Railway runtime, fail fast at boot rather than at first login.
 - [ ] **AUTH-FLASH-LOCALSTORAGE-001** 🟡 P2 (~1 jour audit) — `auth-provider.tsx:69-80` `isLocalhostBrowser()` forces `localStorage` mode in dev, which prevents SSR bootstrap from being honored. Comment about "host-only cookies can't span ports" is now obsolete since `COOKIE-DOMAIN-DEV-FIX-001`. Re-evaluate whether to allow httpOnly mode in dev. (Cross-ref `DEV-LOCALSTORAGE-FORCE-RECONSIDER-003` ligne 155.)
 - [ ] **ESG-EVENTKEY-COLLISION-001** 🟢 P3 (~1h) — green-pulse ESG webhook E2 idempotency uses `eventKey = sha256(payload)`. Theoretical collision exists if two distinct payloads happen to hash to the same digest under sha256 (cryptographically negligible). For full defense: combine `sha256(payload) + timestamp` to make `eventKey` unique-per-(payload,time).
+- [ ] **STATUS-REFRESHHINT-I18N-001** 🟢 P3 (~5min) — On local dev with HMR, ezauth status page rendered raw key `status.refreshHint` instead of translated string. On staging Vercel build it renders correctly ("Auto-refreshes every 30s") — likely a Next.js dev HMR cache stale. Verify EN/FR/VI message keys present in `apps/ezauth/web/src/messages/*/status.json`. Pure local-only nuisance.
+
+### Phase D — Push staging + E2E staging follow-ups (2026-06-13)
+
+- [x] **STAGING-A8-DEPLOY-001** 🔴 P0 (DONE 2026-06-13) — Pushed 18 commits (Phase A + BACKLOG) to staging. Vercel preview redeployed all 8 web apps with Phase A8 status page UI live. Railway redeployed ezstart-api + ezauth-api with deep health checks. Sentry confirmed active in staging (project `4510227936247808`).
+- [ ] **EZPAY-API-RAILWAY-REDEPLOY-001** 🟡 P2 (user action) — ezpay-api staging uptime 23j, Railway watch paths did not auto-redeploy after Phase A8 push. Force via Railway dashboard manual redeploy OR `railway login` then `railway up --service ezpay-api`. Low impact (API works, just `/health/deep` returns `checks:{}` empty without dep breakdown).
+- [ ] **STAGING-RESEND-REFRESH-001** 🔴 P0 (user action, ~10min) — `RESEND_API_KEY` expired on staging Railway (visible via `/health/deep` resend check returns HTTP 401). Signup + email verify won't work staging. Action: signup new key at resend.com → set `RESEND_API_KEY=re_...` on Railway staging projects (ezauth-api, ezstart-api) → trigger redeploy.
+
+### Phase E — Brancher 5 consumer apps minimal (in progress 2026-06-13)
+
+**Audit 2026-06-13** : 3 apps core (ezstart/ezauth/ezpay) staging fully branched. 5 consumer apps audit:
+
+| App            | Web staging key           | Key valid? | EZPAY branch       | API health | Vercel preview |
+| -------------- | ------------------------- | ---------- | ------------------ | ---------- | -------------- |
+| ezbill         | ✅ `ez_pk_live_8a996b3c…` | ✅         | ❌ no EZPAY_KEY    | ✅         | ✅ 200         |
+| green-pulse    | ✅ `ez_pk_live_e8f1742b…` | ✅         | ⚠️ URL set, no KEY | ❌ 404     | ❌ 404         |
+| fengshui       | ✅ `ez_pk_live_f0fae87c…` | ✅         | n/a                | n/a        | ❌ 404         |
+| asc-tcd        | ✅ `ez_pk_live_bbad7489…` | ✅         | n/a (auth-less)    | n/a        | ❌ 404         |
+| gacha-analyzer | ✅ `ez_pk_live_e9a561ec…` | ✅         | n/a                | ✅ 200     | ❌ 404         |
+
+Verdict : `.env.staging` files are correctly prepared. JWT_SECRET cascade OK. **All 5 staging publishable keys validate against ezauth-api-staging** (zero stale keys). Blocker = Vercel staging projects unprovisioned for 4/5 consumer apps + green-pulse-api Railway service down.
+
+- [ ] **PHASE-E-VERCEL-STAGING-GREEN-PULSE-001** 🟠 P1 (user, ~5min) — `green-pulse-git-staging-ezstart.vercel.app` returns 404. Vercel project needs `staging` branch hooked. Run `pnpm env:push:vercel green-pulse staging` + Vercel dashboard "Connect Git → staging branch" OR `vercel link` + `vercel --target staging`.
+- [ ] **PHASE-E-VERCEL-STAGING-FENGSHUI-001** 🟠 P1 (user, ~5min) — Same pattern as green-pulse. `fengshui-git-staging-ezstart.vercel.app` 404. Setup Vercel staging branch hook.
+- [ ] **PHASE-E-VERCEL-STAGING-ASC-TCD-001** 🟠 P1 (user, ~5min) — Same pattern. `asc-tcd-git-staging-ezstart.vercel.app` 404. Setup Vercel staging branch hook. (asc-tcd is intentionally auth-less per BACKLOG, smoke test = just page load.)
+- [ ] **PHASE-E-VERCEL-STAGING-GACHA-001** 🟠 P1 (user, ~5min) — Same pattern. `gacha-analyzer-git-staging-ezstart.vercel.app` 404. Setup Vercel staging branch hook. (gacha-analyzer-api Railway already running.)
+- [ ] **PHASE-E-GREEN-PULSE-API-RAILWAY-001** 🟠 P1 (user, ~10min) — `green-pulse-api-staging.up.railway.app/health` returns 404. Railway service unprovisioned or stopped. Action: Railway dashboard → green-pulse-api → staging env → "Redeploy" OR provision new service. Per `scripts/env/railway-projects.ts` green-pulse-api lives in `TeamProjects` project.
+- [ ] **PHASE-E-EZBILL-EZPAY-BRANCH-001** 🟡 P2 (~10min) — `apps/ezbill/web/.env.staging` does NOT have `NEXT_PUBLIC_EZPAY_KEY` or `NEXT_PUBLIC_EZPAY_API_URL` because ezbill doesn't currently use ezpay. If billing is wired later, add both vars + `pnpm env:push:vercel ezbill staging`.
 
 ---
 
