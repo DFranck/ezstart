@@ -332,9 +332,19 @@ export function createHttpCheck(opts: {
 }
 
 /**
- * Check Resend (transactional email) reachability via the public
- * `GET /domains` endpoint. Returns `down` when the API key is invalid
- * (401) or unreachable.
+ * Check Resend (transactional email) reachability via `GET /domains`.
+ *
+ * Restricted "Sending Access only" API keys (Resend's recommended
+ * least-privilege default for production sending) cannot call `/domains`
+ * — Resend answers with HTTP 401 + JSON body `{ name: 'restricted_api_key' }`.
+ * The key itself IS valid (Resend authenticated it before rejecting the
+ * scope), so this check treats that exact body as healthy and falls back
+ * to the standard duration classification. Any other 401 (revoked key,
+ * typo, `{ name: 'invalid_api_key' }`, non-JSON body) remains `down` so an
+ * operator notices a real auth break.
+ *
+ * Implemented inline (rather than via {@link createHttpCheck}) because the
+ * generic helper cannot inspect the response body.
  *
  * @example
  * ```ts
@@ -345,14 +355,68 @@ export function createResendCheck(
   apiKey: string,
   options: DeepHealthCheckOptions = {}
 ): HealthCheck {
-  return createHttpCheck({
-    name: options.name ?? 'resend',
-    url: 'https://api.resend.com/domains',
-    method: 'GET',
-    headers: { Authorization: `Bearer ${apiKey}` },
-    timeoutMs: options.timeoutMs,
-    slowThresholdMs: options.slowThresholdMs,
-  })
+  const name = options.name ?? 'resend'
+  const timeoutMs = options.timeoutMs ?? DEFAULT_HTTP_TIMEOUT_MS
+  const slowThresholdMs = options.slowThresholdMs ?? DEFAULT_SLOW_THRESHOLD_MS
+  const url = 'https://api.resend.com/domains'
+
+  return {
+    name,
+    timeoutMs,
+    async check(): Promise<HealthCheckResult> {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), timeoutMs)
+      const start = Date.now()
+
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: { Authorization: `Bearer ${apiKey}` },
+          credentials: 'omit',
+        })
+        const durationMs = Date.now() - start
+
+        if (response.ok) {
+          return classifyDuration(durationMs, slowThresholdMs)
+        }
+
+        // Restricted "Sending Access only" key: valid for production sends
+        // (the actual prod use case) but scoped out of `/domains`. Treat
+        // as healthy — anything else (revoked, typo, malformed) stays down.
+        if (response.status === 401) {
+          try {
+            const body = (await response.json()) as { name?: unknown }
+            if (body && body.name === 'restricted_api_key') {
+              return classifyDuration(durationMs, slowThresholdMs)
+            }
+          } catch {
+            // Body wasn't JSON or read errored — fall through to down.
+          }
+        }
+
+        return {
+          status: 'down',
+          message: `HTTP ${response.status} ${response.statusText}`,
+          details: {
+            url: sanitizeUrlForPublicOutput(url),
+            status: response.status,
+            durationMs,
+          },
+        }
+      } catch (err) {
+        const isAbort = err instanceof Error && err.name === 'AbortError'
+        const message = isAbort
+          ? `HTTP check '${name}' timed out after ${timeoutMs}ms`
+          : err instanceof Error
+            ? err.message
+            : 'Network error'
+        return { status: 'down', message }
+      } finally {
+        clearTimeout(timer)
+      }
+    },
+  }
 }
 
 /**

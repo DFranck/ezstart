@@ -200,6 +200,61 @@ describe('createResendCheck', () => {
     )
     vi.unstubAllGlobals()
   })
+
+  it('returns ok on 401 with body.name === "restricted_api_key" (Sending Access only key)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          statusCode: 401,
+          message: 'This API key is restricted to only send emails',
+          name: 'restricted_api_key',
+        }),
+        { status: 401, headers: { 'content-type': 'application/json' } }
+      )
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createResendCheck('re_restricted_key')
+    const result = await check.check()
+    expect(result.status).toBe('ok')
+    vi.unstubAllGlobals()
+  })
+
+  it('returns down on 401 with a different body.name (real invalid/revoked key)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          statusCode: 401,
+          message: 'Invalid API key',
+          name: 'invalid_api_key',
+        }),
+        {
+          status: 401,
+          statusText: 'Unauthorized',
+          headers: { 'content-type': 'application/json' },
+        }
+      )
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createResendCheck('re_bad_key')
+    const result = await check.check()
+    expect(result.status).toBe('down')
+    expect(result.message).toMatch(/HTTP 401/)
+    vi.unstubAllGlobals()
+  })
+
+  it('returns down on 401 with a non-JSON body (malformed upstream response)', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response('not json at all', { status: 401, statusText: 'Unauthorized' })
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    const check = createResendCheck('re_weird_key')
+    const result = await check.check()
+    expect(result.status).toBe('down')
+    expect(result.message).toMatch(/HTTP 401/)
+    vi.unstubAllGlobals()
+  })
 })
 
 describe('createGeminiCheck', () => {
