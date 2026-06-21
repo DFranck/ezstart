@@ -16,11 +16,49 @@ import {
   PkceCodeChallengeMethodSchema,
 } from '@ezstart/auth-sdk/server'
 import { logger } from '@ezstart/logger/server'
+import { getWebUrl, type AppName } from '@ezstart/config/urls'
 import passport, { OAUTH_STATE_COOKIE, signOAuthStateToken } from '../../config/passport.js'
 import { JWT_SECRET } from '../../config/env.js'
 import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 import { ACCESS_COOKIE_NAME } from '../../config/cookie.js'
 import { validateRedirectUriForApp } from '../../services/oauth-redirect-uri.service.js'
+
+/**
+ * RFC 6749 §3.1.2.4 default redirect URI.
+ *
+ * When the OAuth client OMITS `redirect_uri` at `/authorize`, the
+ * Authorization Server MUST fall back to a single registered default URI.
+ * Our default = the canonical web-app callback URL for the requesting `app`
+ * in the current environment (`${getWebUrl(app)}/auth/callback`, no locale
+ * prefix — locale is handled by the framework middleware at render time).
+ *
+ * Returns `undefined` when `app` is not a known `AppName` (third-party SaaS
+ * consumers we don't ship URLs for). The caller treats that as "no default
+ * available" and proceeds without storing a `redirectUri` on the auth code
+ * — the legacy pre-RFC behavior, still secure because the /token endpoint
+ * mirrors the absent-redirect-uri policy.
+ */
+export function getDefaultRedirectUriForApp(app: string): string | undefined {
+  // `getWebUrl` only accepts the closed `AppName` union; for any unknown app
+  // (external SaaS consumer the platform doesn't host) we can't synthesize
+  // a default — return undefined and let the flow run sans redirect_uri.
+  const knownApps: ReadonlyArray<AppName> = [
+    'ezstart',
+    'ezauth',
+    'ezbill',
+    'ezpay',
+    'fengshui',
+    'asc-tcd',
+    'green-pulse',
+    'gacha-analyzer',
+  ]
+  if (!knownApps.includes(app as AppName)) return undefined
+  try {
+    return `${getWebUrl(app as AppName)}/auth/callback`
+  } catch {
+    return undefined
+  }
+}
 
 export const googleAuthorizeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -111,8 +149,10 @@ docRouter.get(
     // `redirect_uri`, it MUST match one of the registered URIs on this
     // Application EXACTLY. We validate before kicking off the Google flow
     // so attacker-controlled URIs never reach Google's consent screen with
-    // a victim's `state`. An absent `redirect_uri` is allowed (falls back
-    // to the EZAuth canonical `/auth/callback`); a present one is enforced.
+    // a victim's `state`. An absent `redirect_uri` falls back to the
+    // server-side default (RFC 6749 §3.1.2.4) computed from `getWebUrl(app)`
+    // — the bypass is server-controlled, never an attacker-supplied value,
+    // so it does NOT need to clear the allowlist check.
     if (redirect_uri !== undefined) {
       const allowed = await validateRedirectUriForApp(app, redirect_uri)
       if (!allowed) {
@@ -123,6 +163,16 @@ docRouter.get(
         )
       }
     }
+
+    // RFC 6749 §3.1.2.4 — when no `redirect_uri` was sent, fall back to the
+    // canonical web-app callback for `app` in the current environment. This
+    // value is signed into the state JWT, mirrored onto the auth code at
+    // mint time (via Passport → handleOAuthCallback → generateAuthCodePublic
+    // → AuthCode.redirectUri), and re-checked at /token exchange (HAC-HIGH-4
+    // strict equality). Without this fallback, /token would store
+    // `undefined` and reject any client that does send `redirect_uri` at
+    // exchange time (which all our SDKs do via `ctx.redirectUri`).
+    const resolvedRedirectUri = redirect_uri ?? getDefaultRedirectUriForApp(app)
 
     let linkUserId: string | undefined
     if (intent === 'link') {
@@ -140,7 +190,7 @@ docRouter.get(
     const stateToken = signOAuthStateToken({
       nonce,
       app,
-      redirectUri: redirect_uri,
+      redirectUri: resolvedRedirectUri,
       intent: intent ?? 'signin',
       linkUserId,
       // PKCE (RFC 7636) — sign the challenge INTO the state so it round-trips

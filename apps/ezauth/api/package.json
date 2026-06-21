@@ -19,6 +19,7 @@
     "seed:docs-demo": "tsx src/scripts/seed-docs-demo-app.ts",
     "seed:pay-docs-demo": "tsx src/scripts/seed-pay-docs-demo-app.ts",
     "seed:platform-owned": "tsx src/scripts/seed-platform-owned-flag.ts",
+    "seed:redirect-uris": "tsx src/scripts/seed-application-redirect-uris.ts",
     "seed:webhook-secrets": "tsx src/scripts/seed-webhook-secrets.ts",
     "migrate:keys-to-apps": "tsx src/scripts/migrate-keys-to-applications.ts",
     "migrate:owner-admin-role": "tsx src/scripts/backfill-app-owner-admin-role.ts",

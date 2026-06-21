@@ -233,14 +233,32 @@ function isLocalhost(): boolean {
 
 /**
  * Detect the redirect URI from the current browser URL.
+ *
+ * Returns the **locale-less** `${origin}/auth/callback` form. OAuth callback
+ * URLs MUST be stable identifiers per RFC 6749 §3.1.2 (exact-match against
+ * the registered allowlist) — embedding the locale would multiply the surface
+ * by the number of supported languages and make `Application.redirectUris`
+ * unbounded.
+ *
+ * The locale is a presentation concern handled by the framework's i18n
+ * middleware AFTER the callback page renders (next-intl resolves the locale
+ * from the `Accept-Language` header, the `NEXT_LOCALE` cookie, or the URL
+ * pathname). Visiting `/auth/callback` therefore resolves transparently to
+ * the user's current locale (`/en/auth/callback`, `/fr/auth/callback`, …).
+ *
+ * This same value is sent at:
+ * - `/authorize` (login or OAuth init)  → backend stores it on the auth code
+ * - `/token` (code exchange)            → backend enforces strict equality
+ *
+ * Pre-2026-06-21 behavior included a `/${locale}` prefix detected from
+ * `window.location.pathname`. That broke `Application.redirectUris` exact-
+ * match validation whenever the user reached `/login` on a non-default
+ * locale (`/fr/login` → `redirect_uri=/fr/auth/callback`, but the registered
+ * allowlist only carried `/auth/callback`). See AUTH-OAUTH-REDIRECT-URI-SEED-001.
  */
 function detectRedirectUri(): string {
   if (typeof window === 'undefined') return '/auth/callback'
-  const pathParts = window.location.pathname.split('/')
-  const maybeLocale = pathParts[1]
-  const hasLocalePrefix = maybeLocale !== undefined && /^[a-z]{2,3}$/.test(maybeLocale)
-  const localePrefix = hasLocalePrefix ? `/${maybeLocale}` : ''
-  return `${window.location.origin}${localePrefix}/auth/callback`
+  return `${window.location.origin}/auth/callback`
 }
 
 /**

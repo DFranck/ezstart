@@ -61,6 +61,38 @@ describe('OAuthButtons', () => {
     window.location = originalLocation
   })
 
+  it('sends a locale-less explicit redirect_uri when provided as a prop (RFC 6749 §3.1.2 allowlist exact-match)', async () => {
+    let capturedHref = ''
+    const originalLocation = window.location
+    // @ts-expect-error - jsdom location override
+    delete window.location
+    window.location = {
+      ...originalLocation,
+      set href(val: string) {
+        capturedHref = val
+      },
+      get href() {
+        return originalLocation.href
+      },
+    } as Location
+
+    render(<OAuthButtons appName="myapp" redirectUri="https://app.example.com/auth/callback" />)
+    fireEvent.click(screen.getByText('Continue with Google'))
+
+    await waitFor(() => {
+      expect(capturedHref).toContain('/api/auth/google?')
+    })
+
+    // Decode the redirect_uri param and assert it is locale-less.
+    const url = new URL(capturedHref)
+    const sentRedirect = url.searchParams.get('redirect_uri')
+    expect(sentRedirect).toBe('https://app.example.com/auth/callback')
+    // Should NOT include a locale segment like /en or /fr
+    expect(sentRedirect).not.toMatch(/\/[a-z]{2,3}\/auth\/callback$/)
+
+    window.location = originalLocation
+  })
+
   it('does not render Google button when not in providers list', () => {
     render(<OAuthButtons appName="myapp" providers={[]} />)
     expect(screen.queryByText('Continue with Google')).not.toBeInTheDocument()
