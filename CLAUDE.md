@@ -59,11 +59,20 @@ Sert pour : (1) lancer un nouveau SaaS (focus P0), (2) auditer un SaaS existant 
 
 ## Git
 
-- **Jamais** de push direct sur master — feature branch + PR (exception hotfix admin documenté)
-- Profil : `git config user.name` → admin (franck/dfranck) peut `--no-verify` en hotfix urgent
-- Branches : `feat/` `fix/` `refactor/` `chore/`
+**Modèle 3 branches** (2026-06-21) — détail dans [`.claude/rules/git.md`](./.claude/rules/git.md) §0 :
+
+- `dev` = local working branch (toi + MCP, jamais déployé)
+- `master` = staging env (Vercel preview + Railway staging — test data)
+- `production` = prod env (Vercel prod + Railway prod — real data)
+
+**Flow obligatoire** : worktree → merge `dev` (local validation) → merge `master` (staging deploy) → PR `master → production` (prod deploy après merge).
+
+- **TOUT passe par worktree** (même petits fixes — autonomie agents + parallèle)
+- **Jamais** de commit direct sur `master` ou `production`
+- Worktree branches : `feat/` `fix/` `refactor/` `chore/` `hotfix/`
+- Worktree cleanup obligatoire après PR merge (delete branch local + remote)
 - Commits conventionnels, **jamais** "Generated with Claude Code" ni "Co-Authored-By: Claude"
-- **Ask user avant push** (Vercel Hobby quota)
+- **Ask user avant push** sur `master` ou `production` (Vercel Hobby quota + risque deploy)
 
 ## BACKLOG
 
