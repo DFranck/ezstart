@@ -31,7 +31,7 @@ import { CheckIcon, XIcon } from 'lucide-react'
  *   showStrength
  *   showRequirements
  *   requirements={[
- *     { test: /.{8,}/, label: 'At least 8 characters' },
+ *     { test: /.{12,}/, label: 'At least 12 characters' },
  *     { test: /[A-Z]/, label: 'One uppercase letter' },
  *     { test: /[0-9]/, label: 'One number' }
  *   ]}
@@ -88,7 +88,7 @@ const DEFAULT_TEXTS: Required<PasswordInputTexts> = {
 }
 
 const DEFAULT_REQUIREMENTS: PasswordRequirement[] = [
-  { test: /.{8,}/, label: 'At least 8 characters' },
+  { test: /.{12,}/, label: 'At least 12 characters' },
   { test: /[a-z]/, label: 'One lowercase letter' },
   { test: /[A-Z]/, label: 'One uppercase letter' },
   { test: /[0-9]/, label: 'One number' },

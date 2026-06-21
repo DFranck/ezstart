@@ -21,7 +21,7 @@ export const en = {
     lastNamePlaceholder: 'Last name',
     password: 'Password',
     passwordPlaceholder: 'Choose a password',
-    passwordHint: 'At least 8 characters with a mix of letters, numbers, and symbols.',
+    passwordHint: 'At least 12 characters with a mix of letters, numbers, and symbols.',
     confirmPassword: 'Confirm Password',
     confirmPasswordPlaceholder: 'Confirm your password',
     passwordMismatch: 'Passwords do not match',

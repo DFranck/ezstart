@@ -20,7 +20,7 @@ export const fr: AuthDict = {
     lastNamePlaceholder: 'Nom',
     password: 'Mot de passe',
     passwordPlaceholder: 'Choisissez un mot de passe',
-    passwordHint: 'Au moins 8 caractères avec un mélange de lettres, chiffres et symboles.',
+    passwordHint: 'Au moins 12 caractères avec un mélange de lettres, chiffres et symboles.',
     confirmPassword: 'Confirmer le mot de passe',
     confirmPasswordPlaceholder: 'Confirmez votre mot de passe',
     passwordMismatch: 'Les mots de passe ne correspondent pas',

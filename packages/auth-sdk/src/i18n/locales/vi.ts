@@ -20,7 +20,7 @@ export const vi: AuthDict = {
     lastNamePlaceholder: 'Họ',
     password: 'Mật khẩu',
     passwordPlaceholder: 'Chọn mật khẩu',
-    passwordHint: 'Tối thiểu 8 ký tự, gồm chữ cái, số và ký tự đặc biệt.',
+    passwordHint: 'Tối thiểu 12 ký tự, gồm chữ cái, số và ký tự đặc biệt.',
     confirmPassword: 'Xác nhận mật khẩu',
     confirmPasswordPlaceholder: 'Xác nhận mật khẩu của bạn',
     passwordMismatch: 'Mật khẩu không khớp',
