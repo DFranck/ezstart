@@ -9,7 +9,12 @@ vi.mock('../../react/applications.js', () => ({
   useApplication: () => ({ data: null, isLoading: false, isError: false }),
   useResolveApplicationByKey: () => ({ data: null, isLoading: false, isError: false }),
   useCreateApplication: () => ({ mutate: vi.fn(), isPending: false }),
-  useUpdateApplication: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateApplication: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  useUpdateApplicationTheme: () => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
   useRevokeApplication: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 

@@ -67,6 +67,19 @@ export interface AuthApplicationsSectionTexts {
   editError?: string
   editSuccess?: string
 
+  // Edit modal — white-label theme fields (primary-only contract, cf.
+  // standard-saas.md §5.2). All optional — fall back to English defaults so
+  // existing consumers stay compatible.
+  editThemeSectionTitle?: string
+  editThemeSectionDescription?: string
+  editThemeEnableLabel?: string
+  editThemeEnableHelp?: string
+  editThemePrimaryLabel?: string
+  editThemePrimaryHelp?: string
+  editThemeLogoLabel?: string
+  editThemeLogoPlaceholder?: string
+  editThemeLogoHelp?: string
+
   // Archive dialog
   confirmArchiveTitle?: string
   confirmArchiveDescription?: string
@@ -128,6 +141,18 @@ export const DEFAULT_APPLICATIONS_TEXTS: Required<AuthApplicationsSectionTexts> 
   saving: 'Saving...',
   editError: 'Failed to update Application.',
   editSuccess: 'Application updated successfully.',
+  editThemeSectionTitle: 'White-label theme',
+  editThemeSectionDescription:
+    'Override the primary color of the EZAuth login pages for users of this Application. Light/dark mode stays driven by each user preference.',
+  editThemeEnableLabel: 'Apply theme to auth pages',
+  editThemeEnableHelp:
+    'When enabled, the primary color below replaces the default EZAuth accent on login, register, and password-reset pages for this Application.',
+  editThemePrimaryLabel: 'Primary color',
+  editThemePrimaryHelp:
+    'Hex (#RRGGBB) or oklch(L C H). This overrides only `--primary` — light/dark, background, foreground stay default.',
+  editThemeLogoLabel: 'Logo URL (optional)',
+  editThemeLogoPlaceholder: 'https://cdn.example.com/logo.svg',
+  editThemeLogoHelp: 'Public HTTPS URL to your app logo (recommended 200x200 PNG/SVG).',
   confirmArchiveTitle: 'Archive Application',
   confirmArchiveDescription:
     'Are you sure you want to archive this Application? Any active API keys will be revoked.',

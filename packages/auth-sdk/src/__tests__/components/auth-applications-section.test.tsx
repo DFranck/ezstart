@@ -8,6 +8,7 @@ import type { ColumnDef, Row } from '@tanstack/react-table'
 const mockUseMyApplications = vi.fn()
 const mockUseRevokeApplication = vi.fn()
 const mockUseUpdateApplication = vi.fn()
+const mockUseUpdateApplicationTheme = vi.fn()
 const mockUseCreateApplication = vi.fn()
 
 vi.mock('../../react/applications.js', () => ({
@@ -16,6 +17,7 @@ vi.mock('../../react/applications.js', () => ({
   useResolveApplicationByKey: () => ({ data: null, isLoading: false, isError: false }),
   useCreateApplication: (...args: unknown[]) => mockUseCreateApplication(...args),
   useUpdateApplication: (...args: unknown[]) => mockUseUpdateApplication(...args),
+  useUpdateApplicationTheme: (...args: unknown[]) => mockUseUpdateApplicationTheme(...args),
   useRevokeApplication: (...args: unknown[]) => mockUseRevokeApplication(...args),
 }))
 
@@ -73,6 +75,7 @@ function setup(overrides?: { data?: Application[]; isLoading?: boolean; isError?
   })
   mockUseRevokeApplication.mockReturnValue(defaultRevoke)
   mockUseUpdateApplication.mockReturnValue(defaultUpdate)
+  mockUseUpdateApplicationTheme.mockReturnValue(defaultUpdate)
   mockUseCreateApplication.mockReturnValue(defaultCreate)
 }
 
