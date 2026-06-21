@@ -39,7 +39,10 @@ export default function LoginClient({ locale }: LoginClientProps) {
     if (typeof window === 'undefined') return
     if (!webUrl) return
 
-    const callbackUrl = `${window.location.origin}/${locale}/auth/callback`
+    // RFC 6749 §4.1.3 round-trip alignment — locale-LESS to match what the
+    // SDK's exchangeCode sends at /token. next-intl routes `/auth/callback`
+    // → `/{defaultLocale}/auth/callback` so the page still resolves.
+    const callbackUrl = `${window.location.origin}/auth/callback`
     const params = new URLSearchParams({ redirect_uri: callbackUrl })
     if (EZAUTH_KEY) params.set('key', EZAUTH_KEY)
     window.location.assign(`${webUrl}/${locale}/login?${params.toString()}`)

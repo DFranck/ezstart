@@ -293,10 +293,14 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 
           const appOrigin = currentUrl.origin
 
-          // Build redirect URL with locale preserved (critical for i18n apps)
-          // Without locale prefix, callback fails and creates redirect loop
-          const localePrefix = locale ? `/${locale}` : ''
-          const redirectUri = `${appOrigin}${localePrefix}/auth/callback`
+          // RFC 6749 §4.1.3 round-trip alignment — the redirect_uri sent here
+          // must match what the SDK's exchangeCode will send at /token (which
+          // uses `ctx.redirectUri` = `detectRedirectUri()` = locale-LESS
+          // `{origin}/auth/callback`). Backend strict equality (HAC-HIGH-4)
+          // rejects locale mismatch. next-intl middleware on the consumer
+          // routes `/auth/callback` to `/{defaultLocale}/auth/callback` so
+          // the locale-less callback page resolves correctly after redirect.
+          const redirectUri = `${appOrigin}/auth/callback`
           const returnTo = pathname // Full path with locale
           const loginUrl = new URL(`${ezauthUrl}/login`)
 
