@@ -191,8 +191,15 @@ describe('TwoFactorPrompt', () => {
 
     await waitFor(() => {
       // No PKCE in this flow — the verifier prop is undefined, so the exchange
-      // receives `(code, undefined)` (PKCE is opt-in / backward compatible).
-      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-same-origin', undefined)
+      // receives `(code, undefined, redirectUri)` (PKCE is opt-in / backward
+      // compatible). The third arg is the redirect_uri override so the /token
+      // exchange echoes the value the original /login committed to (RFC 6749
+      // §4.1.3 strict equality).
+      expect(handleCallbackMock).toHaveBeenCalledWith(
+        'auth-code-same-origin',
+        undefined,
+        'http://localhost:6111/en/admin'
+      )
     })
     await waitFor(() => {
       expect(lastHref).toBe('http://localhost:6111/en/admin')

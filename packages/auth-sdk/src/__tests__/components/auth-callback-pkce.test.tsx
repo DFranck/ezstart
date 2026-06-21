@@ -49,6 +49,10 @@ describe('AuthCallbackPage — PKCE verifier recovery', () => {
     render(<AuthCallbackPage redirectTo="/en/dashboard" />)
 
     await waitFor(() => {
+      // AuthCallbackPage runs the cross-origin path — no redirect_uri override
+      // is needed because `ctx.redirectUri` (= detectRedirectUri()) already
+      // resolves to this very `/auth/callback` URL, which is the value the
+      // original /login committed to (RFC 6749 §4.1.3 strict equality holds).
       expect(handleCallbackMock).toHaveBeenCalledWith('oauth-code-abc', verifier)
     })
     // Single-use hygiene — the verifier must be cleared after recovery.

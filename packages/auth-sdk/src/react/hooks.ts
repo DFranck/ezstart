@@ -129,9 +129,25 @@ export function useAuth(logger?: AuthLogger) {
     return new Promise(() => {})
   }
 
-  const handleCallback = async (code: string, codeVerifier?: string) => {
+  /**
+   * Exchange an authorization code for tokens and hydrate the auth store.
+   *
+   * `redirectUriOverride` MUST be passed when the original login request used
+   * a redirect_uri different from the SDK-detected `/auth/callback` default
+   * (typically: same-origin first-party flow that resolved to `/dashboard`,
+   * `/admin`, etc.). The backend enforces RFC 6749 §4.1.3 strict equality
+   * between the redirect_uri at code creation and at exchange — a mismatch
+   * yields "Invalid or expired authorization code". Cross-origin SSO flows
+   * (where the consumer's `/auth/callback` exchanges the code) typically
+   * omit it because `detectRedirectUri()` already returns the matching value.
+   */
+  const handleCallback = async (
+    code: string,
+    codeVerifier?: string,
+    redirectUriOverride?: string
+  ) => {
     try {
-      const authResult = await client.exchangeCode(code, codeVerifier)
+      const authResult = await client.exchangeCode(code, codeVerifier, redirectUriOverride)
 
       if (mode === 'httpOnly') {
         storeApi

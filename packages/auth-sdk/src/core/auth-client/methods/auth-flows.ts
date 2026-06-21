@@ -19,20 +19,30 @@ import { type ClientContext, parseError, parseErrorCode, unwrapEnvelope } from '
  * `BASE64URL(SHA256(verifier))` against the stored challenge. Omit it for
  * legacy (no-PKCE) codes.
  *
+ * Pass `redirectUriOverride` to send a redirect_uri that DIFFERS from the
+ * SDK-detected default (`{origin}/{locale}/auth/callback`). RFC 6749 §4.1.3
+ * mandates strict equality between the redirect_uri sent at code creation
+ * (POST `/login`) and the one sent at token exchange (POST `/token`). The
+ * backend enforces this (HAC-HIGH-4 anti-injection), so when the login layer
+ * resolved a different destination (e.g. `/dashboard` for same-origin
+ * first-party logins), pass that same value here. Falls back to
+ * `ctx.redirectUri` (= `detectRedirectUri()` callback URL) when omitted.
+ *
  * `/token` is a cookie-auth write — the SDK routes it through
  * `ctx.cookieWrite` so the double-submit CSRF token rides along.
  */
 export async function exchangeCode(
   ctx: ClientContext,
   code: string,
-  codeVerifier?: string
+  codeVerifier?: string,
+  redirectUriOverride?: string
 ): Promise<AuthToken> {
   const response = await ctx.cookieWrite('/token', {
     method: 'POST',
     body: JSON.stringify({
       code,
       app: ctx.appName,
-      redirect_uri: ctx.redirectUri,
+      redirect_uri: redirectUriOverride ?? ctx.redirectUri,
       // Only include when present — the server treats a missing verifier as
       // legacy unless the code was minted with a challenge (then it rejects).
       ...(codeVerifier ? { code_verifier: codeVerifier } : {}),

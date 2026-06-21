@@ -45,6 +45,7 @@ const PERMISSIVE_ALLOWED_HEADERS = [
   'X-API-Key',
   'X-EZStart-Signature',
   'X-User-Id',
+  'X-CSRF-Token',
 ]
 
 /**
@@ -67,7 +68,7 @@ const PERMISSIVE_EXPOSED_HEADERS = ['X-Request-Id', 'Retry-After']
  * the browser — every request carrying one is initiated explicitly by the
  * consumer SDK.
  */
-const STRICT_ALLOWED_HEADERS = ['Content-Type', 'Authorization', 'X-API-Key']
+const STRICT_ALLOWED_HEADERS = ['Content-Type', 'Authorization', 'X-API-Key', 'X-CSRF-Token']
 
 export type PermissiveCorsOptions = {
   /** Override the default methods (`GET/POST/PUT/DELETE/PATCH/OPTIONS`). */
@@ -247,7 +248,7 @@ export function createCorsMiddleware(config: CorsConfig): RequestHandler {
       origin: '*',
       credentials: false,
       methods: DEFAULT_METHODS,
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id', 'x-api-key'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id', 'x-api-key', 'x-csrf-token'],
     }
     return cors(opts)
   }
@@ -261,6 +262,7 @@ export function createCorsMiddleware(config: CorsConfig): RequestHandler {
       'Authorization',
       'x-user-id',
       'x-api-key',
+      'x-csrf-token',
     ],
   }
   return cors(opts)

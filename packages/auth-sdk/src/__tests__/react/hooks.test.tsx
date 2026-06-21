@@ -90,6 +90,64 @@ describe('useAuth hook', () => {
     ).rejects.toThrow('Invalid code')
   })
 
+  it('handleCallback forwards redirectUriOverride to client.exchangeCode (RFC 6749 §4.1.3)', async () => {
+    // Same-origin first-party logins use a redirect_uri different from the
+    // SDK-detected `/auth/callback` default (e.g. `/dashboard`). The backend
+    // enforces strict equality between the redirect_uri at code creation and
+    // at token exchange — handleCallback MUST forward the override so the
+    // /token request echoes back the exact value sent at /login.
+    const user = createTestUser()
+    mockClient.exchangeCode.mockResolvedValueOnce({
+      access_token: 'at',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      user,
+      refresh_token: 'rt',
+    })
+
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    await act(async () => {
+      await result.current.handleCallback(
+        'auth-code-strict',
+        'pkce-verifier',
+        'http://localhost:6111/en/dashboard'
+      )
+    })
+
+    expect(mockClient.exchangeCode).toHaveBeenCalledWith(
+      'auth-code-strict',
+      'pkce-verifier',
+      'http://localhost:6111/en/dashboard'
+    )
+  })
+
+  it('handleCallback omits redirectUriOverride when not provided (backward compat)', async () => {
+    const user = createTestUser()
+    mockClient.exchangeCode.mockResolvedValueOnce({
+      access_token: 'at',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      user,
+      refresh_token: 'rt',
+    })
+
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    await act(async () => {
+      await result.current.handleCallback('cross-origin-code', 'pkce-verifier')
+    })
+
+    // Third arg must be undefined so `exchangeCode` falls back to
+    // `ctx.redirectUri` (the SDK-detected `/auth/callback` URL). This is what
+    // AuthCallbackPage relies on for the cross-origin SSO flow.
+    expect(mockClient.exchangeCode).toHaveBeenCalledWith(
+      'cross-origin-code',
+      'pkce-verifier',
+      undefined
+    )
+  })
+
   it('logout calls client.logout and clears store', async () => {
     const user = createTestUser()
     act(() => {

@@ -14,8 +14,20 @@ export interface CompleteLoginRedirectOptions {
    * `handleCallback` so the bound code is accepted. Undefined ⇒ no-PKCE.
    */
   codeVerifier?: string
-  /** `useAuth().handleCallback` — exchanges the auth code for tokens. */
-  handleCallback: (code: string, codeVerifier?: string) => Promise<unknown>
+  /**
+   * `useAuth().handleCallback` — exchanges the auth code for tokens.
+   *
+   * Receives `redirectUriOverride` so the token exchange can echo back the
+   * SAME `redirect_uri` that was sent at code creation (RFC 6749 §4.1.3
+   * strict equality). For same-origin first-party flows this is the
+   * destination URL (e.g. `/dashboard`), NOT the SDK's `/auth/callback`
+   * default.
+   */
+  handleCallback: (
+    code: string,
+    codeVerifier?: string,
+    redirectUriOverride?: string
+  ) => Promise<unknown>
   /** Fallback error message when the same-origin exchange throws a non-Error. */
   fallbackError: string
 }
@@ -55,8 +67,10 @@ export async function completeLoginRedirect({
   if (isSameOrigin) {
     try {
       // Same-origin → exchange the code here, passing the PKCE verifier (if
-      // the login committed to one) to complete the bound exchange.
-      await handleCallback(code, codeVerifier)
+      // the login committed to one) AND the resolved redirect URI (so the
+      // /token exchange echoes back the exact value sent at /login — RFC 6749
+      // §4.1.3 strict equality enforced backend-side as HAC-HIGH-4).
+      await handleCallback(code, codeVerifier, resolvedRedirectUri)
     } catch (exchangeError) {
       logger.error(
         'Same-origin code exchange failed:',

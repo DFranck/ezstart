@@ -155,8 +155,13 @@ export function TwoFactorPrompt({
         if (isSameOrigin) {
           try {
             // Same-origin → exchange here, passing the PKCE verifier (if the
-            // login committed to one) so the bound code is accepted.
-            await handleCallback(result.code, codeVerifier)
+            // login committed to one) AND the destination redirect URI so the
+            // /token exchange echoes back the exact value sent at the original
+            // /login (RFC 6749 §4.1.3 strict equality — backend-enforced as
+            // HAC-HIGH-4). The login layer minted the auth code against this
+            // same `redirectUri`, the 2FA detour preserves it via the temp
+            // token, and the post-2FA code stays bound to it.
+            await handleCallback(result.code, codeVerifier, redirectUri)
           } catch (exchangeError) {
             logger.error(
               '2FA same-origin code exchange failed:',

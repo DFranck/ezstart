@@ -157,17 +157,42 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
 
     await waitFor(() => {
       // PKCE (RFC 7636) — same-origin login mints a verifier and forwards it
-      // to the exchange. The first arg is the code; the second is the verifier
-      // (a 43-char base64url string).
+      // to the exchange. The first arg is the code; the second is the
+      // verifier (a 43-char base64url string); the third is the redirect_uri
+      // override so the /token exchange echoes the exact value sent at /login
+      // (RFC 6749 §4.1.3 strict equality, backend-enforced as HAC-HIGH-4).
       expect(handleCallbackMock).toHaveBeenCalledWith(
         'auth-code-same-origin',
-        expect.stringMatching(/^[A-Za-z0-9\-_]{43}$/)
+        expect.stringMatching(/^[A-Za-z0-9\-_]{43}$/),
+        'http://localhost:6111/en/admin'
       )
     })
     // Navigation must happen AFTER the exchange resolved.
     await waitFor(() => {
       expect(hrefSet.value).toBe('http://localhost:6111/en/admin')
     })
+  })
+
+  it('forwards the SAME redirect_uri at /login and at /token (RFC 6749 §4.1.3)', async () => {
+    setupLocation('http://localhost:6111')
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-strict-equality' })
+    handleCallbackMock.mockResolvedValueOnce({ id: 'u1', email: 'user@example.com' })
+
+    render(<SignInForm appName="ezauth" redirectUri="http://localhost:6111/en/dashboard" />)
+
+    submit()
+
+    await waitFor(() => {
+      expect(mockApiCall).toHaveBeenCalled()
+    })
+    const loginBody = mockApiCall.mock.calls[0]?.[1]?.body as { redirect_uri?: string }
+    await waitFor(() => {
+      expect(handleCallbackMock).toHaveBeenCalled()
+    })
+    const exchangeRedirectUri = handleCallbackMock.mock.calls[0]?.[2] as string | undefined
+    // The two values MUST be byte-identical — that's what the backend checks.
+    expect(loginBody.redirect_uri).toBe('http://localhost:6111/en/dashboard')
+    expect(exchangeRedirectUri).toBe(loginBody.redirect_uri)
   })
 
   it('sends a PKCE S256 challenge on /auth/login for same-origin redirects', async () => {
@@ -242,7 +267,11 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
     submit()
 
     await waitFor(() => {
-      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-fail', expect.anything())
+      expect(handleCallbackMock).toHaveBeenCalledWith(
+        'auth-code-fail',
+        expect.anything(),
+        'http://localhost:6111/en/admin'
+      )
     })
     // Navigation must NOT have happened.
     expect(hrefSet.value).toBeNull()

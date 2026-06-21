@@ -225,9 +225,20 @@ export class CoreAuthClient {
    *
    * Pass `codeVerifier` to complete a PKCE flow (RFC 7636) — required when the
    * authorization request committed to a `code_challenge`.
+   *
+   * Pass `redirectUriOverride` when the login request used a redirect_uri
+   * different from the SDK-detected `/auth/callback` default (e.g. same-origin
+   * first-party flow that resolved straight to `/dashboard`). The backend
+   * enforces RFC 6749 §4.1.3 strict equality between the redirect_uri sent at
+   * login and at token exchange — mismatch yields "Invalid or expired
+   * authorization code".
    */
-  async exchangeCode(code: string, codeVerifier?: string): Promise<AuthToken> {
-    return exchangeCode(this.ctx, code, codeVerifier)
+  async exchangeCode(
+    code: string,
+    codeVerifier?: string,
+    redirectUriOverride?: string
+  ): Promise<AuthToken> {
+    return exchangeCode(this.ctx, code, codeVerifier, redirectUriOverride)
   }
 
   /** Login with httpOnly cookie (direct, no redirect). */
