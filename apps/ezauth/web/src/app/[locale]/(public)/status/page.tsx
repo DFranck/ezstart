@@ -1,9 +1,10 @@
+import { getApiUrl } from '@ezstart/config'
 import { StatusPage } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 
-const EZAUTH_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
-const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130'
-const EZSTART_API_URL = process.env.NEXT_PUBLIC_EZSTART_API_URL ?? 'http://localhost:6100'
+const EZAUTH_API_URL = getApiUrl('ezauth')
+const EZPAY_API_URL = getApiUrl('ezpay')
+const EZSTART_API_URL = getApiUrl('ezstart')
 
 export default function StatusRoute() {
   const t = useTranslations('status')

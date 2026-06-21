@@ -1,8 +1,9 @@
+import { getApiUrl } from '@ezstart/config'
 import { StatusPage } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 
-const GACHA_API_URL = process.env.NEXT_PUBLIC_GACHA_API_URL ?? 'http://localhost:6170'
-const EZAUTH_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
+const GACHA_API_URL = getApiUrl('gacha-analyzer')
+const EZAUTH_API_URL = getApiUrl('ezauth')
 
 export default function StatusRoute() {
   const t = useTranslations('status')
