@@ -7,7 +7,7 @@
     "incidentsBody": "Không có sự cố nào đang hoạt động.",
     "lastCheckedLabel": "Lần kiểm tra cuối",
     "responseTimeLabel": "Thời gian phản hồi",
-    "refreshHint": "Tự động làm mới mỗi {{seconds}} giây",
+    "refreshHint": "Tự động làm mới mỗi {seconds} giây",
     "refreshButton": "Làm mới ngay",
     "dependenciesLabel": "Phụ thuộc",
     "checkStatus": {

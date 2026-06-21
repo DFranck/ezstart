@@ -1,13 +1,24 @@
 'use client'
 
 import { useNavLinks } from '@/hooks/useNavLinks'
+import { Link } from '@/i18n/navigation'
 import { LoginButton, SignedIn, SignedOut, UserMenuV2 } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
-import { ThemeSwitcher } from '@ezstart/ui/theme/components'
-import { useTheme } from 'next-themes'
+import { logger } from '@ezstart/logger'
 import {
-  ClientLayout as BaseClientLayout,
+  AppActions,
+  AppFooter,
+  AppHeader,
+  AppLayout,
+  AppLogo,
+  AppMain,
+  AppMobileLink,
+  AppMobileMenu,
+  AppMobileToggle,
+  AppNav,
+  AppNavLink,
   Div,
+  FooterBrand,
   H2,
   Icon,
   LocaleSwitcher,
@@ -15,15 +26,39 @@ import {
   Span,
   type NavigationLink,
 } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { useDevice } from '@ezstart/ui/hooks'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { useLocale, useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
+import { useTheme } from 'next-themes'
 import { usePathname, useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
 
 type ClientLayoutProps = {
   children: ReactNode
+}
+
+type FlatLink = { label: string; href: string }
+
+/**
+ * Flatten `NavigationLink[]` (which can contain nested `NavigationMenu`
+ * entries) into a single list of `{ label, href }` items. The new
+ * `AppLayout` compound from `@ezstart/ui` does not ship a built-in
+ * desktop dropdown for nested menus — we surface the children inline so
+ * no navigation target is dropped during the migration off the deprecated
+ * `ClientLayout`.
+ */
+function flattenNavLinks(navLinks: NavigationLink[]): FlatLink[] {
+  const flat: FlatLink[] = []
+  for (const link of navLinks) {
+    if ('menuLabel' in link && 'menu' in link) {
+      for (const child of link.menu) {
+        flat.push({ label: child.label, href: child.href })
+      }
+    } else {
+      flat.push({ label: link.label, href: link.href })
+    }
+  }
+  return flat
 }
 
 const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
@@ -42,11 +77,8 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
     currentLocale = 'en'
   }
 
-  // Pages where header overlays content (hero/landing style)
-  const isOverlayPage = pathname === `/${currentLocale}` || pathname === `/${currentLocale}/`
-
-  // useNavLinks() format is already compatible with ClientLayout!
   const navLinks = useNavLinks() as NavigationLink[]
+  const flatLinks = flattenNavLinks(navLinks)
   const locales = ['en', 'fr']
 
   const handleLocaleChange = (newLocale: string) => {
@@ -54,37 +86,31 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
     router.push(newPath)
   }
 
+  const isActiveLink = (href: string): boolean =>
+    pathname === href ||
+    pathname === `/${currentLocale}${href}` ||
+    pathname === `/${currentLocale}${href === '/' ? '' : href}`
+
   return (
     <>
-      <BaseClientLayout
-        appName="EZStart"
-        headerOverlay={isOverlayPage}
-        mobileLogoIcon="custom:Ezstart"
-        mobileLogoHref="/"
-        creator={
-          <Div className="flex items-center gap-2">
-            <Span>
-              {t('footer.createdWith')} ❤️ {t('footer.by')}{' '}
-            </Span>
-            <Link
-              target="_blank"
-              href="https://www.linkedin.com/in/franck-seradni/"
-              className="hover:underline"
-            >
-              @Franck
+      <AppLayout>
+        <AppHeader mode="sticky">
+          <AppLogo asChild>
+            <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+              <Icon name="custom:Ezstart" size={24} />
+              <H2 size="h4">EZStart</H2>
             </Link>
-          </Div>
-        }
-        currentPath={pathname}
-        headerLeftContent={
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Icon name="custom:Ezstart" size={24} />
-            <H2 size={'h4'}>EZStart</H2>
-          </Link>
-        }
-        navLinks={navLinks}
-        headerRightContent={
-          <Div className="flex items-center gap-2">
+          </AppLogo>
+
+          <AppNav>
+            {flatLinks.map(link => (
+              <AppNavLink key={link.href} asChild active={isActiveLink(link.href)}>
+                <Link href={link.href}>{link.label}</Link>
+              </AppNavLink>
+            ))}
+          </AppNav>
+
+          <AppActions>
             <SignedOut>
               <LoginButton>{t('auth.login')}</LoginButton>
               <LocaleSwitcher
@@ -143,39 +169,60 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
                 }}
               />
             </SignedIn>
+            <AppMobileToggle />
+          </AppActions>
+        </AppHeader>
+
+        <AppMobileMenu>
+          {flatLinks.map(link => (
+            <AppMobileLink key={link.href} asChild active={isActiveLink(link.href)}>
+              <Link href={link.href}>{link.label}</Link>
+            </AppMobileLink>
+          ))}
+        </AppMobileMenu>
+
+        <AppMain>{children}</AppMain>
+
+        <AppFooter>
+          <Div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <FooterBrand copyright={t('footer.copyright', { year: new Date().getFullYear() })}>
+              <Div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Span>
+                  {t('footer.createdWith')} ❤️ {t('footer.by')}{' '}
+                </Span>
+                <Link
+                  target="_blank"
+                  href="https://www.linkedin.com/in/franck-seradni/"
+                  className="hover:underline"
+                >
+                  @Franck
+                </Link>
+              </Div>
+            </FooterBrand>
+            <Div className="flex items-center gap-3">
+              <Link href="/legal-notices" className="text-xs text-muted-foreground hover:underline">
+                {t('footer.legalNotices')}
+              </Link>
+              <Link
+                href="https://github.com/DFranck/ez-start"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="text-muted-foreground hover:opacity-80"
+              >
+                <Icon name="fa:FaGithub" size={16} />
+              </Link>
+              <Link
+                href="mailto:support@ezstart.xyz"
+                className="text-muted-foreground hover:opacity-80"
+                aria-label="Email"
+              >
+                <Icon name="fa:FaEnvelope" size={16} />
+              </Link>
+            </Div>
           </Div>
-        }
-        // Footer customization
-        footerLeftContent={
-          <Div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
-            <Span className="text-xs opacity-70 select-none">
-              {t('footer.copyright', { year: new Date().getFullYear() })}
-            </Span>
-            <Link href="/legal-notices" className="hover:underline text-xs">
-              {t('footer.legalNotices')}
-            </Link>
-          </Div>
-        }
-        footerRightContent={
-          <Div className="flex gap-3 items-center">
-            <Link
-              href="https://github.com/DFranck/ez-start"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="hover:opacity-80"
-            >
-              <Icon name="fa:FaGithub" size={16} />
-            </Link>
-            <Link href="mailto:support@ezstart.xyz" className="hover:opacity-80" aria-label="Email">
-              <Icon name="fa:FaEnvelope" size={16} />
-            </Link>
-          </Div>
-        }
-        LinkComponent={Link}
-      >
-        {children}
-      </BaseClientLayout>
+        </AppFooter>
+      </AppLayout>
       {isMobile && (
         <SignedIn>
           <PWAInstallPrompt

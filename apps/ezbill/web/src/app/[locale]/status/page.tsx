@@ -48,7 +48,7 @@ export default function StatusRoute() {
         stateChecking: t('state.checking'),
         lastCheckedLabel: t('lastCheckedLabel'),
         responseTimeLabel: t('responseTimeLabel'),
-        refreshHint: t('refreshHint'),
+        refreshHint: t('refreshHint', { seconds: 30 }),
         refreshButton: t('refreshButton'),
         dependenciesLabel: t('dependenciesLabel'),
         checkStatusOk: t('checkStatus.ok'),

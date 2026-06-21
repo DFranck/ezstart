@@ -7,7 +7,7 @@
     "incidentsBody": "Aucun incident actif signalé.",
     "lastCheckedLabel": "Dernière vérification",
     "responseTimeLabel": "Temps de réponse",
-    "refreshHint": "Actualisation automatique toutes les {{seconds}} s",
+    "refreshHint": "Actualisation automatique toutes les {seconds} s",
     "refreshButton": "Actualiser",
     "dependenciesLabel": "Dépendances",
     "checkStatus": {

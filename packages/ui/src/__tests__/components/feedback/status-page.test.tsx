@@ -154,14 +154,32 @@ describe('StatusPage', () => {
     })
   })
 
-  it('substitutes {{seconds}} placeholder in the refresh hint', async () => {
+  it('renders the refreshHint text as-is (caller interpolates)', async () => {
     fetchMock.mockResolvedValue(new Response('ok', { status: 200 }))
 
     await act(async () => {
-      render(<StatusPage services={services} refreshIntervalMs={15_000} />)
+      render(
+        <StatusPage
+          services={services}
+          refreshIntervalMs={15_000}
+          texts={{ refreshHint: 'Auto-refreshes every 15s' }}
+        />
+      )
     })
 
     expect(screen.getByText('Auto-refreshes every 15s')).toBeInTheDocument()
+  })
+
+  it('renders the default refreshHint when none is overridden', async () => {
+    fetchMock.mockResolvedValue(new Response('ok', { status: 200 }))
+
+    await act(async () => {
+      render(<StatusPage services={services} refreshIntervalMs={60_000} />)
+    })
+
+    // Default text is plain string — the component does not interpolate the
+    // refreshIntervalMs into it. Callers wire `{ seconds }` themselves.
+    expect(screen.getByText('Auto-refreshes every 30s')).toBeInTheDocument()
   })
 
   it('hides the refresh hint when refreshIntervalMs is 0', async () => {

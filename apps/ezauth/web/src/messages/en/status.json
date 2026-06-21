@@ -7,7 +7,7 @@
     "incidentsBody": "No active incidents reported.",
     "lastCheckedLabel": "Last checked",
     "responseTimeLabel": "Response time",
-    "refreshHint": "Auto-refreshes every {{seconds}}s",
+    "refreshHint": "Auto-refreshes every {seconds}s",
     "refreshButton": "Refresh now",
     "dependenciesLabel": "Dependencies",
     "checkStatus": {

@@ -78,7 +78,13 @@ export interface StatusPageTexts {
   lastCheckedLabel: string
   /** Suffix for response time, e.g. `"Response time"`. */
   responseTimeLabel: string
-  /** Auto-refresh hint shown beside the summary, e.g. `"Auto-refreshes every {{seconds}}s"`. Use `{{seconds}}` placeholder. */
+  /**
+   * Auto-refresh hint shown beside the summary, e.g. `"Auto-refreshes every 30s"`.
+   *
+   * Already-interpolated string. The caller is responsible for substituting any
+   * placeholders (e.g. via `t('refreshHint', { seconds: 30 })` with next-intl)
+   * before passing it in. The component renders the string as-is.
+   */
   refreshHint: string
   /** Manual refresh button label. */
   refreshButton: string
@@ -108,7 +114,7 @@ export const defaultStatusPageTexts: StatusPageTexts = {
   stateChecking: 'Checking',
   lastCheckedLabel: 'Last checked',
   responseTimeLabel: 'Response time',
-  refreshHint: 'Auto-refreshes every {{seconds}}s',
+  refreshHint: 'Auto-refreshes every 30s',
   refreshButton: 'Refresh now',
   dependenciesLabel: 'Dependencies',
   checkStatusOk: 'OK',
@@ -237,11 +243,6 @@ export function StatusPage({
           ? texts.summaryDown
           : texts.summaryChecking
 
-  const refreshHint = texts.refreshHint.replace(
-    '{{seconds}}',
-    String(Math.round(refreshIntervalMs / 1000))
-  )
-
   const dateFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {
@@ -272,7 +273,7 @@ export function StatusPage({
             <P className="text-base text-muted-foreground sm:text-lg">{texts.intro}</P>
           ) : null}
           <Div className="flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-4">
-            {refreshIntervalMs > 0 ? <Span>{refreshHint}</Span> : null}
+            {refreshIntervalMs > 0 ? <Span>{texts.refreshHint}</Span> : null}
             <Button
               type="button"
               variant="outline"
