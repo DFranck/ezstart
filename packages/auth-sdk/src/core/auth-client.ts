@@ -205,6 +205,17 @@ export class CoreAuthClient {
   }
 
   /**
+   * Get the configured redirect URI (defaults to `${origin}/{locale}/auth/callback`
+   * via `detectRedirectUri()`). Exposed so OAuth init flows can send this exact
+   * value as `redirect_uri` — guaranteeing the round-trip match required by
+   * RFC 6749 §4.1.3 at the subsequent `/token` exchange (which uses the same
+   * value via `ctx.redirectUri` unless overridden).
+   */
+  getRedirectUri(): string | undefined {
+    return this.redirectUri
+  }
+
+  /**
    * Prime the CSRF cookie. Called by the `<AuthProvider>` lifecycle hook on
    * mount + after refresh so the first cookie-auth write does not race the
    * priming round-trip.

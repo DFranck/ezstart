@@ -132,15 +132,28 @@ export function OAuthButtons({
   // the tree. This keeps the hook order stable across renders — the hook
   // itself is invoked unconditionally, only its consumption is guarded.
   let providerApiUrl: string | undefined
+  let providerRedirectUri: string | undefined
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    providerApiUrl = useAuthContext().client.getApiUrl()
+    const client = useAuthContext().client
+    providerApiUrl = client.getApiUrl()
+    providerRedirectUri = client.getRedirectUri()
   } catch {
     providerApiUrl = undefined
+    providerRedirectUri = undefined
   }
 
   const resolvedApiUrl =
     apiUrl ?? providerApiUrl ?? (typeof window !== 'undefined' ? window.location.origin : undefined)
+
+  // RFC 6749 §4.1.3 redirect_uri round-trip — the value sent here at /authorize
+  // MUST equal what AuthCallbackPage will send at /token. AuthCallbackPage uses
+  // `ctx.redirectUri` (= `detectRedirectUri()` = `{origin}/{locale}/auth/callback`)
+  // unless overridden. Falling back to that exact value here ensures the backend
+  // can store + verify the equality. Without this fallback, the API would store
+  // `undefined` at code creation and reject the /token exchange (which always
+  // sends a value) as "Invalid or expired authorization code".
+  const resolvedRedirectUri = redirectUri ?? providerRedirectUri
 
   const handleGoogleLogin = async () => {
     if (!resolvedApiUrl || isRedirecting) return
@@ -148,7 +161,7 @@ export function OAuthButtons({
     const base = normalizeOAuthBase(resolvedApiUrl)
     const params = new URLSearchParams({
       app: appName,
-      ...(redirectUri && { redirect_uri: redirectUri }),
+      ...(resolvedRedirectUri && { redirect_uri: resolvedRedirectUri }),
     })
 
     // PKCE (RFC 7636 / OAuth 2.1) — only commit to PKCE when the page that will
