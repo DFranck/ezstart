@@ -238,6 +238,10 @@ export function useAuth(logger?: AuthLogger) {
     const errorText = options.texts?.signOutError ?? logoutDefaults.texts.signOutError
 
     // Step 8 — set isLoggingOut so subscribed UI can render a spinner.
+    // E2E observability (dev/staging only, stripped at prod build):
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.info('[logout-step-8] setLoggingOut(true)')
+    }
     storeApi.getState().setLoggingOut(true)
 
     let serverFailed = false
@@ -245,6 +249,9 @@ export function useAuth(logger?: AuthLogger) {
     // Step 1 — server revoke. Best-effort: keep going even on failure so
     // the local store / persist / broadcast cleanup still runs and the
     // user lands in the unauthenticated state.
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.info('[logout-step-1] POST /api/auth/logout')
+    }
     try {
       const rt = storeApi.getState().refreshToken
       await client.logout(rt || undefined)
@@ -258,14 +265,23 @@ export function useAuth(logger?: AuthLogger) {
 
     // Steps 2 + 4 — local store reset (also broadcasts cross-tab via the
     // wrapped action installed by `createAuthStore`).
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.info('[logout-step-2-4] store.logout() — resets state + broadcasts LOGOUT cross-tab')
+    }
     storeApi.getState().logout()
 
     // Step 3 — explicit localStorage purge. Defensive: persist normally
     // overwrites with the logged-out blob, but a `removeItem` is sturdier.
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.info('[logout-step-3] safeRemoveLocalStorage', logoutDefaults.storageKey)
+    }
     safeRemoveLocalStorage(logoutDefaults.storageKey)
 
     // Step 5 — consumer cleanup hook. Errors must NEVER block the redirect.
     if (consumerOnLogout) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+        console.info('[logout-step-5] consumer onLogout hook invoked')
+      }
       try {
         await consumerOnLogout()
       } catch (err) {
@@ -274,6 +290,8 @@ export function useAuth(logger?: AuthLogger) {
           err instanceof Error ? err.message : String(err)
         )
       }
+    } else if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.info('[logout-step-5] no consumer onLogout hook registered (skipped)')
     }
 
     // Step 6 — toast confirmation. Server failures still toast as success
@@ -281,6 +299,9 @@ export function useAuth(logger?: AuthLogger) {
     // (which we do not have here, the steps above never throw out) would
     // surface the error toast. Skipped when caller passes `silent: true`.
     if (!options.silent) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+        console.info('[logout-step-6] toast.success', successText)
+      }
       if (serverFailed) {
         // Surface the server failure as a soft warning (info), not a hard
         // error — the user IS signed out locally, the server just couldn't
@@ -295,6 +316,9 @@ export function useAuth(logger?: AuthLogger) {
     // Step 7 — hard redirect. Skipped when `redirectAfterLogout === false`
     // (consumer drives navigation, e.g. via router.push to a localized URL).
     if (redirectTarget !== false && typeof window !== 'undefined') {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+        console.info('[logout-step-7] window.location.assign →', redirectTarget)
+      }
       window.location.assign(redirectTarget)
     }
 
