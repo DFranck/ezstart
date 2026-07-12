@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import React from 'react'
-import { useAuth } from '../../react/hooks.js'
+import { useAuth, buildRedirectUri } from '../../react/hooks.js'
+import { detectRedirectUri } from '../../core/auth-client/config-resolver.js'
 import { createTestStore, TestAuthProvider } from '../testProvider.js'
 import { createTestUser } from '../helpers.js'
 
@@ -226,5 +227,164 @@ describe('useAuth hook', () => {
     })
 
     expect(store.getState().isLoggingIn).toBe(true)
+  })
+})
+
+describe('buildRedirectUri (RFC 6749 §4.1.3 parity with detectRedirectUri)', () => {
+  // `buildRedirectUri` is a module-private helper — we test it indirectly via
+  // `useAuth().login()`, which is the only caller that actually uses the
+  // result. Same pattern as the existing `redirectUriOverride` block above.
+  //
+  // Why locale-LESS matters: the peer helper
+  // `packages/auth-sdk/src/core/auth-client/config-resolver.ts:259`
+  // (`detectRedirectUri`) returns `{origin}/auth/callback`. The backend enforces
+  // strict equality between the redirect_uri at code creation and at token
+  // exchange — a `/en/auth/callback` on login + `/auth/callback` on exchange
+  // yields "Invalid or expired authorization code". Cf. commit `4991737b`.
+
+  const originalLocation = window.location
+  let capturedHref = ''
+
+  function setupLocation(origin: string, pathname: string): void {
+    capturedHref = ''
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: {
+        get href() {
+          return capturedHref || `${origin}${pathname}`
+        },
+        set href(next: string) {
+          capturedHref = next
+        },
+        origin,
+        pathname,
+        search: '',
+        hash: '',
+        assign: (url: string) => {
+          capturedHref = url
+        },
+      },
+    })
+  }
+
+  function restoreLocation(): void {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: originalLocation,
+    })
+  }
+
+  let store: ReturnType<typeof createTestStore>
+  let mockClient: {
+    exchangeCode: ReturnType<typeof vi.fn>
+    getCurrentUser: ReturnType<typeof vi.fn>
+    logout: ReturnType<typeof vi.fn>
+    verifyToken: ReturnType<typeof vi.fn>
+    refreshTokens: ReturnType<typeof vi.fn>
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+    store = createTestStore()
+    mockClient = {
+      exchangeCode: vi.fn(),
+      getCurrentUser: vi.fn(),
+      logout: vi.fn(),
+      verifyToken: vi.fn(),
+      refreshTokens: vi.fn(),
+    }
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    restoreLocation()
+  })
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <TestAuthProvider store={store} client={mockClient as never}>
+      {children}
+    </TestAuthProvider>
+  )
+
+  it('returns locale-LESS URI even from a locale-prefixed pathname (/en/dashboard)', () => {
+    setupLocation('http://localhost:6111', '/en/dashboard')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    // login() returns a never-resolving Promise, so we call it but don't await;
+    // window.location.href is assigned synchronously before the pending Promise.
+    void result.current.login()
+
+    // Extract redirect_uri from the assigned URL.
+    const assignedUrl = new URL(capturedHref)
+    const redirectUri = assignedUrl.searchParams.get('redirect_uri')
+    expect(redirectUri).toBe('http://localhost:6111/auth/callback')
+  })
+
+  it('returns locale-LESS URI from /fr/login', () => {
+    setupLocation('http://localhost:6111', '/fr/login')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    void result.current.login()
+
+    const assignedUrl = new URL(capturedHref)
+    expect(assignedUrl.searchParams.get('redirect_uri')).toBe('http://localhost:6111/auth/callback')
+  })
+
+  it('returns locale-LESS URI from root /', () => {
+    setupLocation('http://localhost:6111', '/')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    void result.current.login()
+
+    const assignedUrl = new URL(capturedHref)
+    expect(assignedUrl.searchParams.get('redirect_uri')).toBe('http://localhost:6111/auth/callback')
+  })
+
+  it('returns locale-LESS URI from /es-419/dashboard (multi-segment locale-like path)', () => {
+    // Old buggy regex `/^[a-z]{2,3}$/` would not match `es-419` so it would
+    // omit the prefix here anyway, but the invariant we want is: NEVER a
+    // locale prefix, whatever the pathname looks like.
+    setupLocation('http://localhost:6111', '/es-419/dashboard')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    void result.current.login()
+
+    const assignedUrl = new URL(capturedHref)
+    expect(assignedUrl.searchParams.get('redirect_uri')).toBe('http://localhost:6111/auth/callback')
+  })
+
+  it('also applies to register() (same helper is used)', () => {
+    setupLocation('http://localhost:6111', '/en/signup')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    void result.current.register()
+
+    const assignedUrl = new URL(capturedHref)
+    expect(assignedUrl.searchParams.get('redirect_uri')).toBe('http://localhost:6111/auth/callback')
+  })
+
+  it('bit-equality with detectRedirectUri() across the pathname matrix', () => {
+    // Regression armor: both helpers are locale-LESS today, but they live in
+    // different files (`react/hooks.ts` vs `core/auth-client/config-resolver.ts`).
+    // If a future edit re-introduces a `/${locale}` prefix in one without the
+    // other, this test breaks — before shipping and breaking OAuth in prod.
+    const fixtures: ReadonlyArray<[string, string]> = [
+      ['http://localhost:6111', '/en/dashboard'],
+      ['http://localhost:6111', '/fr/login'],
+      ['http://localhost:6111', '/'],
+      ['http://localhost:6111', '/es-419/settings'],
+      ['http://localhost:6111', '/auth/callback'],
+      ['http://localhost:6111', '/en-GB/x'],
+    ]
+
+    for (const [origin, pathname] of fixtures) {
+      setupLocation(origin, pathname)
+      const fromHooks = buildRedirectUri()
+      const fromCore = detectRedirectUri()
+      expect(fromHooks, `hooks.buildRedirectUri() at ${pathname}`).toBe(fromCore)
+      expect(fromHooks, `must be locale-LESS at ${pathname}`).toBe(`${origin}/auth/callback`)
+    }
   })
 })

@@ -20,7 +20,7 @@ import { type ClientContext, parseError, parseErrorCode, unwrapEnvelope } from '
  * legacy (no-PKCE) codes.
  *
  * Pass `redirectUriOverride` to send a redirect_uri that DIFFERS from the
- * SDK-detected default (`{origin}/{locale}/auth/callback`). RFC 6749 §4.1.3
+ * SDK-detected default (`{origin}/auth/callback`). RFC 6749 §4.1.3
  * mandates strict equality between the redirect_uri sent at code creation
  * (POST `/login`) and the one sent at token exchange (POST `/token`). The
  * backend enforces this (HAC-HIGH-4 anti-injection), so when the login layer

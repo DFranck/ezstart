@@ -3,8 +3,12 @@
  * consumer's light/dark preference across the ezauth redirect flow.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { detectCurrentThemePreference, readThemeCookie } from '../../components/themePreference.js'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import {
+  detectCurrentThemePreference,
+  readThemeCookie,
+  readThemeStorage,
+} from '../../components/themePreference.js'
 
 describe('readThemeCookie', () => {
   it('returns undefined for an empty string', () => {
@@ -55,6 +59,14 @@ describe('detectCurrentThemePreference', () => {
       document.documentElement.className = ''
       delete document.documentElement.dataset.theme
     }
+    // Reset localStorage — next-themes' primary storage in most consumers.
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem('theme')
+      } catch {
+        // ignore
+      }
+    }
   })
 
   afterEach(() => {
@@ -90,5 +102,100 @@ describe('detectCurrentThemePreference', () => {
     document.cookie = 'theme=light; path=/'
     document.documentElement.classList.add('dark')
     expect(detectCurrentThemePreference()).toBe('light')
+  })
+
+  // ---------------------------------------------------------------------------
+  // localStorage-first (fix for stale-cookie bug — cf. `themePreference.ts`
+  // Resolution order §0).
+  //
+  // next-themes (the default wrapper in `packages/ui/src/theme/theme-provider.tsx`
+  // and most @ezstart consumers) writes ONLY to `localStorage['theme']`, never
+  // to a cookie. If the resolver read the cookie first it would surface a
+  // stale value after the user toggled the theme in-session, and the ezauth
+  // pages would paint in the previous scheme.
+  // ---------------------------------------------------------------------------
+
+  it('reads localStorage["theme"] with highest priority (over cookie + DOM class)', () => {
+    window.localStorage.setItem('theme', 'dark')
+    document.cookie = 'theme=light; path=/'
+    document.documentElement.classList.add('light')
+    expect(detectCurrentThemePreference()).toBe('dark')
+  })
+
+  it('falls back to cookie when localStorage is absent', () => {
+    // No localStorage['theme'] set.
+    document.cookie = 'theme=dark; path=/'
+    expect(detectCurrentThemePreference()).toBe('dark')
+  })
+
+  it('falls back to .dark class when both localStorage and cookie are absent', () => {
+    document.documentElement.classList.add('dark')
+    expect(detectCurrentThemePreference()).toBe('dark')
+  })
+
+  it('returns "system" when localStorage["theme"] is "system"', () => {
+    window.localStorage.setItem('theme', 'system')
+    expect(detectCurrentThemePreference()).toBe('system')
+  })
+
+  it('ignores an invalid localStorage value and falls back to cookie/DOM', () => {
+    window.localStorage.setItem('theme', 'blue')
+    document.cookie = 'theme=dark; path=/'
+    expect(detectCurrentThemePreference()).toBe('dark')
+  })
+
+  it('does not throw when localStorage.getItem throws (private-mode Safari, quota, ...)', () => {
+    const spy = vi.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError: localStorage disabled')
+    })
+    document.cookie = 'theme=light; path=/'
+    // Must not throw AND must fall back to the cookie.
+    expect(() => detectCurrentThemePreference()).not.toThrow()
+    expect(detectCurrentThemePreference()).toBe('light')
+    spy.mockRestore()
+  })
+})
+
+describe('readThemeStorage', () => {
+  beforeEach(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem('theme')
+      } catch {
+        // ignore
+      }
+    }
+  })
+
+  it('returns undefined when the key is missing', () => {
+    expect(readThemeStorage()).toBeUndefined()
+  })
+
+  it('returns "light" | "dark" | "system" when set', () => {
+    window.localStorage.setItem('theme', 'light')
+    expect(readThemeStorage()).toBe('light')
+
+    window.localStorage.setItem('theme', 'dark')
+    expect(readThemeStorage()).toBe('dark')
+
+    window.localStorage.setItem('theme', 'system')
+    expect(readThemeStorage()).toBe('system')
+  })
+
+  it('returns undefined for a non-whitelisted value', () => {
+    window.localStorage.setItem('theme', 'blue')
+    expect(readThemeStorage()).toBeUndefined()
+
+    window.localStorage.setItem('theme', '')
+    expect(readThemeStorage()).toBeUndefined()
+  })
+
+  it('returns undefined when localStorage.getItem throws (Safari private mode)', () => {
+    const spy = vi.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError: localStorage disabled')
+    })
+    expect(() => readThemeStorage()).not.toThrow()
+    expect(readThemeStorage()).toBeUndefined()
+    spy.mockRestore()
   })
 })

@@ -80,11 +80,11 @@ function SignUpModalInner({
 
   // First-party fallback: default redirect_uri to ezauth's own callback page
   // when the user lands on /register directly (no third-party ?redirect_uri=).
+  // RFC 6749 §4.1.3 — locale-LESS to match `detectRedirectUri()` at exchange
+  // (config-resolver.ts:259). Cf. commit 4991737b / 20e320b9.
   const resolvedRedirectUri =
     navigation.redirectUri ??
-    (typeof window !== 'undefined'
-      ? `${window.location.origin}${locale ? `/${locale}` : ''}/auth/callback`
-      : undefined)
+    (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined)
 
   const subtitle = appDisplayName ? (
     <>

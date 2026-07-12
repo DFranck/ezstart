@@ -205,7 +205,7 @@ export class CoreAuthClient {
   }
 
   /**
-   * Get the configured redirect URI (defaults to `${origin}/{locale}/auth/callback`
+   * Get the configured redirect URI (defaults to `${origin}/auth/callback`
    * via `detectRedirectUri()`). Exposed so OAuth init flows can send this exact
    * value as `redirect_uri` — guaranteeing the round-trip match required by
    * RFC 6749 §4.1.3 at the subsequent `/token` exchange (which uses the same

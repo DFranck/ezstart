@@ -148,7 +148,7 @@ export function OAuthButtons({
 
   // RFC 6749 §4.1.3 redirect_uri round-trip — the value sent here at /authorize
   // MUST equal what AuthCallbackPage will send at /token. AuthCallbackPage uses
-  // `ctx.redirectUri` (= `detectRedirectUri()` = `{origin}/{locale}/auth/callback`)
+  // `ctx.redirectUri` (= `detectRedirectUri()` = `{origin}/auth/callback`)
   // unless overridden. Falling back to that exact value here ensures the backend
   // can store + verify the equality. Without this fallback, the API would store
   // `undefined` at code creation and reject the /token exchange (which always

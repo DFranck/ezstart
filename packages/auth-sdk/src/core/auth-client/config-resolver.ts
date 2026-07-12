@@ -255,8 +255,12 @@ function isLocalhost(): boolean {
  * match validation whenever the user reached `/login` on a non-default
  * locale (`/fr/login` → `redirect_uri=/fr/auth/callback`, but the registered
  * allowlist only carried `/auth/callback`). See AUTH-OAUTH-REDIRECT-URI-SEED-001.
+ *
+ * @internal Exported for parity tests only — every helper that emits a
+ * `redirect_uri` for `/auth/callback` MUST return bit-equal output to this
+ * function (see `hooks.test.tsx` parity matrix).
  */
-function detectRedirectUri(): string {
+export function detectRedirectUri(): string {
   if (typeof window === 'undefined') return '/auth/callback'
   return `${window.location.origin}/auth/callback`
 }

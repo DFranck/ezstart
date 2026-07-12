@@ -23,8 +23,13 @@ export type ThemePreference = 'light' | 'dark' | 'system'
  * Inspect the DOM to guess the consumer's current theme preference.
  *
  * Resolution order:
- * 1. `document.cookie` → read the `theme` cookie (set by next-themes when
- *    the user picked an explicit scheme, including `'system'`).
+ * 0. `localStorage['theme']` → next-themes (the default wrapper in
+ *    `packages/ui/src/theme/theme-provider.tsx` and most consumers) writes
+ *    ONLY to localStorage, never to a cookie. Reading the cookie first
+ *    would surface a stale value after the user toggled the theme in this
+ *    session.
+ * 1. `document.cookie` → read the `theme` cookie (set by some legacy
+ *    consumer patterns when the user picked an explicit scheme).
  * 2. `document.documentElement.dataset.theme` → some themes set this
  *    attribute directly.
  * 3. `document.documentElement.classList` → `'dark'` vs not → we can only
@@ -41,6 +46,15 @@ export type ThemePreference = 'light' | 'dark' | 'system'
  */
 export function detectCurrentThemePreference(): ThemePreference | undefined {
   if (typeof document === 'undefined') return undefined
+
+  // 0. localStorage takes highest priority — next-themes (the default wrapper
+  //    in packages/ui/src/theme/theme-provider.tsx and most consumers)
+  //    writes ONLY to localStorage['theme'], never to a cookie. Reading the
+  //    cookie first would surface a stale value after the user toggled the
+  //    theme in this session. Silent fallback if localStorage is
+  //    unavailable (private-mode Safari, disabled storage, quota).
+  const localPref = readThemeStorage()
+  if (localPref) return localPref
 
   // 1. Cookie takes priority — it's the source of truth for next-themes
   //    when the user made an explicit choice (including 'system').
@@ -73,5 +87,22 @@ export function readThemeCookie(cookieString: string): ThemePreference | undefin
   if (!match) return undefined
   const raw = decodeURIComponent(match[1] ?? '').trim()
   if (raw === 'light' || raw === 'dark' || raw === 'system') return raw
+  return undefined
+}
+
+/**
+ * Read `localStorage['theme']` safely — returns undefined on Safari private
+ * mode, disabled storage, missing key, or invalid value. Exported for tests.
+ * Most callers want `detectCurrentThemePreference` instead.
+ * @internal
+ */
+export function readThemeStorage(): ThemePreference | undefined {
+  if (typeof window === 'undefined') return undefined
+  try {
+    const raw = window.localStorage.getItem('theme')
+    if (raw === 'light' || raw === 'dark' || raw === 'system') return raw
+  } catch {
+    // localStorage inaccessible — fall through
+  }
   return undefined
 }

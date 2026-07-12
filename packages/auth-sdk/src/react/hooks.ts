@@ -82,7 +82,8 @@ export function useAuth(logger?: AuthLogger) {
       safeSetLocalStorage('ezauth_redirect_after_login', currentUrl, log)
     }
 
-    // Build redirect URI from current origin + locale
+    // Build redirect URI from current origin — locale-LESS per RFC 6749 §4.1.3
+    // (must match `detectRedirectUri()` used at exchangeCode).
     const redirectUri = buildRedirectUri()
 
     const params = new URLSearchParams({
@@ -393,14 +394,21 @@ export function useAuth(logger?: AuthLogger) {
 // ---------------------------------------------------------------------------
 
 /**
- * Build the OAuth redirect URI from the current browser URL.
- * Detects locale prefix and builds: `{origin}/{locale}/auth/callback`
+ * Build the OAuth redirect URI from the current browser origin — locale-LESS.
+ *
+ * RFC 6749 §4.1.3 — MUST match the exact URI sent at exchangeCode. The peer
+ * helper `detectRedirectUri()` in
+ * `packages/auth-sdk/src/core/auth-client/config-resolver.ts:259` returns
+ * `{origin}/auth/callback`, so this one MUST too — or the backend's strict
+ * equality check rejects the code. Cf. commit `4991737b` for the same class
+ * of bug fixed on the consumer bounce pages, and commit `20e320b9` for the
+ * initial RFC alignment.
+ *
+ * @internal Exported for parity tests only — MUST return bit-equal output to
+ * `detectRedirectUri()` from `../core/auth-client/config-resolver.js` (see
+ * `hooks.test.tsx` parity matrix).
  */
-function buildRedirectUri(): string {
+export function buildRedirectUri(): string {
   if (typeof window === 'undefined') return '/auth/callback'
-  const pathParts = window.location.pathname.split('/')
-  const maybeLocale = pathParts[1]
-  const hasLocalePrefix = maybeLocale !== undefined && /^[a-z]{2,3}$/.test(maybeLocale)
-  const localePrefix = hasLocalePrefix ? `/${maybeLocale}` : ''
-  return `${window.location.origin}${localePrefix}/auth/callback`
+  return `${window.location.origin}/auth/callback`
 }
