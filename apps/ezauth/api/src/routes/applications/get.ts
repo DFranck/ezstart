@@ -26,7 +26,7 @@ import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplicationModel } from '../../models/application.js'
-import { getAuthUserModel } from '../../models/auth-user.js'
+import { isSuperadmin } from '../../utils/is-superadmin.js'
 import { serializeApplication, serializeApplicationWithSecret } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
 
@@ -115,14 +115,9 @@ const getApplicationController = async (req: Request, res: Response) => {
       return sendError(res, 'Application not found', 404)
     }
 
-    if (app.ownerId !== userId) {
-      const AuthUser = await getAuthUserModel()
-      const user = await AuthUser.findById(userId).lean()
-      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
-      if (!isSuperadmin) {
-        // Deny existence — 404 instead of 403 to avoid leaks across tenants.
-        return sendError(res, 'Application not found', 404)
-      }
+    // Deny existence — 404 instead of 403 to avoid leaks across tenants.
+    if (app.ownerId !== userId && !(await isSuperadmin(userId))) {
+      return sendError(res, 'Application not found', 404)
     }
 
     if (includeWebhookSecret) {

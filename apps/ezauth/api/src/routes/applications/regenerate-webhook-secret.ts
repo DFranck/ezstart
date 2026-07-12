@@ -44,7 +44,7 @@ import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { generateWebhookSecret, getApplicationModel } from '../../models/application.js'
-import { getAuthUserModel } from '../../models/auth-user.js'
+import { isSuperadmin } from '../../utils/is-superadmin.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { serializeApplicationWithSecret } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
@@ -129,14 +129,9 @@ const regenerateWebhookSecretController = async (req: Request, res: Response) =>
       return sendError(res, 'Application not found', 404)
     }
 
-    if (app.ownerId !== userId) {
-      const AuthUser = await getAuthUserModel()
-      const user = await AuthUser.findById(userId).lean()
-      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
-      if (!isSuperadmin) {
-        // Deny existence — 404 instead of 403 to avoid tenant-existence leak.
-        return sendError(res, 'Application not found', 404)
-      }
+    // Deny existence — 404 instead of 403 to avoid tenant-existence leak.
+    if (app.ownerId !== userId && !(await isSuperadmin(userId))) {
+      return sendError(res, 'Application not found', 404)
     }
 
     const newSecret = generateWebhookSecret()

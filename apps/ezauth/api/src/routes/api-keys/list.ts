@@ -74,16 +74,25 @@ const listApiKeysController = async (req: Request, res: Response) => {
         return sendError(res, 'Application not found', 404)
       }
 
-      // Access check: owner, superadmin, or app admin
-      const AuthUser = await getAuthUserModel()
-      const user = await AuthUser.findById(userId).lean()
-
+      // Access check: owner, superadmin, or app admin.
+      // Fast-path : the 'system' sentinel is a trusted platform-internal
+      // caller (S2S service key) — admin scope was already validated
+      // upstream by the auth middleware. Skip the DB fetch entirely.
       const isOwner = app.ownerId?.toString() === userId
-      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
-      const isAppAdmin = user?.appRoles?.[app.slug]?.includes('admin') ?? false
-
-      if (!isOwner && !isSuperadmin && !isAppAdmin) {
-        return sendError(res, 'Access denied', 403)
+      if (!isOwner && userId !== 'system') {
+        // Defensive : non-ObjectId non-'system' userId shouldn't happen
+        // after JWT/API-key extraction — deny rather than crash with a
+        // Mongoose CastError.
+        if (!Types.ObjectId.isValid(userId)) {
+          return sendError(res, 'Access denied', 403)
+        }
+        const AuthUser = await getAuthUserModel()
+        const user = await AuthUser.findById(userId).lean()
+        const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+        const isAppAdmin = user?.appRoles?.[app.slug]?.includes('admin') ?? false
+        if (!isSuperadmin && !isAppAdmin) {
+          return sendError(res, 'Access denied', 403)
+        }
       }
 
       // Include both keyed-by-applicationId and legacy appName-only keys

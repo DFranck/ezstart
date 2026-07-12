@@ -16,6 +16,7 @@
 import './server-only.js'
 
 import type { Request } from 'express'
+import { isValidObjectId } from 'mongoose'
 import type { AuthMiddlewareConfig } from './auth-middleware-types.js'
 import { buildAttachedUser } from './user-doc-mapper.js'
 
@@ -30,6 +31,28 @@ export function createAttachUser(
   config: Pick<AuthMiddlewareConfig, 'getAuthUserModel' | 'onUserAttached'>
 ): (req: Request, userId: string) => Promise<boolean> {
   return async function attachUserToRequest(req: Request, userId: string): Promise<boolean> {
+    // Reserved sentinel : system-owned service key (created by seed-self-key,
+    // seed-consumer-app-keys). No AuthUser doc exists nor should ever exist.
+    // Stamp a synthetic req.user with implicit superadmin scope so downstream
+    // ownership checks treat the caller as a trusted platform-internal admin.
+    // The S2S key's admin scope is validated upstream by the auth middleware
+    // (requireKeyScope: 'admin').
+    if (userId === 'system') {
+      ;(req as Request & { userId?: string }).userId = 'system'
+      req.user = {
+        _id: 'system',
+        email: 'system@internal',
+        username: 'system',
+        globalRoles: ['superadmin'],
+      } as Request['user']
+      return true
+    }
+
+    // Defensive : userIds that are neither 'system' nor valid ObjectIds
+    // (shouldn't happen after JWT/API-key extraction) are treated as missing
+    // rather than crashing the request with a Mongoose CastError.
+    if (!isValidObjectId(userId)) return false
+
     const AuthUser = await config.getAuthUserModel()
     const user = await AuthUser.findById(userId).select('-passwordHash').lean()
     if (!user) return false

@@ -45,7 +45,7 @@ import { Types } from 'mongoose'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApplicationModel } from '../../models/application.js'
-import { getAuthUserModel } from '../../models/auth-user.js'
+import { isSuperadmin } from '../../utils/is-superadmin.js'
 import { applicationThemeSchema } from '../../utils/theme.js'
 import { serializeApplication } from './serialize.js'
 import { __resetKeyConfigCache } from '../api-keys/config.js'
@@ -118,13 +118,8 @@ const updateApplicationThemeController = async (req: Request, res: Response) => 
       return sendError(res, 'Application not found', 404)
     }
 
-    if (app.ownerId !== userId) {
-      const AuthUser = await getAuthUserModel()
-      const user = await AuthUser.findById(userId).lean()
-      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
-      if (!isSuperadmin) {
-        return sendError(res, 'Application not found', 404)
-      }
+    if (app.ownerId !== userId && !(await isSuperadmin(userId))) {
+      return sendError(res, 'Application not found', 404)
     }
 
     if (theme !== undefined) {

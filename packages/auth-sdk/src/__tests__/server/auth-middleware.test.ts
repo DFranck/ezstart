@@ -29,7 +29,7 @@ const COOKIE_NAME = 'ez_access'
 
 function makeUser(overrides: Partial<AuthUserDoc> = {}): AuthUserDoc {
   return {
-    _id: 'user-123',
+    _id: '507f1f77bcf86cd799439011',
     email: 'alice@example.com',
     username: 'alice',
     isVerified: true,
@@ -49,7 +49,7 @@ function makeApiKey(overrides: Partial<ApiKeyDoc> = {}): ApiKeyDoc {
   return {
     _id: { toString: () => 'key-id-1' },
     key: 'hashed-placeholder',
-    userId: 'user-123',
+    userId: '507f1f77bcf86cd799439011',
     status: 'active',
     scope: 'admin',
     appName: 'ezauth',
@@ -177,7 +177,7 @@ describe('createAuthMiddleware — JWT path', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'user-123', email: 'alice@example.com' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439011', email: 'alice@example.com' })
     const req = {
       headers: {},
       cookies: { [COOKIE_NAME]: token },
@@ -188,7 +188,7 @@ describe('createAuthMiddleware — JWT path', () => {
       middleware(req, res as never, () => resolve())
     })
     expect(res.json).not.toHaveBeenCalled()
-    expect((req as { userId?: string }).userId).toBe('user-123')
+    expect((req as { userId?: string }).userId).toBe('507f1f77bcf86cd799439011')
     expect((req as { user?: { email?: string } }).user?.email).toBe('alice@example.com')
   })
 
@@ -198,7 +198,7 @@ describe('createAuthMiddleware — JWT path', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'user-123', email: 'alice@example.com' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439011', email: 'alice@example.com' })
     const req = {
       headers: { authorization: `Bearer ${token}` },
       cookies: {},
@@ -209,7 +209,7 @@ describe('createAuthMiddleware — JWT path', () => {
       middleware(req, res as never, () => resolve())
     })
     expect(res.json).not.toHaveBeenCalled()
-    expect((req as { userId?: string }).userId).toBe('user-123')
+    expect((req as { userId?: string }).userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('rejects an expired JWT with code TOKEN_EXPIRED (does not fall back to API key)', async () => {
@@ -218,7 +218,7 @@ describe('createAuthMiddleware — JWT path', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const expired = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+    const expired = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
       algorithm: 'HS256',
       expiresIn: '-1s',
     })
@@ -244,7 +244,9 @@ describe('createAuthMiddleware — JWT path', () => {
   it('rejects a forged JWT with code INVALID_TOKEN', async () => {
     const cfg = buildConfig()
     const middleware = createAuthMiddleware(cfg)()
-    const forged = jwt.sign({ userId: 'user-123' }, 'WRONG-SECRET', { algorithm: 'HS256' })
+    const forged = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, 'WRONG-SECRET', {
+      algorithm: 'HS256',
+    })
     const req = {
       headers: {},
       cookies: { [COOKIE_NAME]: forged },
@@ -268,7 +270,7 @@ describe('createAuthMiddleware — JWT path', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(null)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'ghost-id' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439099' })
     const req = {
       headers: {},
       cookies: { [COOKIE_NAME]: token },
@@ -293,7 +295,7 @@ describe('createAuthMiddleware — JWT path', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(deleted)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'user-123' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439011' })
     const req = {
       headers: {},
       cookies: { [COOKIE_NAME]: token },
@@ -320,13 +322,13 @@ describe('createAuthMiddleware — JWT path', () => {
       onUserAttached,
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'user-123' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439011' })
     const req = { headers: {}, cookies: { [COOKIE_NAME]: token }, path: '/' } as never
     const res = makeRes()
     await new Promise<void>(resolve => {
       middleware(req, res as never, () => resolve())
     })
-    expect(onUserAttached).toHaveBeenCalledWith('user-123')
+    expect(onUserAttached).toHaveBeenCalledWith('507f1f77bcf86cd799439011')
   })
 })
 
@@ -340,7 +342,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
       algorithm: 'HS256',
       issuer: 'ezauth',
       audience: ['ezauth', 'ezpay'],
@@ -351,7 +353,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       middleware(req, res as never, () => resolve())
     })
     expect(res.json).not.toHaveBeenCalled()
-    expect((req as { userId?: string }).userId).toBe('user-123')
+    expect((req as { userId?: string }).userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('rejects a token whose audience excludes the configured audience (cross-API replay)', async () => {
@@ -363,7 +365,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
     })
     const middleware = createAuthMiddleware(cfg)()
     // Token minted for ezbill only — must not authenticate ezpay.
-    const ezbillOnly = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+    const ezbillOnly = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
       algorithm: 'HS256',
       issuer: 'ezauth',
       audience: 'ezbill',
@@ -390,7 +392,9 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const legacy = jwt.sign({ userId: 'user-123' }, JWT_SECRET, { algorithm: 'HS256' })
+    const legacy = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
+      algorithm: 'HS256',
+    })
     const req = { headers: {}, cookies: { [COOKIE_NAME]: legacy }, path: '/' } as never
     const res = makeRes()
     await new Promise<void>(resolve => {
@@ -408,7 +412,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const forged = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+    const forged = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
       algorithm: 'HS256',
       issuer: 'evil-issuer',
       audience: 'ezpay',
@@ -429,7 +433,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const anyAud = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+    const anyAud = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
       algorithm: 'HS256',
       audience: 'literally-anything',
     })
@@ -439,7 +443,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       middleware(req, res as never, () => resolve())
     })
     expect(res.json).not.toHaveBeenCalled()
-    expect((req as { userId?: string }).userId).toBe('user-123')
+    expect((req as { userId?: string }).userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('audience array — accepts a token whose audience matches any entry', async () => {
@@ -450,7 +454,7 @@ describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => 
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, JWT_SECRET, {
       algorithm: 'HS256',
       issuer: 'ezauth',
       audience: 'ezbill',
@@ -485,7 +489,7 @@ describe('createAuthMiddleware — API key path', () => {
     })
     expect(res.json).not.toHaveBeenCalled()
     expect((req as { apiKeyId?: string }).apiKeyId).toBe('key-id-1')
-    expect((req as { apiKeyUserId?: string }).apiKeyUserId).toBe('user-123')
+    expect((req as { apiKeyUserId?: string }).apiKeyUserId).toBe('507f1f77bcf86cd799439011')
     expect((req as { apiKeyScope?: string }).apiKeyScope).toBe('admin')
     expect((req as { apiKeyAppName?: string }).apiKeyAppName).toBe('ezauth')
     expect((req as { user?: { email?: string } }).user?.email).toBe('alice@example.com')
@@ -669,7 +673,7 @@ describe('createAuthMiddleware — API key path', () => {
 
   it('rejects a key whose owner is missing with code API_KEY_OWNER_NOT_FOUND', async () => {
     const rawKey = 'ez_sk_live_orphan'
-    const apiKey = makeApiKey({ key: hashApiKey(rawKey), userId: 'ghost' })
+    const apiKey = makeApiKey({ key: hashApiKey(rawKey), userId: '507f1f77bcf86cd799439098' })
     const cfg = buildConfig({
       getApiKeyModel: vi.fn(async () => buildApiKeyModel(apiKey)),
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(null)),
@@ -763,9 +767,9 @@ describe('createAuthMiddleware — API key path', () => {
 
 describe('createAuthMiddleware — combined behaviour', () => {
   it('JWT wins when BOTH JWT cookie and X-API-Key are present', async () => {
-    const jwtUser = makeUser({ _id: 'jwt-user' })
+    const jwtUser = makeUser({ _id: '507f1f77bcf86cd799439012' })
     const rawKey = 'ez_sk_live_should_be_ignored'
-    const apiKey = makeApiKey({ key: hashApiKey(rawKey), userId: 'apikey-user' })
+    const apiKey = makeApiKey({ key: hashApiKey(rawKey), userId: '507f1f77bcf86cd799439013' })
     const apiKeyModel = buildApiKeyModel(apiKey)
 
     // The auth user model must answer for the JWT user.
@@ -774,7 +778,7 @@ describe('createAuthMiddleware — combined behaviour', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(jwtUser)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'jwt-user' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439012' })
     const req = {
       headers: { 'x-api-key': rawKey },
       cookies: { [COOKIE_NAME]: token },
@@ -785,7 +789,7 @@ describe('createAuthMiddleware — combined behaviour', () => {
       middleware(req, res as never, () => resolve())
     })
     expect(res.json).not.toHaveBeenCalled()
-    expect((req as { userId?: string }).userId).toBe('jwt-user')
+    expect((req as { userId?: string }).userId).toBe('507f1f77bcf86cd799439012')
     // API key was never inspected because JWT succeeded first.
     expect(apiKeyModel.findOne).not.toHaveBeenCalled()
   })
@@ -844,7 +848,7 @@ describe('createAuthMiddleware — combined behaviour', () => {
       getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
     })
     const middleware = createAuthMiddleware(cfg)()
-    const token = signToken({ userId: 'user-123' })
+    const token = signToken({ userId: '507f1f77bcf86cd799439011' })
     const req = {
       headers: {},
       cookies: { ez_access: token },
@@ -855,6 +859,6 @@ describe('createAuthMiddleware — combined behaviour', () => {
       middleware(req, res as never, () => resolve())
     })
     expect(res.json).not.toHaveBeenCalled()
-    expect((req as { userId?: string }).userId).toBe('user-123')
+    expect((req as { userId?: string }).userId).toBe('507f1f77bcf86cd799439011')
   })
 })

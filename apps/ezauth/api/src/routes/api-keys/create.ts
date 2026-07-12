@@ -15,7 +15,7 @@ import { requireEmailVerified } from '../../middleware/require-email-verified.js
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
-import { getAuthUserModel } from '../../models/auth-user.js'
+import { isSuperadmin } from '../../utils/is-superadmin.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 
@@ -95,9 +95,10 @@ const createApiKeyController = async (req: Request, res: Response) => {
     const userId = req.userId!
     const { type, env, scope, applicationId, appName: legacyAppName } = parsed.data
 
-    const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(userId).lean()
-    const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+    // `isSuperadmin` helper handles the 'system' sentinel (S2S service key)
+    // + defensively guards against non-ObjectId userIds (returns false without
+    // hitting Mongoose with a CastError).
+    const isSuperadminUser = await isSuperadmin(userId)
 
     // Resolve the Application for this key.
     // Precedence: explicit `applicationId` > legacy `appName` find-or-create > `'*'` (superadmin).
@@ -123,7 +124,7 @@ const createApiKeyController = async (req: Request, res: Response) => {
       if (app.status !== 'active') {
         return sendError(res, 'Application is archived', 400)
       }
-      if (app.ownerId !== userId && !isSuperadmin) {
+      if (app.ownerId !== userId && !isSuperadminUser) {
         return sendError(res, 'Not allowed to create keys for this Application', 403)
       }
       resolvedApplicationId = app._id as Types.ObjectId
@@ -151,7 +152,7 @@ const createApiKeyController = async (req: Request, res: Response) => {
       // with a slug before the owner explicitly provisions the Application.
       const existingApp = await Application.findOne({ slug: legacyAppName }).lean()
       if (existingApp) {
-        if (existingApp.ownerId !== userId && !isSuperadmin) {
+        if (existingApp.ownerId !== userId && !isSuperadminUser) {
           return sendError(res, 'Not allowed to create keys for this Application', 403)
         }
         resolvedApplicationId = existingApp._id as Types.ObjectId
@@ -169,7 +170,7 @@ const createApiKeyController = async (req: Request, res: Response) => {
       }
     } else {
       // Platform-wide `'*'` case — superadmin only. No Application link.
-      if (!isSuperadmin) {
+      if (!isSuperadminUser) {
         return sendError(
           res,
           'Platform-wide keys (appName="*") require superadmin. Pass `applicationId` instead.',
