@@ -106,10 +106,18 @@ export type { PayState } from './react/store.js'
 // Hooks
 export { useDonations } from './react/hooks/useDonations.js'
 export { usePurchases } from './react/hooks/usePurchases.js'
-export { useSubscriptions } from './react/hooks/useSubscriptions.js'
+export {
+  useSubscriptions,
+  SUBSCRIPTIONS_QUERY_KEY,
+  subscriptionsQueryKey,
+} from './react/hooks/useSubscriptions.js'
 export { useSubscriptionStatus } from './react/hooks/useSubscriptionStatus.js'
 export { usePaymentHistory } from './react/hooks/usePaymentHistory.js'
 export { usePlans } from './react/hooks/usePlans.js'
+export { useCancelSubscription } from './react/hooks/useCancelSubscription.js'
+export type { UseCancelSubscriptionCallbacks } from './react/hooks/useCancelSubscription.js'
+export { useRefundPayment } from './react/hooks/useRefundPayment.js'
+export type { UseRefundPaymentCallbacks } from './react/hooks/useRefundPayment.js'
 
 // Connect hooks
 export { useConnectStatus } from './react/hooks/useConnectStatus.js'

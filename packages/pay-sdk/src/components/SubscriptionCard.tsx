@@ -10,7 +10,7 @@ import {
   P,
 } from '@ezstart/ui/components'
 import { useCallback, useState } from 'react'
-import { usePayContext } from '../react/pay-provider.js'
+import { useCancelSubscription } from '../react/hooks/useCancelSubscription.js'
 import { formatCurrency } from '../core/format-currency.js'
 import type { PaymentStatus } from '../core/types.js'
 
@@ -62,7 +62,7 @@ export function SubscriptionCard({
   className,
   texts,
 }: SubscriptionCardProps) {
-  const { client } = usePayContext()
+  const cancelMutation = useCancelSubscription()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const t = {
@@ -104,14 +104,18 @@ export function SubscriptionCard({
       if (onCancel) {
         await onCancel(subscriptionId)
       } else {
-        await client.cancelSubscription(subscriptionId)
+        // Uses `useCancelSubscription` — on success the mutation invalidates
+        // the shared `SUBSCRIPTIONS_QUERY_KEY` cache, so `useSubscriptions`
+        // + `useSubscriptionStatus` re-fetch and the parent dashboard
+        // reflects the "canceling at period end" state automatically.
+        await cancelMutation.mutateAsync(subscriptionId)
       }
     } catch (err) {
       // Re-throw so the surrounding ConfirmActionDialog can surface the
       // error in its own UI (state='error' + toast). No need to log here.
       throw err
     }
-  }, [subscriptionId, onCancel, client])
+  }, [subscriptionId, onCancel, cancelMutation])
 
   return (
     <>

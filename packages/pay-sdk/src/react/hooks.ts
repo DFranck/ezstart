@@ -2,8 +2,14 @@
 
 export { useDonations } from './hooks/useDonations.js'
 export { usePurchases } from './hooks/usePurchases.js'
-export { useSubscriptions } from './hooks/useSubscriptions.js'
+export {
+  useSubscriptions,
+  SUBSCRIPTIONS_QUERY_KEY,
+  subscriptionsQueryKey,
+} from './hooks/useSubscriptions.js'
 export { useSubscriptionStatus } from './hooks/useSubscriptionStatus.js'
+export { useCancelSubscription } from './hooks/useCancelSubscription.js'
+export { useRefundPayment } from './hooks/useRefundPayment.js'
 export { usePaymentHistory } from './hooks/usePaymentHistory.js'
 export { useConnectStatus } from './hooks/useConnectStatus.js'
 export { useConnectOnboard } from './hooks/useConnectOnboard.js'

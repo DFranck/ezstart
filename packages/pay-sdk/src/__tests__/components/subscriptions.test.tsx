@@ -4,6 +4,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   uiComponentsMock,
   loggerMock,
@@ -27,11 +28,22 @@ const { SubscribeButton } = await import('../../components/SubscribeButton.js')
 const { SubscriptionCard } = await import('../../components/SubscriptionCard.js')
 const { SubscriptionPlanCard } = await import('../../components/SubscriptionPlanCard.js')
 
+// `SubscriptionCard` now consumes `useCancelSubscription` (React Query
+// mutation), so every render path needs a `QueryClientProvider`. Fresh
+// client per wrapper mount isolates cache state between test cases.
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      })
+  )
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
-      {children}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+        {children}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 

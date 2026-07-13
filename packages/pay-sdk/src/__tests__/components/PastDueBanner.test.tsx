@@ -5,6 +5,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   uiComponentsMock,
   loggerMock,
@@ -25,11 +26,21 @@ vi.mock('next/navigation', () => nextNavigationMock)
 
 const { PastDueBanner } = await import('../../components/PastDueBanner.js')
 
+// `PastDueBanner` reads `useSubscriptions` which is a React Query hook — the
+// wrapper mounts a `QueryClientProvider` alongside `PayProvider`.
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      })
+  )
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
-      {children}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+        {children}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 

@@ -22,6 +22,14 @@ declare global {
       apiKeyAppSlug?: string
       /** Permission scope attached to the key — metadata only. */
       apiKeyScope?: 'admin' | 'user' | 'readonly'
+      /**
+       * Key type derived from prefix — `publishable` (ez_pk_*) or `secret`
+       * (ez_sk_*). Absent on legacy `ezk_*` keys. Downstream gates that
+       * demand S2S secret auth (e.g. body.userId trust in `/api/subscribe`)
+       * check this to distinguish browser-safe publishable keys from
+       * server-only secret keys.
+       */
+      apiKeyType?: 'publishable' | 'secret'
     }
   }
 }

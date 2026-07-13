@@ -78,6 +78,8 @@ export interface ApiKeyDoc {
   status: string
   scope?: string | null
   appName?: string | null
+  /** `publishable` | `secret` — set on modern keys, absent on legacy `ezk_*`. */
+  type?: string | null
   expiresAt?: Date | string | null
   quotaMonthly?: number | null
 }

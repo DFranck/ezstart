@@ -13,6 +13,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor, renderHook } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   uiComponentsMock,
   loggerMock,
@@ -34,11 +35,21 @@ vi.mock('@ezstart/ui/hooks', () => ({ useDeprecationWarning: vi.fn() }))
 vi.mock('next/image', () => nextImageMock)
 vi.mock('next/navigation', () => nextNavigationMock)
 
+// `useSubscriptionStatus` + `FeatureGate` now use React Query — the wrapper
+// mounts a `QueryClientProvider` alongside `PayProvider`.
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      })
+  )
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
-      {children}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+        {children}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 

@@ -68,21 +68,40 @@ export function buildHeaders(
   return headers
 }
 
+/**
+ * Attach `credentials: 'include'` to every browser fetch so the ezauth
+ * session cookie flows on same-domain deployments (e.g. `pay.ezstart.xyz`
+ * ← `ezauth.ezstart.xyz`, shared root `.ezstart.xyz`). Cross-origin
+ * `SameSite=Lax` cookies still won't be sent, but consumers on the
+ * same eTLD+1 as ezauth get their JWT forwarded automatically.
+ *
+ * The ezpay API's Tier 1/2 CORS reflects the origin and sets
+ * `Access-Control-Allow-Credentials: true`, so the browser accepts the
+ * response even when credentials are attached (see
+ * `standard-saas-cors.md`). Server-side fetches (SSR / node tests) don't
+ * carry cookies so the flag is a no-op there.
+ */
+function withCredentials(options: RequestInit): RequestInit {
+  if (options.credentials !== undefined) return options
+  return { ...options, credentials: 'include' }
+}
+
 /** `fetch()` + automatic one-shot 401 retry via `onTokenRefresh`. */
 export async function fetchWithAuth(
   config: PayClientConfig,
   url: string,
   options: RequestInit
 ): Promise<Response> {
-  let response = await fetch(url, options)
+  const credentialedOptions = withCredentials(options)
+  let response = await fetch(url, credentialedOptions)
 
   if (response.status === 401 && config.onTokenRefresh) {
     try {
       const newToken = await config.onTokenRefresh()
       if (newToken) {
-        const retryHeaders = new Headers(options.headers)
+        const retryHeaders = new Headers(credentialedOptions.headers)
         retryHeaders.set('Authorization', `Bearer ${newToken}`)
-        response = await fetch(url, { ...options, headers: retryHeaders })
+        response = await fetch(url, { ...credentialedOptions, headers: retryHeaders })
       }
     } catch {
       config.onAuthFailure?.()

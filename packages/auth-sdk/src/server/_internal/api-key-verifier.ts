@@ -153,12 +153,21 @@ export function createApiKeyVerifier(
         apiKeyUserId?: string
         apiKeyScope?: string
         apiKeyAppName?: string
+        apiKeyType?: 'publishable' | 'secret'
       }
       reqAny.apiKeyId = keyId
       reqAny.apiKeyUserId = apiKey.userId
       const storedScope = apiKey.scope
       reqAny.apiKeyScope = storedScope ?? 'live'
       reqAny.apiKeyAppName = apiKey.appName ?? '*'
+      // Stamp `type` (`publishable` | `secret`) when the key doc has it.
+      // Modern keys (`ez_pk_*` / `ez_sk_*`) set it at mint time; legacy
+      // `ezk_*` docs leave it undefined. Downstream routes that gate on
+      // secret-only S2S access (e.g. internal PII endpoints) check this.
+      const apiKeyType = (apiKey as { type?: 'publishable' | 'secret' }).type
+      if (apiKeyType === 'publishable' || apiKeyType === 'secret') {
+        reqAny.apiKeyType = apiKeyType
+      }
 
       // Fire-and-forget bookkeeping.
       ApiKey.updateOne({ _id: apiKey._id }, { $set: { lastUsedAt: new Date() } }).catch(

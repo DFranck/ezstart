@@ -74,6 +74,15 @@ export interface PaymentDocument extends Document {
   provider: 'stripe' | 'paypal'
   paymentId: string
   stripePaymentIntentId?: string
+  /**
+   * Stripe customer id (`cus_…`) captured on the first
+   * `checkout.session.completed` event for this Payment (or later, via the
+   * webhook resilience path). Used as a fallback join key to link
+   * `customer.subscription.updated` events back to the originating checkout
+   * Payment when `metadata.subscriptionId` hasn't been stamped yet (i.e.
+   * the subscription webhook arrived before `checkout.completed`).
+   */
+  stripeCustomerId?: string
   paymentMethod?: string
   status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
 
@@ -133,6 +142,12 @@ const paymentSchema = new Schema<PaymentDocument>(
     provider: { type: String, enum: ['stripe', 'paypal'], default: 'stripe' },
     paymentId: { type: String, unique: true },
     stripePaymentIntentId: { type: String, index: true },
+    /**
+     * Fallback join key — indexed so the `subscription.updated` resilience
+     * lookup (`stripeCustomerId + status: 'pending' + type: 'subscription'`)
+     * doesn't fall back to a collscan.
+     */
+    stripeCustomerId: { type: String, index: true },
     paymentMethod: { type: String },
     status: {
       type: String,

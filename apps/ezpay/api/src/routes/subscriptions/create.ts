@@ -11,6 +11,7 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
+import { verifyUserExists } from '../../services/ezauth-client.js'
 import {
   getProviderForRequest,
   resolveRequestMode,
@@ -77,6 +78,20 @@ const createSubscriptionSchema = z.object({
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
+  /**
+   * Optional caller-supplied user id (MongoDB ObjectId, 24-char hex). Used
+   * ONLY as a Priority-2 fallback when the JWT-derived `req.userId` is the
+   * `'system'` sentinel — i.e. the caller authenticated via a publishable
+   * key (`ez_pk_*`) rather than a session cookie. See the trust-boundary
+   * JSDoc on the controller for the security rationale.
+   */
+  userId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'userId must be a MongoDB ObjectId (24-char hex)')
+    .optional()
+    .describe(
+      'Optional caller-supplied user id — trusted only when JWT userId is the "system" sentinel'
+    ),
 })
 
 const paymentResponseSchema = z.object({
@@ -105,10 +120,72 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       customerEmail,
       returnUrl,
       promoCode,
+      userId: bodyUserId,
     } = validation.data
 
-    // Always use the authenticated user ID from JWT, never from the request body
-    const userId = req.userId
+    /**
+     * Resolve the effective `userId` for this subscription — with a hard
+     * ownership proof requirement.
+     *
+     * **Trust boundary rationale.** Three auth paths lead here:
+     *
+     *   1. **JWT (session cookie / Bearer)** — `req.userId` is a real
+     *      Mongo ObjectId derived from a validated ezauth session. If
+     *      `body.userId` is also present it MUST match the JWT — no
+     *      cross-user impersonation. Trusted absolutely otherwise.
+     *   2. **Secret admin S2S key** (`ez_sk_*`, scope=`admin`) — the
+     *      caller is another trusted service. `body.userId` is trusted
+     *      because possession of a secret admin key is functionally
+     *      equivalent to superadmin JWT.
+     *   3. **Publishable key alone** (`ez_pk_*`) — a browser-safe key
+     *      shipped in a consumer's bundle. `body.userId` is NOT trusted
+     *      here because anyone with the key can forge it to another
+     *      user's ObjectId. The pay-sdk client MUST also attach the
+     *      user's JWT Bearer token (path #1). We reject the request
+     *      with 401 "Ownership proof required".
+     *
+     * Additionally, `body.customerEmail` is trusted ONLY when the JWT-
+     * ownership path (#1) is in play — the JWT-verified user context
+     * establishes an email trust relationship. In path #2 (secret admin
+     * S2S) the caller is a trusted service — it may legitimately pass an
+     * email on behalf of the user. In path #3 we never reach here.
+     *
+     * We reject dangling references (`verifyUserExists` returns false → 400)
+     * so a garbage id can't create an orphaned Payment row.
+     */
+    const apiKeyType = (req as Request & { apiKeyType?: 'publishable' | 'secret' }).apiKeyType
+    const apiKeyScope = (req as Request & { apiKeyScope?: string }).apiKeyScope
+    const isSecretAdminKey = apiKeyType === 'secret' && apiKeyScope === 'admin'
+
+    let userId: string
+    if (req.userId && req.userId !== 'system') {
+      // Path 1 — JWT subject. The auth middleware refuses to attach
+      // anything that isn't a valid ObjectId (or the `'system'` sentinel).
+      // If body.userId is also present, it MUST match the JWT — otherwise
+      // we'd be enabling cross-user impersonation on the JWT path.
+      if (bodyUserId && bodyUserId !== req.userId) {
+        return sendError(res, 'body.userId must match the authenticated JWT user', 403)
+      }
+      userId = req.userId
+    } else if (bodyUserId && isSecretAdminKey) {
+      // Path 2 — secret admin S2S key. Trusted service caller.
+      const exists = await verifyUserExists(bodyUserId)
+      if (!exists) {
+        return sendError(res, 'Invalid userId', 400)
+      }
+      userId = bodyUserId
+    } else if (bodyUserId) {
+      // Path 3 — publishable key alone with body.userId. REJECT.
+      // Possession of a publishable key does not prove any specific user
+      // ownership. Require a JWT Bearer OR a secret S2S key.
+      return sendError(
+        res,
+        'Ownership proof required for body.userId — attach JWT Bearer or use secret S2S key',
+        401
+      )
+    } else {
+      return sendError(res, 'Authentication required', 401)
+    }
 
     // Tenant ownership gate (C-3) — resolve + authorise the Application from
     // the ezauth source-of-truth. API-key auth is trusted (bound at mint
@@ -210,7 +287,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
         projectId,
         planId,
         planName,
-        userId: userId || '',
+        userId,
         promoId: promoId || '',
       },
       successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,

@@ -186,6 +186,18 @@ function buildHeaders(opts: EzauthClientOptions): Record<string, string> {
   return headers
 }
 
+/**
+ * Response shape from `POST /api/internal/verify-user-exists`.
+ *
+ * The internal endpoint returns NO PII (no email, no username, no globalRoles)
+ * — only enough state to decide whether a caller-supplied `userId` is safe to
+ * bind to a new Payment / Subscription row.
+ */
+export interface EzauthUserExistence {
+  exists: boolean
+  isDeleted: boolean
+}
+
 /** Options for {@link getApplication} beyond the shared `EzauthClientOptions`. */
 export interface GetApplicationOptions extends EzauthClientOptions {
   /**
@@ -343,6 +355,70 @@ export async function resolveKey(
     recordFailure()
     logger.error('ezauth-client resolveKey failed', { error: err })
     return null
+  }
+}
+
+/**
+ * POST `/api/internal/verify-user-exists` — internal S2S endpoint.
+ *
+ * Returns `true` iff the ezauth user document exists AND is not soft-deleted.
+ * Returns `false` on 404 / 401 / 403 / network error so callers fail-closed
+ * (a garbage or deleted id can never create a dangling Payment row).
+ *
+ * Requires an admin-scoped SECRET S2S API key
+ * (`EZPAY_SERVER_EZAUTH_KEY=ez_sk_live_*`) OR a superadmin JWT. Publishable
+ * keys — even admin-scoped — are rejected by the endpoint because they can
+ * leak into browser bundles.
+ *
+ * The response body is PII-free: `{ exists, isDeleted }`. No email,
+ * globalRoles, or username are ever returned to the caller. This is
+ * intentional — the previous design reused `GET /api/admin/users/:id`
+ * which exposed a full PII payload; a publishable admin key leaking into
+ * a browser bundle would have enabled user PII enumeration (GDPR-grade).
+ *
+ * Used by `POST /api/subscribe` when the caller authenticates via a
+ * publishable key (`ez_pk_*`) — cross-origin cookies from ezauth cannot be
+ * forwarded reliably, so the pay-sdk client passes the current authenticated
+ * user in the request body. This helper validates the caller-supplied
+ * `userId` against the ezauth source-of-truth before the Payment row is
+ * created.
+ *
+ * @example
+ * const exists = await verifyUserExists('507f1f77bcf86cd799439011')
+ * if (!exists) return sendError(res, 'Invalid userId', 400)
+ */
+export async function verifyUserExists(
+  id: string,
+  opts: EzauthClientOptions = {}
+): Promise<boolean> {
+  if (isCircuitOpen()) {
+    logger.warn('ezauth-client skipping call — circuit open', { op: 'verifyUserExists' })
+    return false
+  }
+
+  const apiUrl = opts.apiUrl ?? getApiUrl('ezauth')
+  const url = `${apiUrl}/api/internal/verify-user-exists`
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS
+
+  try {
+    const data = await fetchEzauth<EzauthUserExistence>(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          ...buildHeaders(opts),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: id }),
+      },
+      timeoutMs
+    )
+    recordSuccess()
+    return Boolean(data && data.exists && !data.isDeleted)
+  } catch (err) {
+    recordFailure()
+    logger.error('ezauth-client verifyUserExists failed', { id, error: err })
+    return false
   }
 }
 

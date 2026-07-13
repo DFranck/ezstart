@@ -28,8 +28,17 @@ export type {
 // Hooks
 export { useDonations } from './hooks/useDonations.js'
 export { usePurchases } from './hooks/usePurchases.js'
-export { useSubscriptions } from './hooks/useSubscriptions.js'
+export {
+  useSubscriptions,
+  SUBSCRIPTIONS_QUERY_KEY,
+  subscriptionsQueryKey,
+} from './hooks/useSubscriptions.js'
+export type { UseSubscriptionsParams, UseSubscriptionsResult } from './hooks/useSubscriptions.js'
 export { useSubscriptionStatus } from './hooks/useSubscriptionStatus.js'
+export { useCancelSubscription } from './hooks/useCancelSubscription.js'
+export type { UseCancelSubscriptionCallbacks } from './hooks/useCancelSubscription.js'
+export { useRefundPayment } from './hooks/useRefundPayment.js'
+export type { UseRefundPaymentCallbacks } from './hooks/useRefundPayment.js'
 export { usePaymentHistory } from './hooks/usePaymentHistory.js'
 export { usePlans } from './hooks/usePlans.js'
 

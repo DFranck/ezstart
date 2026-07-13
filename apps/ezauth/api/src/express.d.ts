@@ -26,6 +26,12 @@ declare global {
        */
       apiKeyScope?: 'admin' | 'user' | 'readonly' | 'test' | 'live'
       apiKeyAppName?: string
+      /**
+       * Key type derived from prefix — `publishable` (ez_pk_*) or `secret`
+       * (ez_sk_*). Absent on legacy `ezk_*` keys. Downstream gates that
+       * demand S2S secret auth (e.g. internal PII endpoints) check this.
+       */
+      apiKeyType?: 'publishable' | 'secret'
     }
   }
 }

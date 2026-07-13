@@ -5,6 +5,7 @@
 import React from 'react'
 import { render, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   uiComponentsMock,
   loggerMock,
@@ -55,6 +56,14 @@ function makeFetchMock(): { fetchMock: ReturnType<typeof vi.fn>; calls: FetchCal
   return { fetchMock, calls }
 }
 
+// `PricingPage` reads `useSubscriptionStatus` (React Query hook) — every
+// render needs a `QueryClientProvider`. Fresh client per test isolates cache.
+function makeTestQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+}
+
 function renderWithProvider(
   ui: React.ReactElement,
   providerProps: {
@@ -63,15 +72,18 @@ function renderWithProvider(
     publishableKey?: string
   } = {}
 ) {
+  const queryClient = makeTestQueryClient()
   return render(
-    <PayProvider
-      applicationId={providerProps.applicationId}
-      appName={providerProps.appName}
-      publishableKey={providerProps.publishableKey}
-      config={{ apiUrl: 'http://api.example.com' }}
-    >
-      {ui}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider
+        applicationId={providerProps.applicationId}
+        appName={providerProps.appName}
+        publishableKey={providerProps.publishableKey}
+        config={{ apiUrl: 'http://api.example.com' }}
+      >
+        {ui}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 

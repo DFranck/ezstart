@@ -36,6 +36,10 @@ const middleware = createApiKeyMiddleware({
     req.apiKeyApplicationId = key.applicationId as string | undefined
     req.apiKeyAppSlug = key.appSlug as string | undefined
     req.apiKeyScope = key.scope as 'admin' | 'user' | 'readonly' | undefined
+    const keyType = (key as { type?: 'publishable' | 'secret' }).type
+    if (keyType === 'publishable' || keyType === 'secret') {
+      req.apiKeyType = keyType
+    }
   },
   logger,
 })

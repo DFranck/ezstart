@@ -5,6 +5,7 @@
  */
 import React from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PayProvider } from '../react/pay-provider.js'
 import { createPayClient, type PayClient } from '../core/pay-client.js'
 import type {
@@ -187,17 +188,33 @@ interface WrapperOptions {
   appName?: string
 }
 
+/**
+ * Build a fresh React Query client for tests — retries disabled so failure
+ * cases (`error` branch of the hook) surface without waiting for the default
+ * exponential backoff. A new instance per wrapper isolates cache state
+ * between test cases (mandatory for the invalidation-on-mutation flow used
+ * by `useCancelSubscription` / `useRefundPayment`).
+ */
+function makeTestQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+}
+
 export function createWrapper(options: WrapperOptions = {}) {
   const client = options.client ?? createMockPayClient()
 
   function TestWrapper({ children }: { children: React.ReactNode }) {
+    const [queryClient] = React.useState(makeTestQueryClient)
     return (
-      <PayProvider
-        appName={options.appName ?? 'test-app'}
-        config={{ apiUrl: 'http://localhost:9999' }}
-      >
-        {children}
-      </PayProvider>
+      <QueryClientProvider client={queryClient}>
+        <PayProvider
+          appName={options.appName ?? 'test-app'}
+          config={{ apiUrl: 'http://localhost:9999' }}
+        >
+          {children}
+        </PayProvider>
+      </QueryClientProvider>
     )
   }
 
@@ -221,13 +238,16 @@ export function renderWithPay(
   // Actually, the cleanest approach is to mock global fetch and have the real PayClient call it.
 
   function Wrapper({ children }: { children: React.ReactNode }) {
+    const [queryClient] = React.useState(makeTestQueryClient)
     return (
-      <PayProvider
-        appName={options.appName ?? 'test-app'}
-        config={{ apiUrl: 'http://localhost:9999' }}
-      >
-        {children}
-      </PayProvider>
+      <QueryClientProvider client={queryClient}>
+        <PayProvider
+          appName={options.appName ?? 'test-app'}
+          config={{ apiUrl: 'http://localhost:9999' }}
+        >
+          {children}
+        </PayProvider>
+      </QueryClientProvider>
     )
   }
 

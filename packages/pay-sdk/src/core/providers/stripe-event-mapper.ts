@@ -38,6 +38,7 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
         sessionId: obj.id as string,
         paymentIntentId: (obj.payment_intent as string) ?? undefined,
         subscriptionId: (obj.subscription as string) ?? undefined,
+        customerId: (obj.customer as string) ?? undefined,
         paymentMethod: (obj.payment_method_types as string[])?.[0],
         mode: (obj.mode as 'payment' | 'subscription') ?? 'payment',
         metadata: (obj.metadata as Record<string, string>) ?? undefined,
@@ -53,6 +54,7 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
         status: obj.status as string,
         cancelAtPeriodEnd: (obj.cancel_at_period_end as boolean) ?? undefined,
         currentPeriodEnd: (obj.current_period_end as number) ?? undefined,
+        customerId: (obj.customer as string) ?? undefined,
       }
     case 'invoice.payment_failed':
       return {

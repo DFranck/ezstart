@@ -1,9 +1,24 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+/**
+ * React Query hook — derive the caller's current subscription status.
+ *
+ * Migrated to `useQuery` so that cancel / refund mutations invalidate the
+ * cache and this hook re-derives the status automatically (previously the
+ * dashboard showed a stale "Current plan" after cancel until manual reload).
+ *
+ * The return shape is preserved so `BillingDashboard`, `PricingPage`, and
+ * `FeatureGate` keep working without changes.
+ *
+ * @module @ezstart/pay-sdk/react/hooks/useSubscriptionStatus
+ */
+
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { usePayContext } from '../pay-provider.js'
 import { deriveSubscriptionStatus } from '../../core/derive-subscription-status.js'
 import type { Payment, SubscriptionStatusSnapshot } from '../../core/types.js'
+import { subscriptionsQueryKey } from './useSubscriptions.js'
 
 interface SubscriptionStatus {
   loading: boolean
@@ -35,8 +50,8 @@ interface UseSubscriptionStatusParams {
    * SSR-resolved subscription snapshot used to hydrate the hook synchronously
    * at mount. Pass the result of `getServerSubscriptionStatus()` (from
    * `@ezstart/pay-sdk/server`) so `<BillingDashboard>` renders the correct
-   * billing state on the very first paint — the `useEffect` fetch then becomes
-   * a revalidation-only fallback (no skeleton flash). When provided, `loading`
+   * billing state on the very first paint — the client query then becomes a
+   * revalidation-only fallback (no skeleton flash). When provided, `loading`
    * starts `false`.
    */
   initialStatus?: SubscriptionStatusSnapshot
@@ -56,71 +71,79 @@ function snapshotToStatus(snapshot: SubscriptionStatusSnapshot): SubscriptionSta
   }
 }
 
+const EMPTY_STATUS: SubscriptionStatus = {
+  loading: true,
+  isActive: false,
+  isTrialing: false,
+  isCanceling: false,
+  plan: null,
+  features: [],
+  periodEnd: null,
+  subscription: null,
+}
+
 export function useSubscriptionStatus(params: UseSubscriptionStatusParams): SubscriptionStatus {
   const { client, applicationId: ctxApplicationId, appSlug: ctxAppSlug } = usePayContext()
-
-  // Hydrate synchronously from the SSR snapshot when provided; otherwise start
-  // in the `loading` state.
-  const [status, setStatus] = useState<SubscriptionStatus>(() =>
-    params.initialStatus
-      ? snapshotToStatus(params.initialStatus)
-      : {
-          loading: true,
-          isActive: false,
-          isTrialing: false,
-          isCanceling: false,
-          plan: null,
-          features: [],
-          periodEnd: null,
-          subscription: null,
-        }
-  )
 
   const effectiveApplicationId = params.applicationId ?? ctxApplicationId ?? undefined
   const effectiveAppName =
     params.appName ?? (effectiveApplicationId ? undefined : (ctxAppSlug ?? undefined))
 
-  const load = useCallback(async () => {
+  // Share the same query key namespace as `useSubscriptions` so the mutation
+  // hooks (`useCancelSubscription`, `useRefundPayment`) invalidate BOTH the
+  // list view and the status card with a single `invalidateQueries` call.
+  const paymentsQuery = useQuery({
+    queryKey: subscriptionsQueryKey({ userId: params.userId, limit: 1, offset: 0 }),
+    queryFn: () => client.getSubscriptions({ userId: params.userId, limit: 1 }),
+    enabled: !!params.userId,
+    staleTime: 30_000,
+    // Seed the cache from the SSR snapshot when provided so the first render
+    // matches server output byte-for-byte (no skeleton flash on hydration).
+    initialData: params.initialStatus?.subscription
+      ? { success: true, payments: [params.initialStatus.subscription], total: 1 }
+      : undefined,
+  })
+
+  // Plan features lookup — only when the subscription metadata snapshot is
+  // empty (mirror of the previous inline behaviour + the server companion).
+  const activeSub = paymentsQuery.data?.payments.find(
+    p => p.status === 'completed' && p.type === 'subscription'
+  )
+  const metaFeatures = (activeSub?.metadata?.features as string[] | undefined) ?? []
+  const shouldFetchPlans = !!activeSub && metaFeatures.length === 0
+
+  const plansQuery = useQuery({
+    queryKey: [
+      'pay',
+      'plans',
+      { applicationId: effectiveApplicationId, appName: effectiveAppName, active: true },
+    ],
+    queryFn: () =>
+      client.listPlans({
+        applicationId: effectiveApplicationId,
+        appName: effectiveAppName,
+        active: true,
+      }),
+    enabled: shouldFetchPlans,
+    staleTime: 60_000,
+  })
+
+  return useMemo<SubscriptionStatus>(() => {
     if (!params.userId) {
-      setStatus(prev => ({ ...prev, loading: false }))
-      return
+      return { ...EMPTY_STATUS, loading: false }
     }
-
-    try {
-      const res = await client.getSubscriptions({ userId: params.userId, limit: 1 })
-      const payments = res.payments || []
-      const activeSub = payments.find(p => p.status === 'completed' && p.type === 'subscription')
-
-      // Resolve plan features only when the metadata snapshot is empty —
-      // mirrors the server companion's best-effort lookup.
-      let plans = undefined
-      const metaFeatures = (activeSub?.metadata?.features as string[] | undefined) ?? []
-      if (activeSub && metaFeatures.length === 0) {
-        try {
-          const plansRes = await client.listPlans({
-            applicationId: effectiveApplicationId,
-            appName: effectiveAppName,
-            active: true,
-          })
-          plans = plansRes.data || []
-        } catch {
-          // Plan lookup is best-effort
-        }
-      }
-
-      const snapshot = deriveSubscriptionStatus(payments, plans)
-      setStatus(snapshotToStatus(snapshot))
-    } catch {
-      setStatus(prev => ({ ...prev, loading: false }))
+    if (paymentsQuery.isLoading && !params.initialStatus) {
+      return EMPTY_STATUS
     }
-  }, [client, params.userId, effectiveApplicationId, effectiveAppName])
-
-  // When hydrated from an SSR snapshot, `loading` already started `false`, so
-  // the revalidation `load()` swaps data in place without a skeleton flash.
-  // Without a snapshot it runs as the primary fetch (loading → done).
-  useEffect(() => {
-    void load()
-  }, [load])
-
-  return status
+    const payments = paymentsQuery.data?.payments ?? []
+    const plans = plansQuery.data?.data
+    const snapshot = deriveSubscriptionStatus(payments, plans ?? undefined)
+    return snapshotToStatus(snapshot)
+  }, [
+    params.userId,
+    params.initialStatus,
+    paymentsQuery.data,
+    paymentsQuery.isLoading,
+    plansQuery.data,
+  ])
 }

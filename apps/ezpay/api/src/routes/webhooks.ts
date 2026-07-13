@@ -168,6 +168,14 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           updateData['metadata.subscriptionId'] = data.subscriptionId
         }
 
+        // Stamp the Stripe customer id so downstream `subscription.updated`
+        // webhooks can look this Payment up via the customer fallback when
+        // events arrive out of order (before `metadata.subscriptionId` is
+        // stamped). Populated for every subscription checkout by Stripe.
+        if (data.customerId) {
+          updateData.stripeCustomerId = data.customerId
+        }
+
         // isTestMode in the filter overrides testModeScopePlugin: webhook
         // requests carry no API key so derivedMode defaults to 'live', which
         // would otherwise exclude test payments from the query.
@@ -295,10 +303,60 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         // Snapshot current subscription payment BEFORE the update so we can
         // tell whether the Stripe status actually changed (avoid notifying
         // ezauth for every heartbeat webhook).
-        const existingPayment = await Payment.findOne({
+        let existingPayment = await Payment.findOne({
           'metadata.subscriptionId': data.subscriptionId,
           isTestMode: !eventLiveMode,
         }).lean()
+
+        // Resilience — Stripe delivery order is not guaranteed. When
+        // `customer.subscription.updated` fires BEFORE `checkout.completed`
+        // has stamped `metadata.subscriptionId` on the originating Payment
+        // row, the query above misses. Recover by joining on the Stripe
+        // customer id (captured on the checkout Session) + `status:
+        // 'pending' + type: 'subscription' + no existing subscriptionId` —
+        // that uniquely identifies the originating checkout row for this
+        // subscription. We use `findOneAndUpdate` atomic to avoid a
+        // lost-update race when two webhook deliveries arrive concurrently
+        // (each finding the same pending Payment then racing on the write).
+        if (!existingPayment && data.customerId) {
+          const claimed = await Payment.findOneAndUpdate(
+            {
+              stripeCustomerId: data.customerId,
+              status: 'pending',
+              type: 'subscription',
+              isTestMode: !eventLiveMode,
+              // Filter out rows that already have a subscriptionId — this
+              // means another delivery already claimed them. This is what
+              // makes the operation truly atomic under concurrent claims.
+              $or: [
+                { 'metadata.subscriptionId': { $exists: false } },
+                { 'metadata.subscriptionId': null },
+                { 'metadata.subscriptionId': '' },
+              ],
+            },
+            {
+              $set: {
+                'metadata.subscriptionId': data.subscriptionId,
+                'metadata.subscriptionStatus': data.status,
+              },
+            },
+            {
+              sort: { createdAt: -1 },
+              new: true,
+            }
+          ).lean()
+
+          if (claimed) {
+            logger.info(
+              `Subscription ${data.subscriptionId} linked via customer fallback to Payment ${String(claimed._id)}`
+            )
+            existingPayment = claimed
+          } else {
+            logger.info(
+              `Subscription ${data.subscriptionId} — no pending Payment matched customer fallback (already claimed or absent)`
+            )
+          }
+        }
 
         const updateFields: Record<string, unknown> = {
           status: mappedStatus,

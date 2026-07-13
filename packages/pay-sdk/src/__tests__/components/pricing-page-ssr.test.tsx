@@ -6,6 +6,7 @@
 import React from 'react'
 import { render, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   uiComponentsMock,
   loggerMock,
@@ -60,10 +61,17 @@ function makeFetchMock(): { fetchMock: ReturnType<typeof vi.fn>; calls: string[]
 }
 
 function renderWithProvider(ui: React.ReactElement) {
+  // `PricingPage` reads `useSubscriptionStatus` (React Query hook) —
+  // every render needs a `QueryClientProvider`.
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
   return render(
-    <PayProvider applicationId="app_1" config={{ apiUrl: 'http://api.example.com' }}>
-      {ui}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider applicationId="app_1" config={{ apiUrl: 'http://api.example.com' }}>
+        {ui}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 

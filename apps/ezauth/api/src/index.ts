@@ -26,6 +26,7 @@ import routes, {
   apiKeysRouter,
   applicationsRouter,
   subscriptionsRouter,
+  internalRouter,
   publicRouter,
 } from './routes/index.js'
 import passport from './config/passport.js'
@@ -138,6 +139,7 @@ try {
       app.use(createVersionedRouter('/api', apiKeysRouter))
       app.use(createVersionedRouter('/api', applicationsRouter))
       app.use(createVersionedRouter('/api', subscriptionsRouter))
+      app.use(createVersionedRouter('/api/internal', internalRouter))
       app.use(createVersionedRouter('/api', publicRouter))
 
       // Warm Mongoose models so the first request does not pay the

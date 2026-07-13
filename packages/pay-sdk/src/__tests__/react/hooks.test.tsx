@@ -7,24 +7,37 @@
 import React from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PayProvider } from '../../react/pay-provider.js'
 import { useDonations } from '../../react/hooks/useDonations.js'
 import { usePurchases } from '../../react/hooks/usePurchases.js'
-import { useSubscriptions } from '../../react/hooks/useSubscriptions.js'
+import { useSubscriptions, SUBSCRIPTIONS_QUERY_KEY } from '../../react/hooks/useSubscriptions.js'
 import { usePaymentHistory } from '../../react/hooks/usePaymentHistory.js'
 import { useSubscriptionStatus } from '../../react/hooks/useSubscriptionStatus.js'
+import { useCancelSubscription } from '../../react/hooks/useCancelSubscription.js'
+import { useRefundPayment } from '../../react/hooks/useRefundPayment.js'
 import { usePay, usePayContext } from '../../react/pay-provider.js'
 import { setupFetchMock, makePayment } from '../helpers.js'
 
 // ---------------------------------------------------------------------------
-// Wrapper
+// Wrapper — `useSubscriptions` + `useSubscriptionStatus` now use React Query
+// so the wrapper mounts a `QueryClientProvider` alongside the `PayProvider`.
+// A fresh client per test isolates cache state between cases.
 // ---------------------------------------------------------------------------
 
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      })
+  )
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
-      {children}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+        {children}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 
@@ -255,6 +268,109 @@ describe('useSubscriptions', () => {
     })
 
     expect(result.current.subscriptions).toHaveLength(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// useCancelSubscription — cache invalidation
+// ---------------------------------------------------------------------------
+
+describe('useCancelSubscription', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('invalidates SUBSCRIPTIONS_QUERY_KEY on successful cancel', async () => {
+    // Wrapper that exposes the queryClient so we can spy on invalidateQueries.
+    let sharedClient: QueryClient | undefined
+    function InvalidationWrapper({ children }: { children: React.ReactNode }) {
+      const [queryClient] = React.useState(
+        () =>
+          new QueryClient({
+            defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+          })
+      )
+      sharedClient = queryClient
+      return (
+        <QueryClientProvider client={queryClient}>
+          <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+            {children}
+          </PayProvider>
+        </QueryClientProvider>
+      )
+    }
+
+    setupFetchMock([
+      {
+        url: '/subscriptions/sub_123/cancel',
+        method: 'POST',
+        response: { success: true },
+      },
+    ])
+
+    const { result } = renderHook(() => useCancelSubscription(), { wrapper: InvalidationWrapper })
+
+    expect(sharedClient).toBeDefined()
+    const invalidateSpy = vi.spyOn(sharedClient!, 'invalidateQueries')
+
+    await act(async () => {
+      await result.current.mutateAsync('sub_123')
+    })
+
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [...SUBSCRIPTIONS_QUERY_KEY],
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// useRefundPayment — cache invalidation
+// ---------------------------------------------------------------------------
+
+describe('useRefundPayment', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('invalidates SUBSCRIPTIONS_QUERY_KEY on successful refund', async () => {
+    let sharedClient: QueryClient | undefined
+    function InvalidationWrapper({ children }: { children: React.ReactNode }) {
+      const [queryClient] = React.useState(
+        () =>
+          new QueryClient({
+            defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+          })
+      )
+      sharedClient = queryClient
+      return (
+        <QueryClientProvider client={queryClient}>
+          <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+            {children}
+          </PayProvider>
+        </QueryClientProvider>
+      )
+    }
+
+    setupFetchMock([
+      {
+        url: '/payments/pay_123/refund',
+        method: 'POST',
+        response: { success: true },
+      },
+    ])
+
+    const { result } = renderHook(() => useRefundPayment(), { wrapper: InvalidationWrapper })
+
+    expect(sharedClient).toBeDefined()
+    const invalidateSpy = vi.spyOn(sharedClient!, 'invalidateQueries')
+
+    await act(async () => {
+      await result.current.mutateAsync('pay_123')
+    })
+
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [...SUBSCRIPTIONS_QUERY_KEY],
+    })
   })
 })
 

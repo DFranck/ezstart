@@ -182,6 +182,16 @@ export interface WebhookCheckoutData {
   sessionId: string
   paymentIntentId?: string
   subscriptionId?: string
+  /**
+   * Stripe customer id (`cus_…`) attached to the Checkout Session. Populated
+   * for every session that resulted in a persisted customer (subscription
+   * mode always creates one; payment mode does when `customer_email` +
+   * `customer_creation: 'always'` were passed). Consumers persist this on
+   * their local Payment row so downstream webhooks can look up the
+   * originating Payment via `stripeCustomerId` when the
+   * `metadata.subscriptionId` join key hasn't been stamped yet.
+   */
+  customerId?: string
   paymentMethod?: string
   mode: 'payment' | 'subscription'
   /** Session metadata passed when creating the checkout */
@@ -197,6 +207,14 @@ export interface WebhookSubscriptionData {
   status: string
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: number
+  /**
+   * Stripe customer id (`cus_…`) on the subscription. Used by the ezpay
+   * webhook resilience path — when `metadata.subscriptionId` hasn't been
+   * stamped yet on the local Payment row (delivery arrived out of order),
+   * the handler falls back to `stripeCustomerId + status: 'pending'` to
+   * locate the originating checkout and stamp the join key inline.
+   */
+  customerId?: string
 }
 
 export interface WebhookInvoiceData {

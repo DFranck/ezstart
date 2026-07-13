@@ -4,6 +4,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   uiComponentsMock,
   loggerMock,
@@ -29,11 +30,22 @@ const { FeatureGate } = await import('../../components/FeatureGate.js')
 const { ConfirmActionDialog } = await import('../../components/ConfirmActionDialog.js')
 const { PaymentHistory } = await import('../../components/PaymentHistory.js')
 
+// `RefundButton` + `FeatureGate` now consume React Query hooks
+// (`useRefundPayment`, `useSubscriptionStatus`), so every render path needs
+// a `QueryClientProvider`. Fresh client per mount isolates cache state.
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      })
+  )
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
-      {children}
-    </PayProvider>
+    <QueryClientProvider client={queryClient}>
+      <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
+        {children}
+      </PayProvider>
+    </QueryClientProvider>
   )
 }
 
