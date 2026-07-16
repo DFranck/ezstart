@@ -75,7 +75,7 @@ export function SignInForm({
   turnstileShowAfterFails = 3,
 }: SignInFormProps) {
   const navigation = useAuthNavigation()
-  const { handleCallback, isAuthenticated, isAuthReady } = useAuth()
+  const { handleCallback, isAuthenticated, isAuthReady, verifyAndRefresh, clearSession } = useAuth()
   const locale = propLocale ?? navigation.locale
   const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
@@ -96,7 +96,28 @@ export function SignInForm({
       ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
       : undefined)
 
-  useAuthedRedirect({ isAuthReady, isAuthenticated, resolvedRedirectUri, appName })
+  useAuthedRedirect({
+    isAuthReady,
+    isAuthenticated,
+    resolvedRedirectUri,
+    appName,
+    // Prove the session is LIVE before the cross-origin SSO handoff — the
+    // persisted `isAuthenticated` flag outlives the httpOnly access cookie, so
+    // firing `sso/authorize` off the flag alone 401s (and, unguarded, storms).
+    // `verifyAndRefresh` hits `GET /me` (dual-mode) and returns the user, `null`
+    // (no credential), or throws. Tri-state: only a DEFINITIVE 401 is
+    // `'expired'` (→ clear); a transient network/5xx blip is `'error'` and must
+    // NOT clear/broadcast logout across tabs on a still-valid cookie.
+    revalidateSession: async () => {
+      try {
+        return (await verifyAndRefresh()) != null ? 'live' : 'expired'
+      } catch (err) {
+        return (err as { status?: number })?.status === 401 ? 'expired' : 'error'
+      }
+    },
+    // `'expired'` only → drop the stale flag so the form renders signed-out.
+    onStaleSession: clearSession,
+  })
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

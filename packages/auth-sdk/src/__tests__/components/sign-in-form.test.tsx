@@ -25,6 +25,11 @@ import { apiCall } from '@ezstart/api-sdk'
 const mockApiCall = vi.mocked(apiCall)
 
 const handleCallbackMock = vi.fn()
+// T02: SignInForm now revalidates the session (verifyAndRefresh → GET /me)
+// before a cross-origin SSO handoff, and clears the stale flag (clearSession)
+// when it is not live. Default: session IS live (returns a user).
+const verifyAndRefreshMock = vi.fn<() => Promise<unknown>>()
+const clearSessionMock = vi.fn()
 
 const useAuthState = {
   isAuthenticated: false,
@@ -36,6 +41,8 @@ vi.mock('../../react/hooks.js', () => ({
     handleCallback: handleCallbackMock,
     isAuthenticated: useAuthState.isAuthenticated,
     isAuthReady: useAuthState.isAuthReady,
+    verifyAndRefresh: verifyAndRefreshMock,
+    clearSession: clearSessionMock,
   }),
 }))
 
@@ -127,6 +134,9 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     handleCallbackMock.mockReset()
+    verifyAndRefreshMock.mockReset()
+    verifyAndRefreshMock.mockResolvedValue({ id: 'u1', email: 'user@example.com' })
+    clearSessionMock.mockReset()
     useAuthState.isAuthenticated = false
     useAuthState.isAuthReady = false
   })
@@ -299,6 +309,9 @@ describe('SignInForm — auto-redirect when already authenticated', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     handleCallbackMock.mockReset()
+    verifyAndRefreshMock.mockReset()
+    verifyAndRefreshMock.mockResolvedValue({ id: 'u1', email: 'user@example.com' })
+    clearSessionMock.mockReset()
     useAuthState.isAuthenticated = false
     useAuthState.isAuthReady = false
     replaceMock = vi.fn()

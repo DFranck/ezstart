@@ -329,6 +329,22 @@ export function useAuth(logger?: AuthLogger) {
     return { serverFailed, errorText }
   }
 
+  /**
+   * Reset the local auth state WITHOUT the full logout orchestration.
+   *
+   * Distinct from {@link logout}: this does NOT call the server, show a toast,
+   * run the consumer `onLogout` hook, or hard-redirect. It only clears the
+   * per-Provider store (`user: null`, `isAuthenticated: false`) — the same raw
+   * store action `verifyAndRefresh` uses on a 401. Use it to drop a persisted
+   * `isAuthenticated` flag that no longer maps to a live session (e.g. the
+   * SSO handoff precheck found the credential expired), so the UI falls back
+   * to the sign-in form instead of looping on an authenticated call that will
+   * 401.
+   */
+  const clearSession = (): void => {
+    storeApi.getState().logout()
+  }
+
   const verifyAndRefresh = async () => {
     const current = storeApi.getState()
     if (mode === 'localStorage' && current.accessToken) {
@@ -385,6 +401,7 @@ export function useAuth(logger?: AuthLogger) {
     logout,
     handleCallback,
     verifyAndRefresh,
+    clearSession,
     setLoggingIn: store.setLoggingIn,
   }
 }
