@@ -23,6 +23,7 @@ import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { resetDocsDemoData } from '../../services/docs-demo-reset.service.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
@@ -86,6 +87,7 @@ docRouter.post(
   '/docs-demo/reset',
   authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
+  requireSecretKeyOrJwt,
   enforceAdminTwoFactor,
   docsDemoResetController,
   {
@@ -94,7 +96,11 @@ docRouter.post(
     responseSchema: docsDemoResetResponseSchema,
     extraResponses: {
       401: { description: 'Unauthorized', schema: adminErrorSchema },
-      403: { description: 'Superadmin role required', schema: adminErrorSchema },
+      403: {
+        description:
+          'Superadmin role required, or publishable key rejected (secret S2S key or superadmin JWT required)',
+        schema: adminErrorSchema,
+      },
       500: { description: 'Reset failed', schema: adminErrorSchema },
     },
   }

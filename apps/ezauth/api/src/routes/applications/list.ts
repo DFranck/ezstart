@@ -17,6 +17,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { getApplicationModel } from '../../models/application.js'
 import { serializeApplication } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
@@ -109,6 +110,7 @@ const listApplicationsController = async (req: Request, res: Response) => {
 docRouter.get(
   '/applications',
   authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
   attachDerivedScope,
   listApplicationsController,
   {
@@ -118,7 +120,8 @@ docRouter.get(
     extraResponses: {
       401: { description: 'Authentication required', schema: errorResponseSchema },
       403: {
-        description: 'Forbidden (`?all=true` requires superadmin)',
+        description:
+          'Forbidden (`?all=true` requires superadmin), or publishable key rejected (secret S2S key or superadmin JWT required)',
         schema: errorResponseSchema,
       },
     },

@@ -14,6 +14,7 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { getApplicationModel } from '../../models/application.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../../utils/map-to-record.js'
@@ -182,6 +183,7 @@ docRouter.get(
   '/users',
   authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
+  requireSecretKeyOrJwt,
   enforceAdminTwoFactor,
   attachDerivedScope,
   listUsersController,
@@ -192,7 +194,11 @@ docRouter.get(
     responseSchema: listUsersResponseSchema,
     extraResponses: {
       401: { description: 'Unauthorized', schema: adminErrorSchema },
-      403: { description: 'Forbidden', schema: adminErrorSchema },
+      403: {
+        description:
+          'Forbidden — publishable key rejected (secret S2S key or superadmin JWT required)',
+        schema: adminErrorSchema,
+      },
       500: { description: 'Server error', schema: adminErrorSchema },
     },
   }

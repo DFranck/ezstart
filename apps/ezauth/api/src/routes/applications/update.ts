@@ -18,6 +18,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApplicationModel } from '../../models/application.js'
 import { isSuperadmin } from '../../utils/is-superadmin.js'
@@ -128,6 +129,7 @@ const updateApplicationController = async (req: Request, res: Response) => {
 docRouter.patch(
   '/applications/:id',
   authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
   // HAC-HIGH-2 (2026-05-17) — mutating Application metadata (including the
   // `requireEmailVerification` policy flag) is owner-privileged; require
   // the owner's own email to be verified first.
@@ -141,7 +143,8 @@ docRouter.patch(
     extraResponses: {
       401: { description: 'Authentication required', schema: errorResponseSchema },
       403: {
-        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        description:
+          'Email not verified (`code: EMAIL_VERIFICATION_REQUIRED`), or publishable key rejected (secret S2S key or superadmin JWT required)',
         schema: errorResponseSchema,
       },
       404: { description: 'Application not found', schema: errorResponseSchema },

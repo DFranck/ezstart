@@ -10,6 +10,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../models/api-key-usage.js'
 import { getApplicationModel } from '../../models/application.js'
@@ -163,15 +164,25 @@ const listApiKeysController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/keys', authJwtOrKey({ requireKeyScope: 'admin' }), listApiKeysController, {
-  summary: 'List API keys for current user',
-  tags: ['API Keys'],
-  responseSchema: listApiKeysResponseSchema,
-  extraResponses: {
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    403: { description: 'Access denied', schema: errorResponseSchema },
-    404: { description: 'Application not found', schema: errorResponseSchema },
-  },
-})
+docRouter.get(
+  '/keys',
+  authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
+  listApiKeysController,
+  {
+    summary: 'List API keys for current user',
+    tags: ['API Keys'],
+    responseSchema: listApiKeysResponseSchema,
+    extraResponses: {
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description:
+          'Access denied, or publishable key rejected (secret S2S key or superadmin JWT required)',
+        schema: errorResponseSchema,
+      },
+      404: { description: 'Application not found', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

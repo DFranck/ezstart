@@ -16,6 +16,7 @@ import { getApiKeyModel } from '../../models/api-key.js'
 import { getTotpSecretModel } from '../../models/totp-secret.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const analyticsOverviewRegistry = new OpenAPIRegistry()
@@ -302,6 +303,7 @@ docRouter.get(
   '/analytics/overview',
   authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
+  requireSecretKeyOrJwt,
   enforceAdminTwoFactor,
   attachDerivedScope,
   analyticsOverviewController,
@@ -311,7 +313,11 @@ docRouter.get(
     responseSchema: analyticsOverviewResponseSchema,
     extraResponses: {
       401: { description: 'Unauthorized', schema: adminErrorSchema },
-      403: { description: 'Forbidden — admin role required', schema: adminErrorSchema },
+      403: {
+        description:
+          'Forbidden — admin role required, or publishable key rejected (secret S2S key or superadmin JWT required)',
+        schema: adminErrorSchema,
+      },
       500: { description: 'Server error', schema: adminErrorSchema },
     },
   }

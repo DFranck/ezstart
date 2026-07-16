@@ -42,6 +42,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { generateWebhookSecret, getApplicationModel } from '../../models/application.js'
 import { isSuperadmin } from '../../utils/is-superadmin.js'
@@ -167,6 +168,7 @@ docRouter.post(
   '/applications/:id/regenerate-webhook-secret',
   createStrictRateLimiter(),
   authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
   // HAC-HIGH-2 (2026-05-17) — webhook secret rotation kills the previous
   // secret instantly; an unverified account cannot be allowed to mass-DoS
   // an Application's signed-webhook receivers.
@@ -180,7 +182,8 @@ docRouter.post(
     extraResponses: {
       401: { description: 'Authentication required', schema: errorResponseSchema },
       403: {
-        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        description:
+          'Email not verified (`code: EMAIL_VERIFICATION_REQUIRED`), or publishable key rejected (secret S2S key or superadmin JWT required)',
         schema: errorResponseSchema,
       },
       404: { description: 'Application not found', schema: errorResponseSchema },

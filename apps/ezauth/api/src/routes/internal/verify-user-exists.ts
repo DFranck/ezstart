@@ -39,6 +39,7 @@ import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireAdmin } from '../admin/require-admin.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 
@@ -63,30 +64,6 @@ const errorSchema = z.object({
   success: z.literal(false),
   error: z.string(),
 })
-
-/**
- * Reject requests authenticated via a PUBLISHABLE API key.
- *
- * Only secret S2S keys OR superadmin JWTs are allowed on internal endpoints
- * that could enable user enumeration. `req.apiKeyType` is set by the SDK's
- * api-key-verifier when the key doc has a `type` field. Legacy `ezk_*`
- * keys have no `type` — they are treated as untrusted (rejected) to be safe.
- */
-function requireSecretKeyOrJwt(req: Request, res: Response, next: (err?: unknown) => void): void {
-  const apiKeyId = (req as Request & { apiKeyId?: string }).apiKeyId
-  if (!apiKeyId) {
-    // No API key path — JWT-authenticated (verified by authJwtOrKey +
-    // requireAdmin above). Superadmin JWTs are trusted for S2S semantics
-    // (a signed-in superadmin driving the dashboard is a valid caller).
-    return next()
-  }
-  const apiKeyType = (req as Request & { apiKeyType?: 'publishable' | 'secret' }).apiKeyType
-  if (apiKeyType !== 'secret') {
-    sendError(res, 'This endpoint requires a secret API key, not publishable', 403)
-    return
-  }
-  next()
-}
 
 const verifyUserExistsController = async (req: Request, res: Response) => {
   try {

@@ -11,6 +11,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
@@ -255,6 +256,7 @@ const createApiKeyController = async (req: Request, res: Response) => {
 docRouter.post(
   '/keys',
   authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
   // HAC-HIGH-2 (2026-05-17) — gate API key creation behind email verification.
   // An unverified account must not be able to mint keys that grant access to
   // paid features (cf. `standard-saas-security.md` §2 "email verification gate").
@@ -270,7 +272,7 @@ docRouter.post(
       401: { description: 'Authentication required', schema: errorResponseSchema },
       403: {
         description:
-          'Forbidden (platform-wide, non-owned Application, or email not verified — `code: EMAIL_VERIFICATION_REQUIRED`)',
+          'Forbidden (platform-wide, non-owned Application, email not verified — `code: EMAIL_VERIFICATION_REQUIRED`, or publishable key rejected — secret S2S key or superadmin JWT required)',
         schema: errorResponseSchema,
       },
       404: { description: 'Application not found', schema: errorResponseSchema },

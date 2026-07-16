@@ -25,6 +25,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { getApplicationModel } from '../../models/application.js'
 import { isSuperadmin } from '../../utils/is-superadmin.js'
 import { serializeApplication, serializeApplicationWithSecret } from './serialize.js'
@@ -133,6 +134,7 @@ const getApplicationController = async (req: Request, res: Response) => {
 docRouter.get(
   '/applications/:id',
   authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
   getApplicationController,
   {
     summary: 'Fetch a single Application',
@@ -140,6 +142,10 @@ docRouter.get(
     responseSchema: applicationResponseSchema,
     extraResponses: {
       401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Publishable key rejected — secret S2S key or superadmin JWT required',
+        schema: errorResponseSchema,
+      },
       404: { description: 'Application not found', schema: errorResponseSchema },
     },
   }

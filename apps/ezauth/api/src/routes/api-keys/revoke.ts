@@ -9,6 +9,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireSecretKeyOrJwt } from '../../middleware/require-secret-key-or-jwt.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
@@ -74,6 +75,7 @@ const revokeApiKeyController = async (req: Request, res: Response) => {
 docRouter.delete(
   '/keys/:id',
   authJwtOrKey({ requireKeyScope: 'admin' }),
+  requireSecretKeyOrJwt,
   // HAC-HIGH-2 (2026-05-17) — unverified accounts must not mutate key
   // inventory (rotation / revoke). Cf. `standard-saas-security.md` §2.
   requireEmailVerified,
@@ -86,7 +88,8 @@ docRouter.delete(
       400: { description: 'Key already revoked', schema: errorResponseSchema },
       401: { description: 'Authentication required', schema: errorResponseSchema },
       403: {
-        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        description:
+          'Email not verified (`code: EMAIL_VERIFICATION_REQUIRED`), or publishable key rejected (secret S2S key or superadmin JWT required)',
         schema: errorResponseSchema,
       },
       404: { description: 'API key not found', schema: errorResponseSchema },
