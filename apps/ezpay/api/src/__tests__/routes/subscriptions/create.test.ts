@@ -53,6 +53,10 @@ let currentApiKeyApplicationId: string | undefined
 // Email carried by the verified JWT identity (`req.user.email`). `undefined`
 // models a token with no email claim.
 let currentEmail: string | undefined
+// Email-verification claim (`req.user.isVerified`). Defaults to a verified
+// identity so the "persists the verified identity email" tests stay green;
+// set to `false` to model an unverified account (anti dunning-spam gate).
+let currentIsVerified = true
 // API-key context stamped by the real `api-key` middleware. `secret` + `admin`
 // makes `isSecretAdminKey` true → the S2S caller may supply `customerEmail`.
 let currentApiKeyType: 'publishable' | 'secret' | undefined
@@ -81,6 +85,7 @@ vi.mock('../../../middleware/unified-auth.js', () => ({
     ;(req as unknown as { user: Record<string, unknown> }).user = {
       userId: currentUserId,
       email: currentEmail,
+      isVerified: currentIsVerified,
       globalRoles: currentGlobalRoles,
     }
     next()
@@ -169,6 +174,7 @@ describe('POST /subscribe — price authority + tenant ownership (Wave E 1A)', (
     currentGlobalRoles = []
     currentApiKeyApplicationId = undefined
     currentEmail = undefined
+    currentIsVerified = true
     currentApiKeyType = undefined
     currentApiKeyScope = undefined
     mockApplication = {
@@ -452,7 +458,28 @@ describe('POST /subscribe — price authority + tenant ownership (Wave E 1A)', (
     expect(payment?.customerEmail).toBeUndefined()
   })
 
-  it('secret admin S2S key — HONOURS body.customerEmail (only email signal available)', async () => {
+  it('JWT path with an UNVERIFIED email — persists NO email (anti dunning-spam)', async () => {
+    const planId = await seedPlan()
+    // Attacker registered with a victim's email — JWT carries it but the
+    // account is unverified. Neither the token email nor the body may persist.
+    currentEmail = 'victim@example.com'
+    currentIsVerified = false
+
+    const res = await postSubscribe(app, {
+      projectId: 'myapp',
+      applicationId: 'app-1',
+      planId: String(planId),
+      customerEmail: 'attacker@evil.com',
+    })
+
+    expect(res.status).toBe(200)
+    const payment = await persistedPayment()
+    expect(payment?.customerEmail).toBeUndefined()
+    expect(payment?.customerEmail).not.toBe('victim@example.com')
+    expect(payment?.customerEmail).not.toBe('attacker@evil.com')
+  })
+
+  it('secret admin S2S key — HONOURS body.customerEmail regardless of isVerified', async () => {
     const planId = await seedPlan()
     // Secret admin key bound to app-1 → authority passes via the binding.
     currentApiKeyApplicationId = 'app-1'

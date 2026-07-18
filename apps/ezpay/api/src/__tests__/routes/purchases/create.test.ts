@@ -45,6 +45,11 @@ vi.mock('../../../services/connect-fee.js', () => ({
 let currentUserId: string | undefined = 'user-1'
 let currentGlobalRoles: string[] = []
 let currentApiKeyApplicationId: string | undefined
+// Email claim carried by the verified JWT (populateUserFromToken → req.user.email).
+let currentUserEmail: string | undefined = 'verified@buyer.example.com'
+// Email-verification claim (populateUserFromToken → req.user.isVerified).
+// Defaults to a verified identity so existing tests persist the token email.
+let currentUserIsVerified = true
 
 vi.mock('../../../middleware/auth.js', () => ({
   authMiddleware: (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -69,6 +74,8 @@ vi.mock('../../../middleware/auth.js', () => ({
     if (req.userId) {
       ;(req as unknown as { user: Record<string, unknown> }).user = {
         userId: req.userId,
+        email: currentUserEmail,
+        isVerified: currentUserIsVerified,
         globalRoles: currentGlobalRoles,
       }
     }
@@ -151,6 +158,8 @@ describe('POST /purchase — price authority + tenant ownership (Wave E 1A)', ()
     currentUserId = 'user-1'
     currentGlobalRoles = []
     currentApiKeyApplicationId = undefined
+    currentUserEmail = 'verified@buyer.example.com'
+    currentUserIsVerified = true
     mockApplication = {
       id: 'app-1',
       slug: 'myapp',
@@ -240,5 +249,69 @@ describe('POST /purchase — price authority + tenant ownership (Wave E 1A)', ()
     expect(res.status).toBe(200)
     expect(getApplicationMock).not.toHaveBeenCalled()
     expect(createCheckoutSessionMock).toHaveBeenCalledTimes(1)
+  })
+
+  // --- Customer email trust boundary (anti dunning-spam) --------------------
+
+  it('IGNORES a body customerEmail and persists the verified identity email (JWT path)', async () => {
+    const res = await postPurchase(app, {
+      projectId: 'myapp',
+      applicationId: 'app-1',
+      productId: 'ezpay-test-item',
+      customerEmail: 'attacker-victim@evil.example.com',
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
+
+    const payment = await Payment.findOne({ paymentId: 'cs_purchase_test' }).lean()
+    expect(payment).not.toBeNull()
+    // The verified identity email wins — the attacker-controlled body value
+    // must NEVER reach the dunning-spam sink.
+    expect(payment?.customerEmail).toBe('verified@buyer.example.com')
+    expect(payment?.customerEmail).not.toBe('attacker-victim@evil.example.com')
+  })
+
+  it('persists NO email when the JWT carries no email claim (never the body)', async () => {
+    currentUserEmail = undefined
+
+    const res = await postPurchase(app, {
+      projectId: 'myapp',
+      applicationId: 'app-1',
+      productId: 'ezpay-test-item',
+      customerEmail: 'attacker-victim@evil.example.com',
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
+
+    const payment = await Payment.findOne({ paymentId: 'cs_purchase_test' }).lean()
+    expect(payment).not.toBeNull()
+    // No email claim on the token → store nothing, never fall back to the body.
+    expect(payment?.customerEmail == null).toBe(true)
+  })
+
+  it('persists NO email when the JWT email is UNVERIFIED (anti dunning-spam)', async () => {
+    // Attacker registered with a victim's email — JWT carries it but
+    // isVerified:false. Neither the token email nor the body may be stored.
+    currentUserEmail = 'victim@example.com'
+    currentUserIsVerified = false
+
+    const res = await postPurchase(app, {
+      projectId: 'myapp',
+      applicationId: 'app-1',
+      productId: 'ezpay-test-item',
+      customerEmail: 'attacker-victim@evil.example.com',
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
+
+    const payment = await Payment.findOne({ paymentId: 'cs_purchase_test' }).lean()
+    expect(payment).not.toBeNull()
+    // Unverified identity → store nothing. The victim must never be mailed.
+    expect(payment?.customerEmail == null).toBe(true)
+    expect(payment?.customerEmail).not.toBe('victim@example.com')
+    expect(payment?.customerEmail).not.toBe('attacker-victim@evil.example.com')
   })
 })

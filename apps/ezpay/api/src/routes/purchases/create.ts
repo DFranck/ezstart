@@ -63,7 +63,13 @@ const createPurchaseSchema = z.object({
     .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
     .optional()
     .describe('Ignored — currency is resolved server-side from the product catalogue'),
-  customerEmail: z.string().email().optional().describe('Customer email'),
+  customerEmail: z
+    .string()
+    .email()
+    .optional()
+    .describe(
+      'Ignored — the purchase route is JWT-authenticated, so the persisted receipt email is the ezauth-verified identity email (`req.user.email`), never the client body (anti dunning-spam). Kept for backcompat.'
+    ),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
 })
@@ -91,13 +97,42 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       projectId,
       applicationId: bodyApplicationId,
       productId,
-      customerEmail,
       returnUrl,
       promoCode,
     } = validation.data
 
     // Always use the authenticated user ID from JWT, never from the request body
     const userId = req.userId
+
+    /**
+     * Customer email trust boundary (anti dunning-spam).
+     *
+     * The persisted `Payment.customerEmail` is the same column
+     * `dunning.service.ts` reads as `to:` when it sends retry emails. It
+     * ignores `type: 'purchase'` rows today, so this endpoint is not
+     * exploitable yet — but the moment a purchase-receipt email is wired up,
+     * an attacker-controlled `body.customerEmail` would let a JWT user
+     * trigger emails to an arbitrary address. We fix it proactively.
+     *
+     * This route is JWT-only (`authMiddleware` + `populateUserFromToken` —
+     * NOT `authJwtOrKey`), and non-anonymous (`isAnonymous: false`). Unlike
+     * `/subscribe` there is no secret-admin S2S key path, and unlike
+     * `/donate` there is no anonymous donor path. So there is exactly one
+     * trust boundary: the ezauth-verified identity. We therefore NEVER use
+     * the request body — we use `req.user.email` (populated from the token).
+     *
+     * **isVerified gate (PAY-SUB-UNVERIFIED-EMAIL-DUNNING-001).** A valid JWT
+     * signature proves only that the account exists, NOT that its email was
+     * verified — ezauth intentionally lets unverified accounts log in (Clerk
+     * pattern). An attacker can therefore register with a VICTIM's email
+     * (`isVerified: false`), obtain a JWT carrying that email, and check out.
+     * If we persisted it, a future purchase-receipt / dunning email would be
+     * mailed to the victim. We close this by only trusting `req.user.email`
+     * when `req.user.isVerified === true`; otherwise we store NO email at all
+     * (never the body, never an unverified claim). The Zod schema keeps
+     * `customerEmail` for backcompat but the value is deliberately ignored.
+     */
+    const resolvedCustomerEmail = req.user?.isVerified === true ? req.user?.email : undefined
 
     // Tenant ownership gate (C-3) — resolve + authorise the Application from
     // the ezauth source-of-truth. API-key auth is trusted (bound at mint
@@ -202,7 +237,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       amount: finalAmount,
       currency,
       userId,
-      customerEmail,
+      customerEmail: resolvedCustomerEmail,
       isAnonymous: false,
       provider: 'stripe',
       paymentId: session.sessionId,
