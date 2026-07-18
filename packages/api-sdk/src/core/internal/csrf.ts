@@ -20,11 +20,31 @@
  */
 
 import { getHeaderCI, hasHeaderCI } from './request.js'
+import { parseApiError, parseApiErrorCode } from '../parse-api-error.js'
 import type { CsrfConfig } from '../types.js'
 
 const STATE_CHANGING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 const DEFAULT_COOKIE_NAME = 'csrf-token'
 const DEFAULT_HEADER_NAME = 'X-CSRF-Token'
+
+/**
+ * @internal
+ *
+ * Default heuristic — does a `403` response body look like a CSRF token
+ * mismatch (worth re-priming + retrying) rather than a genuine authorization
+ * failure? Reuses {@link parseApiError} / {@link parseApiErrorCode} to unwrap
+ * every standard envelope shape, then looks for `'csrf'` (case-insensitive) in
+ * the message or code. Mirrors `@ezstart/auth-sdk`'s `isCsrfMismatch` and
+ * matches the `@ezstart/api-core` server, which emits `'CSRF token mismatch'`
+ * (cf. `packages/api-core/src/core/middleware/csrf.ts`).
+ */
+export function defaultCsrfMismatchMatcher(status: number, body: unknown): boolean {
+  if (status !== 403) return false
+  const message = parseApiError(body)
+  if (message !== null && message.toLowerCase().includes('csrf')) return true
+  const code = parseApiErrorCode(body)
+  return code !== undefined && code.toLowerCase().includes('csrf')
+}
 
 /**
  * @internal
@@ -35,6 +55,7 @@ export type ResolvedCsrfConfig = {
   cookieName: string
   headerName: string
   primeUrl?: string
+  mismatchMatcher: (status: number, body: unknown) => boolean
 }
 
 /**
@@ -57,6 +78,11 @@ export interface CsrfManager {
   prime(): Promise<void>
   /** Discard the primed flag so the next `prime()` re-fetches a fresh token. */
   invalidate(): void
+  /**
+   * Decide whether a `403` response body is a CSRF mismatch worth re-priming +
+   * retrying. Delegates to the configured (or default) matcher.
+   */
+  isMismatch(status: number, body: unknown): boolean
 }
 
 /**
@@ -92,6 +118,7 @@ export function createCsrfManager(config: CsrfConfig): CsrfManager {
     cookieName: config.cookieName ?? DEFAULT_COOKIE_NAME,
     headerName: config.headerName ?? DEFAULT_HEADER_NAME,
     primeUrl: config.primeUrl,
+    mismatchMatcher: config.mismatchMatcher ?? defaultCsrfMismatchMatcher,
   }
   let inflight: Promise<void> | null = null
   let primed = false
@@ -124,6 +151,7 @@ export function createCsrfManager(config: CsrfConfig): CsrfManager {
       primed = false
       inflight = null
     },
+    isMismatch: (status, body) => resolved.mismatchMatcher(status, body),
   }
 }
 

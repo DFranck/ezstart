@@ -143,9 +143,15 @@ function resolveToken(
  * @internal
  *
  * Run a cookie-auth write with CSRF double-submit: prime the token on cache
- * miss, attach the `X-CSRF-Token` header, then retry ONCE on a 403 with a
- * freshly re-primed token (re-prime covers the stale-token case). Mirrors the
- * `cookieWrite` helper of `@ezstart/auth-sdk`.
+ * miss, attach the `X-CSRF-Token` header, then retry ONCE on a 403 **only when
+ * the body confirms a CSRF mismatch** (re-prime covers the stale-token case).
+ * A genuine 403 (email-verify gate, RBAC denial, etc.) propagates unchanged —
+ * no wasted prime GET / retry POST. Mirrors the `cookieWrite` helper of
+ * `@ezstart/auth-sdk`.
+ *
+ * The 403 body is read from a `res.clone()` so the original response stays
+ * readable for the caller (`finalizeResponse`). When the Response shim lacks
+ * `clone` (bare test stub), the peek — and the retry — are skipped.
  */
 async function fetchWithCsrf(
   csrf: CsrfManager,
@@ -155,8 +161,11 @@ async function fetchWithCsrf(
 ): Promise<Response> {
   await primeCsrfIfMissing(csrf)
   const res = await runFetch(makeInit(attachCsrfHeader(csrf, headers)))
-  if (res.status !== 403) return res
-  // Re-prime with a fresh token and retry once — covers a stale/rotated cookie.
+  if (res.status !== 403 || typeof res.clone !== 'function') return res
+  const body = await safeParseJson(res.clone())
+  if (!csrf.isMismatch(res.status, body)) return res
+  // Confirmed CSRF mismatch → re-prime with a fresh token and retry once
+  // (covers a stale/rotated cookie).
   csrf.invalidate()
   await csrf.prime()
   return runFetch(makeInit(attachCsrfHeader(csrf, headers)))
