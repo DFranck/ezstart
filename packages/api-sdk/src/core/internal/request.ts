@@ -90,6 +90,21 @@ export function hasHeaderCI(headers: Record<string, string>, name: string): bool
 /**
  * @internal
  *
+ * Case-insensitive lookup of an HTTP header value. Returns the first matching
+ * entry's value, or `undefined` when absent. Companion to {@link hasHeaderCI}
+ * for callers that need the value (e.g. detecting `Authorization: Bearer …`).
+ */
+export function getHeaderCI(headers: Record<string, string>, name: string): string | undefined {
+  const lower = name.toLowerCase()
+  for (const key of Object.keys(headers)) {
+    if (key.toLowerCase() === lower) return headers[key]
+  }
+  return undefined
+}
+
+/**
+ * @internal
+ *
  * Resolve the `Idempotency-Key` header value from the per-call
  * `idempotencyKey` option:
  *

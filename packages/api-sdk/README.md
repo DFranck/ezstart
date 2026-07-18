@@ -166,7 +166,25 @@ const repo = await fetchExternal<Repo>('https://api.github.com/repos/vercel/next
 
 ### `createApiClient(config): ApiClient`
 
-Factory for fully agnostic clients. Returns `{ apiCall, apiStream, apiQuery, config, __resetRefresh }` bound to the provided `ApiClientConfig` (baseUrl / tokenStore / refresh / envelope / pathPrefix / logger).
+Factory for fully agnostic clients. Returns `{ apiCall, apiStream, apiQuery, config, __resetRefresh }` bound to the provided `ApiClientConfig` (baseUrl / tokenStore / refresh / envelope / pathPrefix / logger / csrfConfig).
+
+#### `csrfConfig` — CSRF double-submit for cookie-auth writes
+
+When set, `apiCall` attaches the `X-CSRF-Token` header (read from the `csrf-token` cookie) on state-changing cookie-auth requests (POST/PUT/PATCH/DELETE with `credentials: 'include'` and no `Authorization: Bearer`). It primes the cookie on cache miss via `primeUrl` and retries once on a 403. GET/HEAD and Bearer requests are untouched. Omit to disable (default — backward compatible).
+
+```ts
+const client = createApiClient({
+  baseUrl: 'https://api.example.com',
+  csrfConfig: {
+    primeUrl: 'https://api.example.com/api/auth/login-cookie/csrf',
+    // cookieName: 'csrf-token', // default
+    // headerName: 'X-CSRF-Token', // default
+  },
+})
+
+// Cookie-auth write → SDK reads the cookie, attaches X-CSRF-Token, primes on miss.
+await client.apiCall('/account/change-email', { method: 'POST', body: { email: 'a@b.c' } })
+```
 
 ### `ApiError`
 

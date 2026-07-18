@@ -1,5 +1,11 @@
 import { ApiError } from './api-error.js'
 import { resolveBaseUrl, type ResolvedConfig } from './internal/config.js'
+import {
+  attachCsrfHeader,
+  type CsrfManager,
+  isCookieAuthWrite,
+  primeCsrfIfMissing,
+} from './internal/csrf.js'
 import { fetchWithRetry } from './internal/fetch-with-retry.js'
 import type { RefreshHelper } from './internal/refresh.js'
 import { buildBody, buildHeaders, hasHeaderCI, resolveIdempotencyKey } from './internal/request.js'
@@ -136,6 +142,29 @@ function resolveToken(
 /**
  * @internal
  *
+ * Run a cookie-auth write with CSRF double-submit: prime the token on cache
+ * miss, attach the `X-CSRF-Token` header, then retry ONCE on a 403 with a
+ * freshly re-primed token (re-prime covers the stale-token case). Mirrors the
+ * `cookieWrite` helper of `@ezstart/auth-sdk`.
+ */
+async function fetchWithCsrf(
+  csrf: CsrfManager,
+  headers: Record<string, string>,
+  makeInit: (headers: Record<string, string>) => (token: string | null) => RequestInit,
+  runFetch: (initFactory: (token: string | null) => RequestInit) => Promise<Response>
+): Promise<Response> {
+  await primeCsrfIfMissing(csrf)
+  const res = await runFetch(makeInit(attachCsrfHeader(csrf, headers)))
+  if (res.status !== 403) return res
+  // Re-prime with a fresh token and retry once — covers a stale/rotated cookie.
+  csrf.invalidate()
+  await csrf.prime()
+  return runFetch(makeInit(attachCsrfHeader(csrf, headers)))
+}
+
+/**
+ * @internal
+ *
  * Factory: build an `apiCall` function bound to the resolved config.
  */
 export function createApiCall(resolved: ResolvedConfig, refreshHelper: RefreshHelper) {
@@ -175,19 +204,30 @@ export function createApiCall(resolved: ResolvedConfig, refreshHelper: RefreshHe
         ? { ...headers, 'Idempotency-Key': resolvedIdempotencyKey }
         : headers
 
-    const initFactory = buildInit(method, body, headersWithIdempotency, credentials, signal)
+    // Bound helpers so the CSRF path and the plain path share the same fetch
+    // pipeline (URL, token, refresh-on-401). `makeInit` re-binds the request
+    // builder to a headers object so the CSRF retry can swap the token header.
+    const makeInit = (h: Record<string, string>) => buildInit(method, body, h, credentials, signal)
+    const runFetch = (initFactory: (token: string | null) => RequestInit): Promise<Response> =>
+      fetchWithRetry({
+        url,
+        method,
+        buildInit: initFactory,
+        token,
+        skipRefresh,
+        skipAuth: options.skipAuth ?? false,
+        resolved,
+        refreshHelper,
+        tag: 'apiCall',
+      })
 
-    const res = await fetchWithRetry({
-      url,
-      method,
-      buildInit: initFactory,
-      token,
-      skipRefresh,
-      skipAuth: options.skipAuth ?? false,
-      resolved,
-      refreshHelper,
-      tag: 'apiCall',
-    })
+    // CSRF double-submit for cookie-auth writes only (SDK-CSRF-APICALL-001).
+    // Bearer / GET / no-csrfConfig callers take the plain path — zero overhead.
+    const res =
+      resolved.csrf &&
+      isCookieAuthWrite({ method, credentials, headers: headersWithIdempotency, token })
+        ? await fetchWithCsrf(resolved.csrf, headersWithIdempotency, makeInit, runFetch)
+        : await runFetch(makeInit(headersWithIdempotency))
 
     return finalizeResponse<T>(res, responseType, preserveEnvelope, resolved)
   }

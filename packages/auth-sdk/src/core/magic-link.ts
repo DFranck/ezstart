@@ -5,6 +5,8 @@
  * anti-enumeration).
  */
 
+import { cookieWrite } from './auth-client/cookie-write.js'
+import { createCsrfHelper } from './auth-client/csrf.js'
 import { AuthError } from './errors.js'
 
 interface RequestMagicLinkOptions {
@@ -85,12 +87,21 @@ export async function requestMagicLink(
   if (opts.redirectUri !== undefined) body.redirect_uri = opts.redirectUri
   if (opts.locale !== undefined) body.locale = opts.locale
 
-  const response = await fetch(`${opts.apiUrl}/magic-link/request`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(body),
-  })
+  // Route through the centralized `cookieWrite` helper so the same-origin
+  // cookie-auth path attaches the double-submit `X-CSRF-Token` header (priming
+  // the cookie on cache miss + retrying once on a 403 mismatch). A raw `fetch`
+  // with `credentials: 'include'` here would be CSRF-vulnerable — the browser
+  // sends any session cookie automatically but never the CSRF header. The
+  // standalone function owns no API key, so `baseHeaders` just passes extras
+  // through.
+  const baseHeaders = (extra?: Record<string, string>): Record<string, string> => ({ ...extra })
+  const csrf = createCsrfHelper({ apiUrl: opts.apiUrl, baseHeaders })
+
+  const response = await cookieWrite(
+    { apiUrl: opts.apiUrl, baseHeaders, csrf },
+    '/magic-link/request',
+    { method: 'POST', body: JSON.stringify(body) }
+  )
 
   const result = await response.json()
   if (!response.ok) {

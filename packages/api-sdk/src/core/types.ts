@@ -106,6 +106,44 @@ export type ClientLogger = {
 export type BaseUrlResolver = string | null | ((appName: string | undefined) => string)
 
 /**
+ * CSRF double-submit configuration for cookie-authenticated writes.
+ *
+ * When provided, `apiCall` attaches the `X-CSRF-Token` header (read from the
+ * non-httpOnly `csrf-token` cookie) on state-changing cookie-auth requests
+ * (POST/PUT/PATCH/DELETE with `credentials: 'include'` and no `Authorization:
+ * Bearer` header). GET/HEAD and Bearer-auth requests are untouched. Omit the
+ * config entirely to disable CSRF handling (default — fully backward-compatible).
+ *
+ * @example
+ * ```ts
+ * const client = createApiClient({
+ *   baseUrl: 'https://api.example.com',
+ *   csrfConfig: {
+ *     primeUrl: 'https://api.example.com/api/auth/login-cookie/csrf',
+ *   },
+ * })
+ * ```
+ */
+export type CsrfConfig = {
+  /**
+   * Name of the non-httpOnly cookie holding the double-submit token.
+   * @default 'csrf-token'
+   */
+  cookieName?: string
+  /**
+   * Name of the request header the token is attached to.
+   * @default 'X-CSRF-Token'
+   */
+  headerName?: string
+  /**
+   * Absolute URL of the idempotent GET endpoint that sets the CSRF cookie via
+   * `Set-Cookie`. Called on cache miss (no cookie present) and on a 403 retry.
+   * When omitted, the SDK never primes — it only reads an existing cookie.
+   */
+  primeUrl?: string
+}
+
+/**
  * Configuration accepted by `createApiClient`.
  */
 export type ApiClientConfig = {
@@ -123,6 +161,11 @@ export type ApiClientConfig = {
   pathPrefix?: string
   /** Logger override. Default is silent (no-op). */
   logger?: ClientLogger
+  /**
+   * CSRF double-submit config for cookie-auth writes. Omit to disable (default).
+   * See {@link CsrfConfig}.
+   */
+  csrfConfig?: CsrfConfig
 }
 
 /** Response shape requested by the caller (default `'json'`). */

@@ -7,6 +7,8 @@
  * Standard ref: `.claude/rules/standard-saas-security.md` §6 (token replay).
  */
 
+import { cookieWrite } from './auth-client/cookie-write.js'
+import { createCsrfHelper } from './auth-client/csrf.js'
 import { AuthError } from './errors.js'
 
 interface RequestEmailChangeOptions {
@@ -84,18 +86,25 @@ function parseError(body: Record<string, unknown>, fallback: string): string {
 export async function requestEmailChange(
   opts: RequestEmailChangeOptions
 ): Promise<RequestEmailChangeResult> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (opts.accessToken) headers.Authorization = `Bearer ${opts.accessToken}`
-
   const body: Record<string, unknown> = { newEmail: opts.newEmail }
   if (opts.password !== undefined) body.password = opts.password
   if (opts.locale !== undefined) body.locale = opts.locale
   if (opts.app !== undefined) body.app = opts.app
 
-  const response = await fetch(`${opts.apiUrl}/change-email`, {
+  // Route through the centralized `cookieWrite` helper so the same-origin
+  // cookie-auth path attaches the double-submit `X-CSRF-Token` header (priming
+  // the cookie on cache miss + retrying once on a 403 mismatch). A raw `fetch`
+  // with `credentials: 'include'` here would be CSRF-vulnerable — the browser
+  // sends the httpOnly session cookie automatically but never the CSRF header.
+  // The standalone function owns no API key, so `baseHeaders` just passes
+  // extras through. Bearer callers keep working: `cookieWrite` still attaches
+  // the (harmless, server-ignored) CSRF header alongside the Authorization one.
+  const baseHeaders = (extra?: Record<string, string>): Record<string, string> => ({ ...extra })
+  const csrf = createCsrfHelper({ apiUrl: opts.apiUrl, baseHeaders })
+
+  const response = await cookieWrite({ apiUrl: opts.apiUrl, baseHeaders, csrf }, '/change-email', {
     method: 'POST',
-    headers,
-    credentials: 'include',
+    headers: opts.accessToken ? { Authorization: `Bearer ${opts.accessToken}` } : undefined,
     body: JSON.stringify(body),
   })
 
