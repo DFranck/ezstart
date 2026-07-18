@@ -141,6 +141,23 @@ export type CsrfConfig = {
    * When omitted, the SDK never primes — it only reads an existing cookie.
    */
   primeUrl?: string
+  /**
+   * Decide whether a `403` response is a CSRF token mismatch (and therefore
+   * worth re-priming + retrying once) rather than a genuine authorization
+   * failure (email-verify gate, RBAC denial, etc.). The SDK peeks the parsed
+   * 403 body and only retries when this returns `true`; any other 403
+   * propagates to the caller unchanged (no extra prime GET, no retry POST).
+   *
+   * Defaults to a generic matcher that looks for `'csrf'` (case-insensitive)
+   * in the parsed error message or code — this matches the
+   * `@ezstart/api-core` server (`'CSRF token mismatch'`). Override it when the
+   * upstream server signals CSRF mismatches with a different message/code.
+   *
+   * @param status - The response status (always `403` when invoked).
+   * @param body - The parsed 403 body (`null` when empty / non-JSON).
+   * @default matches `'csrf'` in the error message or code
+   */
+  mismatchMatcher?: (status: number, body: unknown) => boolean
 }
 
 /**

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ApiError } from '@ezstart/api-contracts'
 import { createApiClient } from '../core/create-client.js'
 
 type FetchMock = ReturnType<typeof vi.fn>
@@ -101,6 +102,116 @@ describe('apiCall — CSRF double-submit (SDK-CSRF-APICALL-001)', () => {
     expect(headersOf(fetchMock, 0)['X-CSRF-Token']).toBe('stale1') // first attempt
     expect(fetchMock.mock.calls[1]?.[0]).toBe(PRIME_URL) // re-prime
     expect(headersOf(fetchMock, 2)['X-CSRF-Token']).toBe('fresh2') // retry uses fresh token
+  })
+
+  it('(c2) retries once on a 403 with the nested api-core envelope shape', async () => {
+    const doc = stubDocument('csrf-token=stale1')
+    // Real `@ezstart/api-core` server shape: { success: false, error: { message } }.
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ success: false, error: { message: 'CSRF token mismatch' } }, { status: 403 })
+    )
+    fetchMock.mockImplementationOnce(() => {
+      doc.cookie = 'csrf-token=fresh2'
+      return Promise.resolve(jsonResponse({ success: true, data: null }))
+    })
+    fetchMock.mockResolvedValueOnce(jsonResponse({ success: true, data: { ok: true } }))
+
+    const client = createApiClient({
+      baseUrl: TEST_BASE,
+      credentials: 'include',
+      csrfConfig: { primeUrl: PRIME_URL },
+    })
+    await client.apiCall('/account/change-email', { method: 'POST', body: { email: 'a@b.c' } })
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock.mock.calls[1]?.[0]).toBe(PRIME_URL)
+    expect(headersOf(fetchMock, 2)['X-CSRF-Token']).toBe('fresh2')
+  })
+
+  it('(c3) does NOT re-prime or retry a genuine (non-CSRF) 403', async () => {
+    stubDocument('csrf-token=abc123') // cookie present → no prime GET on the happy path
+    // Authorization failure, not a CSRF mismatch → must propagate untouched.
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(
+        { success: false, error: { message: 'Forbidden', code: 'FORBIDDEN' } },
+        {
+          status: 403,
+        }
+      )
+    )
+
+    const client = createApiClient({
+      baseUrl: TEST_BASE,
+      credentials: 'include',
+      csrfConfig: { primeUrl: PRIME_URL },
+    })
+
+    await expect(
+      client.apiCall('/admin/maintenance-mode', { method: 'PUT', body: { enabled: true } })
+    ).rejects.toMatchObject({ status: 403, message: 'Forbidden' })
+
+    // Single write fetch: no prime GET, no retry POST.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0]?.[0]).not.toBe(PRIME_URL)
+  })
+
+  it('(c4) 403 body stays readable for the caller (cloned, not consumed)', async () => {
+    stubDocument('csrf-token=abc123')
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(
+        { success: false, error: { message: 'Email not verified', code: 'EMAIL_NOT_VERIFIED' } },
+        { status: 403 }
+      )
+    )
+
+    const client = createApiClient({
+      baseUrl: TEST_BASE,
+      credentials: 'include',
+      csrfConfig: { primeUrl: PRIME_URL },
+    })
+
+    // If the peek consumed the original body, finalizeResponse's read would
+    // throw and the message/code below could not be recovered.
+    const err = await client
+      .apiCall('/account/change-email', { method: 'POST', body: { email: 'a@b.c' } })
+      .catch((e: unknown) => e)
+
+    expect(ApiError.isApiError(err)).toBe(true)
+    expect((err as ApiError).status).toBe(403)
+    expect((err as ApiError).message).toBe('Email not verified')
+    expect((err as ApiError).code).toBe('EMAIL_NOT_VERIFIED')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('(c5) honours a custom mismatchMatcher (retries on a non-standard code)', async () => {
+    const doc = stubDocument('csrf-token=stale1')
+    // Server signals CSRF via a bespoke code the default matcher would miss.
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ success: false, error: { code: 'X_TOKEN_DESYNC' } }, { status: 403 })
+    )
+    fetchMock.mockImplementationOnce(() => {
+      doc.cookie = 'csrf-token=fresh2'
+      return Promise.resolve(jsonResponse({ success: true, data: null }))
+    })
+    fetchMock.mockResolvedValueOnce(jsonResponse({ success: true, data: { ok: true } }))
+
+    const client = createApiClient({
+      baseUrl: TEST_BASE,
+      credentials: 'include',
+      csrfConfig: {
+        primeUrl: PRIME_URL,
+        mismatchMatcher: (status, body) =>
+          status === 403 &&
+          typeof body === 'object' &&
+          body !== null &&
+          (body as { error?: { code?: string } }).error?.code === 'X_TOKEN_DESYNC',
+      },
+    })
+    await client.apiCall('/account/change-email', { method: 'POST', body: { email: 'a@b.c' } })
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock.mock.calls[1]?.[0]).toBe(PRIME_URL)
+    expect(headersOf(fetchMock, 2)['X-CSRF-Token']).toBe('fresh2')
   })
 
   it('(d) does NOT attach CSRF on a GET (no prime, no header)', async () => {

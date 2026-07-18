@@ -170,7 +170,7 @@ Factory for fully agnostic clients. Returns `{ apiCall, apiStream, apiQuery, con
 
 #### `csrfConfig` — CSRF double-submit for cookie-auth writes
 
-When set, `apiCall` attaches the `X-CSRF-Token` header (read from the `csrf-token` cookie) on state-changing cookie-auth requests (POST/PUT/PATCH/DELETE with `credentials: 'include'` and no `Authorization: Bearer`). It primes the cookie on cache miss via `primeUrl` and retries once on a 403. GET/HEAD and Bearer requests are untouched. Omit to disable (default — backward compatible).
+When set, `apiCall` attaches the `X-CSRF-Token` header (read from the `csrf-token` cookie) on state-changing cookie-auth requests (POST/PUT/PATCH/DELETE with `credentials: 'include'` and no `Authorization: Bearer`). It primes the cookie on cache miss via `primeUrl`. On a `403`, it peeks the response body and re-primes + retries **once** only when the body confirms a CSRF mismatch — a genuine `403` (email-verify gate, RBAC denial, etc.) propagates to the caller unchanged, with no wasted prime GET / retry POST. GET/HEAD and Bearer requests are untouched. Omit to disable (default — backward compatible).
 
 ```ts
 const client = createApiClient({
@@ -179,12 +179,15 @@ const client = createApiClient({
     primeUrl: 'https://api.example.com/api/auth/login-cookie/csrf',
     // cookieName: 'csrf-token', // default
     // headerName: 'X-CSRF-Token', // default
+    // mismatchMatcher: (status, body) => ..., // default: matches 'csrf' in the parsed message/code
   },
 })
 
 // Cookie-auth write → SDK reads the cookie, attaches X-CSRF-Token, primes on miss.
 await client.apiCall('/account/change-email', { method: 'POST', body: { email: 'a@b.c' } })
 ```
+
+The default `mismatchMatcher` looks for `'csrf'` (case-insensitive) in the parsed error message or code, matching the `@ezstart/api-core` server (`'CSRF token mismatch'`). Override it when the upstream server signals CSRF mismatches with a different message/code.
 
 ### `ApiError`
 
