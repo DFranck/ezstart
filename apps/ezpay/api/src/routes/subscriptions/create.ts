@@ -75,7 +75,13 @@ const createSubscriptionSchema = z.object({
     .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
     .optional()
     .describe('Ignored — currency is resolved server-side from the linked Plan'),
-  customerEmail: z.string().email().optional().describe('Customer email'),
+  customerEmail: z
+    .string()
+    .email()
+    .optional()
+    .describe(
+      'Customer email — honoured ONLY on the secret admin S2S path. On the JWT path it is ignored and the verified identity email is used instead (anti dunning-spam).'
+    ),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
   /**
@@ -144,11 +150,23 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
      *      user's JWT Bearer token (path #1). We reject the request
      *      with 401 "Ownership proof required".
      *
-     * Additionally, `body.customerEmail` is trusted ONLY when the JWT-
-     * ownership path (#1) is in play — the JWT-verified user context
-     * establishes an email trust relationship. In path #2 (secret admin
-     * S2S) the caller is a trusted service — it may legitimately pass an
-     * email on behalf of the user. In path #3 we never reach here.
+     * **Customer email trust boundary (anti dunning-spam).** The persisted
+     * `Payment.customerEmail` feeds `handlePastDue` → `dunning.service.ts`
+     * (`to: args.customerEmail`), so an attacker-controlled value would let a
+     * JWT user trigger dunning-retry emails to an arbitrary address. We
+     * therefore NEVER trust `body.customerEmail` on the JWT path:
+     *
+     *   - Path #1 (JWT) — `body.customerEmail` is ignored entirely. We use
+     *     `req.user.email`, which comes from the ezauth-verified token
+     *     (`populateUserFromToken`). If the token carries no email claim we
+     *     store NO email at all (never the body). Zero added network call —
+     *     the email is already on the verified identity.
+     *   - Path #2 (secret admin S2S) — the caller holds a secret admin key,
+     *     which is functionally superadmin. `verifyUserExists` is PII-free
+     *     (`{ exists, isDeleted }`, no email) by GDPR design, so the body is
+     *     the only email signal available and the trusted service may
+     *     legitimately supply it on behalf of the user. Honoured here.
+     *   - Path #3 (publishable alone) — rejected before we reach here.
      *
      * We reject dangling references (`verifyUserExists` returns false → 400)
      * so a garbage id can't create an orphaned Payment row.
@@ -320,6 +338,12 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
     const mode = resolveRequestMode(req)
     const isTestMode = mode === 'test'
 
+    // Anti dunning-spam (see the trust-boundary JSDoc above). On the JWT path
+    // the persisted email is the ezauth-verified identity email — NEVER the
+    // request body (undefined when the token has no email claim → store none).
+    // Only a secret admin S2S caller may supply the email via the body.
+    const resolvedCustomerEmail = isSecretAdminKey ? customerEmail : req.user?.email
+
     const payment = await Payment.create({
       projectId,
       projectName: projectId,
@@ -327,7 +351,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       amount: finalAmount,
       currency,
       userId,
-      customerEmail,
+      customerEmail: resolvedCustomerEmail,
       isAnonymous: false,
       provider: 'stripe',
       paymentId: session.sessionId,
