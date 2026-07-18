@@ -20,6 +20,16 @@ export interface JwtUser {
   userId: string
   email?: string
   username?: string
+  /**
+   * Email-verification status carried by the ezauth JWT
+   * (`buildJwtPayload` → `isVerified: user.isVerified === true`). The token
+   * signature only proves the account exists, NOT that the email was
+   * verified — ezauth intentionally lets unverified accounts log in (Clerk
+   * pattern). Downstream sinks that email the account (dunning) MUST gate on
+   * this flag so an attacker who registers with a victim's email cannot make
+   * us mail that address. Absent on legacy tokens → treated as `false`.
+   */
+  isVerified?: boolean
   apps?: string[]
   globalRoles?: string[]
   appRoles?: Record<string, string[]>
@@ -67,6 +77,9 @@ export function populateUserFromToken(req: Request, _res: Response, next: NextFu
           userId: req.userId,
           email: decoded.email as string | undefined,
           username: decoded.username as string | undefined,
+          // Only `true` counts as verified — a missing/legacy claim or any
+          // non-true value is treated as unverified (fail-closed).
+          isVerified: decoded.isVerified === true,
           apps: decoded.apps as string[] | undefined,
           globalRoles: decoded.globalRoles as string[] | undefined,
           appRoles: decoded.appRoles as Record<string, string[]> | undefined,

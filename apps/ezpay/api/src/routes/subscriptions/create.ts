@@ -158,9 +158,14 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
      *
      *   - Path #1 (JWT) — `body.customerEmail` is ignored entirely. We use
      *     `req.user.email`, which comes from the ezauth-verified token
-     *     (`populateUserFromToken`). If the token carries no email claim we
-     *     store NO email at all (never the body). Zero added network call —
-     *     the email is already on the verified identity.
+     *     (`populateUserFromToken`), but ONLY when `req.user.isVerified ===
+     *     true`. A JWT signature proves the account exists, NOT that its email
+     *     was verified — ezauth lets unverified accounts log in (Clerk
+     *     pattern), so an attacker could register with a victim's email and
+     *     obtain a JWT carrying it. When the email is unverified (or the token
+     *     has no email claim) we store NO email at all (never the body). Zero
+     *     added network call — the email + verification flag are already on
+     *     the verified identity.
      *   - Path #2 (secret admin S2S) — the caller holds a secret admin key,
      *     which is functionally superadmin. `verifyUserExists` is PII-free
      *     (`{ exists, isDeleted }`, no email) by GDPR design, so the body is
@@ -340,9 +345,19 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     // Anti dunning-spam (see the trust-boundary JSDoc above). On the JWT path
     // the persisted email is the ezauth-verified identity email — NEVER the
-    // request body (undefined when the token has no email claim → store none).
-    // Only a secret admin S2S caller may supply the email via the body.
-    const resolvedCustomerEmail = isSecretAdminKey ? customerEmail : req.user?.email
+    // request body. It is further gated on `isVerified` (PAY-SUB-UNVERIFIED-
+    // EMAIL-DUNNING-001): a JWT signature proves the account exists but NOT
+    // that its email was verified (ezauth lets unverified accounts log in,
+    // Clerk pattern). Without the gate an attacker could register with a
+    // victim's email (`isVerified: false`), obtain a JWT carrying it, and make
+    // us mail dunning to the victim. So we store the token email ONLY when
+    // `isVerified === true`, else no email at all. Only a secret admin S2S
+    // caller (trusted service) may still supply the email via the body.
+    const resolvedCustomerEmail = isSecretAdminKey
+      ? customerEmail
+      : req.user?.isVerified === true
+        ? req.user?.email
+        : undefined
 
     const payment = await Payment.create({
       projectId,
