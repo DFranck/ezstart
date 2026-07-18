@@ -120,6 +120,15 @@ export const ezstartClient = createApiClient({
   refresh: {
     endpoint: `${getApiUrl('ezauth')}/api/auth/refresh`,
   },
+  // CSRF double-submit for cookie-auth writes (SDK-CSRF-APICALL-001 wiring).
+  // Primes + attaches `X-CSRF-Token` on state-changing cookie-auth calls
+  // (POST/PUT/PATCH/DELETE with `credentials: 'include'` and no Bearer token).
+  // Same priming endpoint as the auth-sdk `cookieWrite` helper
+  // (`GET /api/auth/login-cookie/csrf` — the OWASP double-submit prime route
+  // served by EZAuth). Bearer / GET callers are untouched.
+  csrfConfig: {
+    primeUrl: `${getApiUrl('ezauth')}/api/auth/login-cookie/csrf`,
+  },
   envelope: { unwrap: true, throwOnFailureEnvelope: true },
   pathPrefix: '/api',
   credentials: 'include',

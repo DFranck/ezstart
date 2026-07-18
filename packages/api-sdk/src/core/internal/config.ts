@@ -1,3 +1,4 @@
+import { createCsrfManager, type CsrfManager } from './csrf.js'
 import type { ApiClientConfig, BaseUrlResolver, ClientLogger, EnvelopeConfig } from '../types.js'
 
 /**
@@ -14,6 +15,8 @@ export type ResolvedConfig = Omit<
   envelope: EnvelopeConfig
   tokenStore: ApiClientConfig['tokenStore']
   refresh: ApiClientConfig['refresh']
+  /** CSRF manager for cookie-auth writes, or `null` when `csrfConfig` is absent. */
+  csrf: CsrfManager | null
 }
 
 // Silent by default (industry convention — ky/ofetch/axios don't log without
@@ -43,6 +46,7 @@ export function resolveConfig(config: ApiClientConfig): ResolvedConfig {
     credentials: config.credentials ?? 'include',
     pathPrefix: config.pathPrefix ?? '/api',
     logger: config.logger ?? DEFAULT_LOGGER,
+    csrf: config.csrfConfig ? createCsrfManager(config.csrfConfig) : null,
   }
 }
 
