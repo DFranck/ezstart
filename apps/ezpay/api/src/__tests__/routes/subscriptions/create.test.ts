@@ -34,8 +34,11 @@ vi.mock('../../../services/stripe.js', () => ({
 // --- ezauth-client mock (ownership source-of-truth) --------------------------
 let mockApplication: EzauthApplication | null = null
 const getApplicationMock = vi.fn(async () => mockApplication)
+// PII-free by design ({ exists, isDeleted } only) — never returns an email.
+const verifyUserExistsMock = vi.fn(async () => true)
 vi.mock('../../../services/ezauth-client.js', () => ({
   getApplication: getApplicationMock,
+  verifyUserExists: verifyUserExistsMock,
 }))
 
 // --- connect-fee mock (no Connect routing in these tests) --------------------
@@ -47,6 +50,13 @@ vi.mock('../../../services/connect-fee.js', () => ({
 let currentUserId: string | undefined = 'user-1'
 let currentGlobalRoles: string[] = []
 let currentApiKeyApplicationId: string | undefined
+// Email carried by the verified JWT identity (`req.user.email`). `undefined`
+// models a token with no email claim.
+let currentEmail: string | undefined
+// API-key context stamped by the real `api-key` middleware. `secret` + `admin`
+// makes `isSecretAdminKey` true → the S2S caller may supply `customerEmail`.
+let currentApiKeyType: 'publishable' | 'secret' | undefined
+let currentApiKeyScope: 'admin' | 'user' | 'readonly' | undefined
 
 vi.mock('../../../middleware/auth.js', () => ({
   isAdminUser: (req: express.Request): boolean =>
@@ -55,6 +65,8 @@ vi.mock('../../../middleware/auth.js', () => ({
 
 vi.mock('../../../middleware/unified-auth.js', () => ({
   authJwtOrKey: () => (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (currentApiKeyType) req.apiKeyType = currentApiKeyType
+    if (currentApiKeyScope) req.apiKeyScope = currentApiKeyScope
     if (currentApiKeyApplicationId) {
       req.apiKeyApplicationId = currentApiKeyApplicationId
       req.userId = currentUserId
@@ -68,6 +80,7 @@ vi.mock('../../../middleware/unified-auth.js', () => ({
     req.userId = currentUserId
     ;(req as unknown as { user: Record<string, unknown> }).user = {
       userId: currentUserId,
+      email: currentEmail,
       globalRoles: currentGlobalRoles,
     }
     next()
@@ -150,9 +163,14 @@ describe('POST /subscribe — price authority + tenant ownership (Wave E 1A)', (
       url: 'https://stripe.test/cs',
     })
     getApplicationMock.mockClear()
+    verifyUserExistsMock.mockClear()
+    verifyUserExistsMock.mockResolvedValue(true)
     currentUserId = 'user-1'
     currentGlobalRoles = []
     currentApiKeyApplicationId = undefined
+    currentEmail = undefined
+    currentApiKeyType = undefined
+    currentApiKeyScope = undefined
     mockApplication = {
       id: 'app-1',
       slug: 'myapp',
@@ -391,5 +409,83 @@ describe('POST /subscribe — price authority + tenant ownership (Wave E 1A)', (
     expect(res.status).toBe(200)
     expect(getApplicationMock).not.toHaveBeenCalled()
     expect(createSubscriptionCheckoutMock).toHaveBeenCalledTimes(1)
+  })
+
+  // --- customerEmail trust boundary (anti dunning-spam) ----------------------
+  // Persisted `Payment.customerEmail` feeds handlePastDue → dunning emails, so
+  // a JWT user MUST NOT be able to steer it to an arbitrary address.
+
+  async function persistedPayment(): Promise<PaymentDocument | null> {
+    return Payment.findOne({ paymentId: 'cs_sub_test' })
+  }
+
+  it('JWT path — IGNORES body.customerEmail and persists the verified identity email', async () => {
+    const planId = await seedPlan()
+    currentEmail = 'verified@example.com'
+
+    const res = await postSubscribe(app, {
+      projectId: 'myapp',
+      applicationId: 'app-1',
+      planId: String(planId),
+      customerEmail: 'attacker@evil.com', // attacker-controlled, must be dropped
+    })
+
+    expect(res.status).toBe(200)
+    const payment = await persistedPayment()
+    expect(payment?.customerEmail).toBe('verified@example.com')
+    expect(payment?.customerEmail).not.toBe('attacker@evil.com')
+  })
+
+  it('JWT path with no email claim — persists NO email (never the body)', async () => {
+    const planId = await seedPlan()
+    currentEmail = undefined // token carries no email claim
+
+    const res = await postSubscribe(app, {
+      projectId: 'myapp',
+      applicationId: 'app-1',
+      planId: String(planId),
+      customerEmail: 'attacker@evil.com', // must NOT be persisted
+    })
+
+    expect(res.status).toBe(200)
+    const payment = await persistedPayment()
+    expect(payment?.customerEmail).toBeUndefined()
+  })
+
+  it('secret admin S2S key — HONOURS body.customerEmail (only email signal available)', async () => {
+    const planId = await seedPlan()
+    // Secret admin key bound to app-1 → authority passes via the binding.
+    currentApiKeyApplicationId = 'app-1'
+    currentApiKeyType = 'secret'
+    currentApiKeyScope = 'admin'
+    currentUserId = 'key-owner'
+
+    const res = await postSubscribe(app, {
+      projectId: 'myapp',
+      planId: String(planId),
+      customerEmail: 'admin-supplied@example.com',
+    })
+
+    expect(res.status).toBe(200)
+    const payment = await persistedPayment()
+    expect(payment?.customerEmail).toBe('admin-supplied@example.com')
+  })
+
+  it('user-scoped (non-admin) key — IGNORES body.customerEmail', async () => {
+    const planId = await seedPlan()
+    currentApiKeyApplicationId = 'app-1'
+    currentApiKeyType = 'publishable'
+    currentApiKeyScope = 'user'
+    currentUserId = 'key-owner'
+
+    const res = await postSubscribe(app, {
+      projectId: 'myapp',
+      planId: String(planId),
+      customerEmail: 'attacker@evil.com',
+    })
+
+    expect(res.status).toBe(200)
+    const payment = await persistedPayment()
+    expect(payment?.customerEmail).toBeUndefined()
   })
 })
