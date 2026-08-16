@@ -61,7 +61,9 @@ export default function Header() {
         <Div className="flex items-center gap-2">
           {isDesktop && (
             <NavMenu
-              className={cn('sticky top-14 flex items-center justify-center gap-2 w-full z-20')}
+              className={cn(
+                'sticky top-14 flex flex-row items-center justify-center gap-2 w-full z-20'
+              )}
             />
           )}
           {/* <HeaderControls /> */}
