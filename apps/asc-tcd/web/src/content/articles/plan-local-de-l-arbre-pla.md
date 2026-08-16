@@ -2,7 +2,7 @@
 title: "Plan Local de l'Arbre (PLA) : préserver et transplanter les arbres urbains"
 description: Et si les arbres condamnés par les projets urbains devenaient une ressource climat ? Le Plan Local de l'Arbre (PLA) relie besoins de canopée, arbres transplantables et calendrier des projets.
 date: 2026-08-16
-cover: /images/articles/pla-planification.webp
+cover: /images/articles/pla-2-planification.webp
 tags: Plan Local de l'Arbre, canopée urbaine, transplantation, adaptation climatique, SIG, collectivités
 author: ASC TCD
 draft: false
@@ -22,6 +22,8 @@ plantés, mais de se demander : **où avons-nous besoin de canopée, avec quelle
 intensité et dans quels délais ?**
 
 ## Besoin de canopée d'un côté, arbres condamnés de l'autre : un paradoxe territorial
+
+![Un déficit de canopée d'un côté, des arbres matures menacés par des projets de l'autre : l'arbre est une ressource territoriale — conserver d'abord, évaluer ensuite, transplanter si possible](/images/articles/pla-1-paradoxe.webp)
 
 Pendant que les collectivités cherchent à végétaliser des espaces exposés aux
 fortes chaleurs, des arbres adultes disparaissent simultanément dans le cadre de
@@ -72,12 +74,14 @@ complète : préparation éventuelle du sujet, prélèvement, manutention, trans
 préparation du site receveur, plantation, stabilisation, gestion de l'eau et
 suivi post-transplantation.
 
-![La transplantation d'un arbre adulte étape par étape : étude et diagnostic, prélèvement mécanique, transport et plantation, suivi post-transplantation — 98 % de reprise en moyenne avec un suivi hydrique adapté pendant 2 ans](/images/articles/pla-transplantation.webp)
+![La transplantation d'un arbre adulte étape par étape : étude et diagnostic, prélèvement mécanique, transport et plantation, suivi post-transplantation — 98 % de reprise en moyenne avec un suivi hydrique adapté pendant 2 ans](/images/articles/pla-4-transplantation.webp)
 
 **La transplantation est donc une solution de sauvegarde après évitement, et non
 une alternative automatique à la conservation.**
 
 ## Le Plan Local de l'Arbre : d'une politique de plantation à une gestion de la canopée
+
+![Le PLA, un outil de planification à l'échelle du territoire : relier les besoins de canopée, les ressources végétales disponibles et le calendrier des projets — la bonne ressource, au bon endroit, au bon moment](/images/articles/pla-2-planification.webp)
 
 Un Plan Local de l'Arbre met en relation trois informations jusqu'ici souvent
 gérées séparément : **les besoins de canopée** du territoire, **les ressources
@@ -139,6 +143,8 @@ plusieurs décennies ? L'arbre qui n'apparaissait que comme une contrainte dans 
 bilan d'un chantier devient une **ressource territoriale à qualifier.**
 
 ### Mettre en relation besoins et ressources grâce au SIG
+
+![Le PLA en action, le SIG au service de la décision : croiser une couche besoins de canopée, une couche arbres menacés et une couche transplantabilité pour prioriser les zones d'opportunité](/images/articles/pla-3-sig.webp)
 
 C'est ici que le Plan Local de l'Arbre prend toute sa dimension. Une couche SIG
 « besoins » identifie les secteurs prioritaires (déficit de canopée + exposition
