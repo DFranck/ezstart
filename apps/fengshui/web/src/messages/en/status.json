@@ -1,0 +1,37 @@
+{
+  "status": {
+    "title": "Status",
+    "intro": "Real-time health of upstream services used by FengShui. Auto-refreshed every 30s.",
+    "componentsHeading": "Service components",
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "No active incidents reported.",
+    "lastCheckedLabel": "Last checked",
+    "responseTimeLabel": "Response time",
+    "refreshHint": "Auto-refreshes every {seconds}s",
+    "refreshButton": "Refresh now",
+    "dependenciesLabel": "Dependencies",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Slow",
+      "down": "Down"
+    },
+    "summary": {
+      "operational": "All systems operational",
+      "degraded": "Partial service disruption",
+      "down": "Major outage",
+      "checking": "Checking services"
+    },
+    "state": {
+      "operational": "Operational",
+      "degraded": "Degraded",
+      "down": "Down",
+      "checking": "Checking"
+    },
+    "services": {
+      "ezauthApi": "EZAuth API",
+      "ezauthApiDescription": "Authentication, sessions, OAuth, API keys",
+      "ezpayApi": "EZPay API",
+      "ezpayApiDescription": "Plans, subscriptions, payments"
+    }
+  }
+}

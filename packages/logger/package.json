@@ -1,41 +1,75 @@
 {
   "name": "@ezstart/logger",
-  "version": "0.0.1",
-  "description": "Structured logging with Pino for @ezstart monorepo",
+  "version": "0.2.0",
+  "description": "Universal structured logger for the @ezstart monorepo. Auto-resolves to Pino server-side, console wrappers browser-side — single import works everywhere.",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/logger"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/logger",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "logger",
+    "logging",
+    "pino",
+    "structured-logging",
+    "isomorphic",
+    "universal",
+    "browser",
+    "node",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": "./dist/index.js",
+      "node": "./dist/server.js",
       "default": "./dist/index.js"
     },
     "./server": {
       "types": "./dist/server.d.ts",
       "default": "./dist/server.js"
+    },
+    "./client": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc --watch",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@sentry/node": "^10.20.0",
-    "@sentry/profiling-node": "^10.20.0",
-    "dotenv": "^17.2.3",
     "pino": "^9.5.0",
     "pino-pretty": "^11.3.0"
   },
   "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"
   },
   "engines": {
-    "node": "20.18.x",
-    "pnpm": "10.12.x"
+    "node": ">=18.0.0"
   }
 }

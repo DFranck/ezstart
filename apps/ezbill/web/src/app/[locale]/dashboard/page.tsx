@@ -14,6 +14,7 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import {
   Div,
+  P,
   Spinner,
   SkeletonCard,
   Skeleton,
@@ -202,21 +203,23 @@ const DashboardPage = () => {
           ? (deleteDialog.item as Client).clientName
           : (deleteDialog.item as PaymentMethod).name
 
+    const headers = user?._id ? { 'X-User-Id': user._id } : undefined
+
     try {
       if (deleteDialog.type === 'company') {
         await callApi(`/companies/${deleteDialog.item._id}`, {
           method: 'DELETE',
-          userId: user?._id,
+          headers,
         })
       } else if (deleteDialog.type === 'client') {
         await callApi(`/clients/${deleteDialog.item._id}`, {
           method: 'DELETE',
-          userId: user?._id,
+          headers,
         })
       } else if (deleteDialog.type === 'payment-method') {
         await callApi(`/payment-methods/${deleteDialog.item._id}`, {
           method: 'DELETE',
-          userId: user?._id,
+          headers,
         })
       }
       toast.success(tToast('deleteSuccess', { name: itemName }))
@@ -423,7 +426,7 @@ const DashboardPage = () => {
                     name="lucide:SearchX"
                     className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50"
                   />
-                  <p className="text-muted-foreground">{tDashboard('noSearchResults')}</p>
+                  <P className="text-muted-foreground">{tDashboard('noSearchResults')}</P>
                 </Div>
               )
             )}

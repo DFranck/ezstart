@@ -30,7 +30,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import type { JWTPayload } from '../types.js'
+import type { JWTPayload } from '../core/types.js'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -305,9 +305,12 @@ function buildLoginRedirect(
     }
   }
 
-  // Build callback URI (where EZAuth redirects back after login)
-  const localePrefix = locale ? `/${locale}` : `/${defaultLocale}`
-  const redirectUri = `${currentUrl.origin}${localePrefix}/auth/callback`
+  // Build callback URI (where EZAuth redirects back after login).
+  // RFC 6749 §4.1.3 round-trip alignment — locale-LESS to match what the
+  // SDK's exchangeCode sends at /token (= `detectRedirectUri()` =
+  // `{origin}/auth/callback`). next-intl middleware routes the locale-less
+  // path to `/{defaultLocale}/auth/callback` so the page still resolves.
+  const redirectUri = `${currentUrl.origin}/auth/callback`
 
   // Build login URL with params
   const loginRedirect = new URL(`${loginBase}/login`)

@@ -4,7 +4,7 @@
  * Get health check for specific project
  */
 
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import { ProjectHealthChecker } from '@ezstart/monitoring'
 import type { ProjectId } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'

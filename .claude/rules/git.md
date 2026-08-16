@@ -1,5 +1,44 @@
 ## 📝 Git et Documentation
 
+**Toutes les règles de ce fichier sont 🔴 P0** (workflow non-négociable). Voir `standard.md` pour le système de priorisation global.
+
+### 0. Modèle de branches (2026-06-21)
+
+**3 branches permanentes** :
+
+| Branche      | Rôle                                                                        | Environnement                    | Qui déploie   |
+| ------------ | --------------------------------------------------------------------------- | -------------------------------- | ------------- |
+| `dev`        | Local working branch (toi + MCP + manager). Push remote = backup seulement. | aucun                            | personne      |
+| `master`     | Staging environment. Test data. Validation avant prod.                      | Vercel preview + Railway staging | auto sur push |
+| `production` | Production environment. Real data.                                          | Vercel prod + Railway prod       | auto sur push |
+
+**Flow obligatoire — TOUT passe par worktree** (même petits fixes) :
+
+```
+worktree feat/xxx (créée depuis master)
+  ↓ agent code + tests
+  ↓ merge worktree → dev (local — manager valide via MCP/dev server)
+  ↓ merge worktree → master (push — auto-deploy staging, validation)
+  ↓ user valide staging (E2E)
+  ↓ PR worktree → production (auto-deploy prod après merge)
+  ↓ auto-cleanup worktree (delete branch local + remote)
+```
+
+**Règles strictes** :
+
+- ❌ JAMAIS de commit direct sur `master` ou `production` (toujours via worktree → PR)
+- ❌ JAMAIS de force push sur `production` sauf hotfix incident (documenté)
+- ❌ JAMAIS skip l'étape `dev` validation locale (catch les regressions avant staging)
+- ✅ Worktree branches préfixées par `feat/`, `fix/`, `refactor/`, `chore/`, `hotfix/`
+- ✅ Worktree branche delete après PR merge (auto via GitHub Action OU `git worktree prune` local)
+- ✅ Hotfix prod urgent : worktree depuis `production` → PR directe `production` (avec backport `master` + `dev` ensuite)
+
+**Vercel/Railway config** :
+
+- Vercel "Production Branch" = `production` (8 projects ezstart team)
+- Railway production env = branch `production` (12 services across ezstart-apis + TeamProjects)
+- Railway staging env = branch `master`
+
 ### 1. Commits - Structure Recommandée
 
 ```
@@ -44,8 +83,9 @@ pnpm typecheck
 
 ### 4. Backlog Formatting
 
-- App backlogs (`apps/*/BACKLOG.md`) utilisent `- [ ]` (tirets), **PAS** de listes numérotées (`1. [ ]`). Cela évite les conflits de merge quand plusieurs personnes ajoutent des items.
-- Seul le BACKLOG racine du monorepo (`BACKLOG.md`) peut utiliser des numéros.
+- Un seul fichier `BACKLOG.md` (root) pour les items actifs + `BACKLOG-HISTORY.md` (root) pour l'archive des items terminés. Pas de backlog per-app.
+- Utiliser `- [ ]` / `- [x]` (tirets), **PAS** de listes numérotées (`1. [ ]`). Cela évite les conflits de merge quand plusieurs personnes ajoutent des items.
+- Claude déplace les `- [x]` de `BACKLOG.md` vers `BACKLOG-HISTORY.md` à chaque passe de maintenance.
 
 ### 5. Documentation README
 

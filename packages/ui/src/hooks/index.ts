@@ -1,4 +1,5 @@
 export * from './use-click-outside'
+export * from './use-deprecation-warning'
 export * from './use-device'
 export * from './use-in-view'
 export * from './use-on-scroll'

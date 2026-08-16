@@ -1,71 +1,37 @@
 'use client'
 
+import { Dropdown } from '@ezstart/ui/components'
+import { useDeprecationWarning } from '@ezstart/ui/hooks'
 import { useState } from 'react'
-import { Button, Dropdown, type DropdownItem, Icon, Div, Span } from '@ezstart/ui/components'
-import { useAuth } from '../provider.js'
-import { UserAvatar } from './UserAvatar.js'
+import { useAuth } from '../react/hooks.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { AccountModal } from './AccountModal.js'
+import { LoginButton } from './LoginButton.js'
+import { UserMenuAuthenticatedTrigger } from './user-menu/authenticated-trigger.js'
+import { buildUserMenuItems } from './user-menu/items.js'
+import { UserMenuSignedOutTrigger } from './user-menu/signed-out-trigger.js'
+import { getDefaultTexts, type UserMenuProps, type UserMenuTexts } from './user-menu/types.js'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// Public types live in `./user-menu/types.ts`; re-exported here to preserve the
+// canonical `@ezstart/auth-sdk` import path (the barrel re-exports from here).
+export type { UserMenuItem, UserMenuProps, UserMenuTexts } from './user-menu/types.js'
 
-export interface UserMenuItem {
-  /** Display label */
-  label: string
-  /** Navigation href (rendered as onClick with window.location) */
-  href?: string
-  /** Lucide icon name (e.g. 'lucide:Settings') */
-  icon?: string
-  /** Click handler */
-  onClick?: () => void
-  /** Renders a separator before this item */
-  separator?: boolean
-}
-
-export interface UserMenuTexts {
-  signIn: string
-  signOut: string
-  manageAccount: string
-}
-
-export interface UserMenuProps {
-  /** Available languages for selector */
-  languages?: { code: string; label: string }[]
-  /** Current locale code */
-  currentLocale?: string
-  /** Locale change handler */
-  onLocaleChange?: (locale: string) => void
-  /** Custom menu items injected by the app */
-  extraItems?: UserMenuItem[]
-  /** Additional class name on the root container */
-  className?: string
-  /** Override default texts */
-  texts?: Partial<UserMenuTexts>
-  /** Avatar trigger size */
-  avatarSize?: 'sm' | 'md' | 'lg'
-  /** Theme getter — pass `useTheme()` result to avoid hard dep on next-themes */
-  theme?: { theme?: string; setTheme: (t: string) => void }
-  /** Override "Manage account" behavior (e.g. navigate to settings page) */
-  onManageAccount?: () => void
-  /** Override texts for AccountModal */
-  accountModalTexts?: Record<string, string>
-  /** Google OAuth URL for "Connect account" button in AccountModal */
-  googleOAuthUrl?: string
-  /** Dropdown open direction */
-  side?: 'top' | 'bottom'
-  /** Trigger style: 'icon' = avatar only, 'extended' = avatar + name + email */
-  variant?: 'icon' | 'extended'
-}
-
-// ─── Defaults ────────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: UserMenuTexts = {
-  signIn: 'Sign in',
-  signOut: 'Sign out',
-  manageAccount: 'Manage account',
-}
-
-// ─── Component ───────────────────────────────────────────────────────────────
-
+/**
+ * V1 user dropdown menu (compact list pattern) showing avatar, account info,
+ * theme switcher, language switcher, and sign-out action. Renders a sign-in
+ * CTA when the user is not authenticated.
+ *
+ * @deprecated Use `UserMenuV2` for the modern dropdown panel pattern (avatar
+ * + identity card + email-verified badge + plan badge + notifications +
+ * sign-out-all). `UserMenu` will be removed 2026-08-01. See migration guide.
+ *
+ * @example
+ * ```tsx
+ * <UserMenu
+ *   languages={[{ code: 'en', label: 'EN' }, { code: 'fr', label: 'FR' }]}
+ * />
+ * ```
+ */
 export function UserMenu({
   languages,
   currentLocale,
@@ -80,95 +46,100 @@ export function UserMenu({
   googleOAuthUrl,
   side = 'bottom',
   variant = 'icon',
+  redirectAfterLogout = '/',
+  onLogout,
+  hideSignIn = false,
+  signInProps,
+  locale: propLocale,
 }: UserMenuProps) {
-  const { user, isAuthenticated, login, logout, isLoggingIn } = useAuth()
-  const texts = { ...DEFAULT_TEXTS, ...textOverrides }
+  useDeprecationWarning(
+    'UserMenu (V1) from @ezstart/auth-sdk',
+    'UserMenuV2 from @ezstart/auth-sdk/components'
+  )
+  const { user, isAuthenticated, login, logout, isLoggingIn, setLoggingIn, isLoggingOut } =
+    useAuth()
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
+  const texts: UserMenuTexts = { ...getDefaultTexts(locale), ...textOverrides }
   const [showAccount, setShowAccount] = useState(false)
 
-  // ── Not authenticated: show sign-in button ──
-  if (!isAuthenticated || !user) {
-    return (
-      <Button
-        variant="default"
-        size="default"
-        className={className}
-        onClick={() => login()}
-        disabled={isLoggingIn}
-      >
-        <Icon name="lucide:LogIn" className="w-4 h-4 mr-2" />
-        {isLoggingIn ? '...' : texts.signIn}
-      </Button>
-    )
-  }
-
-  const fullName = user.firstName
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
-    : user.username
-
-  // ── Build dropdown items ──
-  const items: DropdownItem[] = []
-
-  // 1. Header: avatar + name + email (non-clickable)
-  items.push({
-    label: (
-      <Div className="flex items-center gap-2 pointer-events-none">
-        <UserAvatar size="sm" user={user} />
-        <Div className="flex flex-col min-w-0">
-          <Span className="text-sm font-medium text-foreground truncate">{fullName}</Span>
-          <Span className="text-xs text-muted-foreground truncate">{user.email}</Span>
-        </Div>
-      </Div>
-    ),
-    value: '_user-info',
-    disabled: true,
-    divider: true,
-  })
-
-  // 2. Manage account
-  items.push({
-    label: texts.manageAccount,
-    value: '_manage-account',
-    icon: <Icon name="lucide:Settings" className="w-4 h-4" />,
-    onSelect: () => {
-      if (onManageAccount) {
-        onManageAccount()
-      } else {
-        setShowAccount(true)
-      }
-    },
-  })
-
-  // 3. Extra items from the app
-  if (extraItems && extraItems.length > 0) {
-    extraItems.forEach((item, index) => {
-      if (item.separator && index > 0) {
-        const prevItem = items[items.length - 1]
-        if (prevItem) prevItem.divider = true
-      }
-
-      items.push({
-        label: item.label,
-        value: `extra-${index}`,
-        icon: item.icon ? (
-          <Icon name={item.icon as 'lucide:LogIn'} className="w-4 h-4" />
-        ) : undefined,
-        onSelect: () => {
-          if (item.onClick) item.onClick()
-          if (item.href) window.location.href = item.href
-        },
-      })
+  // Logout flow — delegated to `useAuth().logout()` which runs the full
+  // 8-step orchestration (cf. standard-sdk-dx.md §11ter). The component
+  // forwards its per-instance overrides (redirect target + onLogout hook
+  // + localized toast text) so the SDK pipeline does the heavy lifting.
+  const handleLogout = () => {
+    void logout({
+      redirectAfterLogout,
+      onLogout,
+      texts: {
+        signOutSuccess: texts.signOutSuccess,
+        signOutError: texts.signOutError,
+      },
     })
   }
 
-  // 4. Divider + Sign out (destructive)
-  const lastItem = items[items.length - 1]
-  if (lastItem) lastItem.divider = true
+  // ── Not authenticated: render the SAME visual trigger shape as the
+  // authenticated state, just with a generic placeholder (UserCircle icon
+  // for `'icon'` variant, "Sign in" row for `'extended'`) and `onClick =
+  // login()`. Mirroring the authenticated trigger keeps the chrome stable
+  // across auth state changes — the consumer mounts `<UserMenu />` once and
+  // visits both states without an unmount/remount that would interrupt
+  // in-flight toasts (e.g. the post-logout success toast).
+  //
+  // Override the visual via `signInProps`: pass any `LoginButtonProps`
+  // (`variant`, `size`, `icon`, `loginText`, ...) — when present, we
+  // delegate to `<LoginButton>` instead of the matching round / extended
+  // shape. Useful when the design wants a colored CTA in the not-auth state.
+  if (!isAuthenticated || !user) {
+    if (hideSignIn) return null
 
-  items.push({
-    label: <Span className="text-destructive">{texts.signOut}</Span>,
-    value: '_sign-out',
-    icon: <Icon name="lucide:LogOut" className="w-4 h-4 text-destructive" />,
-    onSelect: () => logout(),
+    if (signInProps) {
+      return (
+        <LoginButton
+          loginText={texts.signIn}
+          {...signInProps}
+          className={signInProps.className ?? className}
+        />
+      )
+    }
+
+    const handleSignInClick = () => {
+      if (isLoggingIn) return
+      // `useAuth().login()` performs a hard `window.location.href` redirect
+      // and never sets `isLoggingIn` itself — the caller is responsible for
+      // flipping the flag so subscribers (this button's spinner / disabled
+      // state, RequireAuth's loader, etc.) reflect the in-flight redirect.
+      // Mirror what `<LoginButton>` does to keep the spinner visible from
+      // click → cross-app navigation.
+      setLoggingIn(true)
+      void login()
+    }
+
+    return (
+      <UserMenuSignedOutTrigger
+        variant={variant}
+        avatarSize={avatarSize}
+        signInLabel={texts.signIn}
+        isLoggingIn={isLoggingIn}
+        className={className}
+        onClick={handleSignInClick}
+      />
+    )
+  }
+
+  // ── Build dropdown items ──
+  const items = buildUserMenuItems({
+    user,
+    texts,
+    isLoggingOut,
+    extraItems,
+    theme,
+    languages,
+    currentLocale,
+    onLocaleChange,
+    onManageAccount,
+    onOpenAccount: () => setShowAccount(true),
+    onLogout: handleLogout,
   })
 
   // ── Render ──
@@ -176,30 +147,7 @@ export function UserMenu({
     <>
       <Dropdown
         trigger={
-          variant === 'extended' ? (
-            <Button
-              variant="ghost"
-              className="w-full justify-start h-auto py-2 px-2 cursor-pointer"
-              aria-label="User menu"
-            >
-              <Div className="flex items-center gap-2 w-full min-w-0">
-                <UserAvatar size={avatarSize} user={user} />
-                <Div className="flex flex-col min-w-0 text-left">
-                  <Span className="text-sm font-medium truncate">{fullName}</Span>
-                  <Span className="text-xs text-muted-foreground truncate">{user.email}</Span>
-                </Div>
-              </Div>
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full cursor-pointer"
-              aria-label="User menu"
-            >
-              <UserAvatar size={avatarSize} user={user} />
-            </Button>
-          )
+          <UserMenuAuthenticatedTrigger user={user} variant={variant} avatarSize={avatarSize} />
         }
         items={items}
         align="end"

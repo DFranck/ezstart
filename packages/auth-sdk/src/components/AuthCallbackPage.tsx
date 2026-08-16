@@ -1,0 +1,372 @@
+'use client'
+import { parseApiError } from '@ezstart/api-sdk'
+import {
+  safeGetLocalStorage,
+  safeRemoveLocalStorage,
+  safeGetSessionStorage,
+  safeRemoveSessionStorage,
+} from '../core/safe-storage.js'
+import { PKCE_VERIFIER_STORAGE_KEY } from '../core/pkce.js'
+import { Button, Div, P, Spinner } from '@ezstart/ui/components'
+import { logger } from './internal-logger.js'
+import { useRouter, useSearchParams } from 'next/navigation'
+import React, { Suspense, useEffect, useState } from 'react'
+import { useAuth } from '../react/hooks.js'
+import type { ThemePreference } from './themePreference.js'
+
+/** Module-level lock to prevent duplicate OAuth code exchanges. */
+const processingLocks = new Set<string>()
+
+/**
+ * Apply a theme preference propagated from the ezauth auth pages by writing
+ * the `theme` cookie that `next-themes` reads. Kept as a cookie write
+ * (rather than importing `next-themes`) so the SDK has zero runtime
+ * dependency on the theming library — the consumer's next-themes instance
+ * picks up the cookie on the next render tick. Returns silently when the
+ * value is not in the whitelist or when executed server-side.
+ */
+function applyCallbackThemePreference(value: string | null | undefined): void {
+  if (typeof document === 'undefined') return
+  if (value !== 'light' && value !== 'dark' && value !== 'system') return
+  const preference: ThemePreference = value
+  // SameSite=Lax + path=/ mirrors next-themes' own cookie shape. 1 year
+  // expiry matches the next-themes default so the preference survives
+  // across sessions until the user changes it.
+  const maxAge = 60 * 60 * 24 * 365
+  document.cookie = `theme=${preference}; path=/; max-age=${maxAge}; samesite=lax`
+  // Nudge next-themes to pick it up immediately by mirroring the class on
+  // <html>. This is a best-effort — next-themes will reconcile on its own
+  // effect, but doing it here removes a brief flash.
+  const root = document.documentElement
+  if (preference === 'dark') {
+    root.classList.remove('light')
+    root.classList.add('dark')
+  } else if (preference === 'light') {
+    root.classList.remove('dark')
+    root.classList.add('light')
+  }
+  // 'system' → let next-themes resolve via media query on its next effect.
+}
+
+/**
+ * Extract a human-readable message from an unknown auth error.
+ *
+ * Handles: envelope `{ error: { message, code } }`, flat `{ error: string }`,
+ * native `Error`, `Error` whose message is `[object Object]` (the bug this fixes),
+ * plain strings, and unknown/undefined shapes.
+ */
+function extractAuthErrorMessage(err: unknown, fallback: string): string {
+  // 1. Try API envelope parser first (handles { error: { message } }, details[], etc.)
+  const parsed = parseApiError(err)
+  if (parsed && parsed !== '[object Object]') return parsed
+
+  // 2. If native Error, check its `.message` but reject `[object Object]` (the bug)
+  if (err instanceof Error && err.message && err.message !== '[object Object]') {
+    return err.message
+  }
+
+  // 3. Try to pull a message from common nested shapes on Error.cause or similar
+  if (err instanceof Error && err.cause !== undefined) {
+    const fromCause = parseApiError(err.cause)
+    if (fromCause && fromCause !== '[object Object]') return fromCause
+  }
+
+  // 4. Plain string
+  if (typeof err === 'string' && err.length > 0 && err !== '[object Object]') return err
+
+  // 5. Last resort
+  return fallback
+}
+
+interface AuthCallbackPageProps {
+  /** Redirect path after successful authentication. Defaults to '/' */
+  redirectTo?: string
+  /**
+   * Fallback href used by the error-state "Go Back" button when authentication
+   * fails. Defaults to `'/'`. Consumers should pass a locale-prefixed path
+   * (e.g. `` `/${locale}` ``) to avoid hitting the non-localized root 404.
+   */
+  fallbackHref?: string
+  /** Custom success message. Defaults to 'Authentication successful!' */
+  successMessage?: string
+  /** Custom redirect message. Defaults to 'Redirecting...' */
+  redirectMessage?: string
+  /** Custom processing message. Defaults to 'Processing authentication...' */
+  processingMessage?: string
+  /** Custom error title. Defaults to 'Authentication failed' */
+  errorTitle?: string
+  /** Custom no-code error message. Defaults to 'No authorization code found' */
+  noCodeMessage?: string
+  /** Custom error button text. Defaults to 'Go Back' */
+  errorButtonText?: string
+}
+
+function CallbackContent({
+  redirectTo = '/',
+  fallbackHref = '/',
+  successMessage = 'Authentication successful!',
+  redirectMessage = 'Redirecting...',
+  processingMessage = 'Processing authentication...',
+  errorTitle = 'Authentication failed',
+  noCodeMessage = 'No authorization code found',
+  errorButtonText = 'Go Back',
+}: AuthCallbackPageProps): React.ReactElement {
+  const { handleCallback, isAuthenticated } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const [error, setError] = useState<string>('')
+
+  // Use a ref to capture the code synchronously on first render, before any
+  // URL cleanup or re-render can remove it from `searchParams`. This avoids
+  // the race condition where `window.history.replaceState` causes
+  // `useSearchParams` to re-render with an empty query string before the
+  // React state update from `setCode` has committed.
+  const codeRef = React.useRef<string | null>(null)
+  // Same rationale as `codeRef` — capture `?theme=` synchronously before
+  // the history replace below wipes the query string.
+  const themeRef = React.useRef<string | null>(null)
+
+  if (codeRef.current === null) {
+    // Try searchParams first (Next.js hook), then fall back to raw URL
+    // in case the hook hasn't synced yet.
+    const fromHook = searchParams.get('code')
+    const fromUrl =
+      typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('code') : null
+    codeRef.current = fromHook || fromUrl || ''
+  }
+
+  if (themeRef.current === null) {
+    const fromHook = searchParams.get('theme')
+    const fromUrl =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('theme')
+        : null
+    themeRef.current = fromHook || fromUrl || ''
+  }
+
+  const code = codeRef.current || null
+  const themeFromCallback = themeRef.current || null
+
+  // Apply the consumer's theme preference propagated from ezauth via
+  // `?theme=`. The value is whitelisted inside `applyCallbackThemePreference`
+  // so anything malformed is a no-op. This makes the ezauth → consumer
+  // round trip preserve the user's light/dark choice: if the user switched
+  // scheme on the ezauth login page, the consumer adopts it on callback.
+  useEffect(() => {
+    applyCallbackThemePreference(themeFromCallback)
+  }, [themeFromCallback])
+
+  // Clean URL once we've captured the code (fire-and-forget, no deps on searchParams)
+  useEffect(() => {
+    if (code && typeof window !== 'undefined') {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [code])
+
+  // Process the saved code with global lock to prevent race conditions
+  useEffect(() => {
+    if (!code) {
+      // No code present in the URL. Two distinct cases:
+      //   1. User is ALREADY authenticated (e.g. same-origin login already
+      //      exchanged the code locally and navigated here, or session was
+      //      restored from cookie/localStorage). Treat this as a normal
+      //      "post-login landing" and redirect to `redirectTo` instead of
+      //      surfacing a misleading error.
+      //   2. User is anonymous and arrived without a code. That IS an error
+      //      (broken SSO flow, manual URL paste, browser back-button after
+      //      logout). Surface `noCodeMessage` so the consumer can offer a
+      //      "Go to login" recovery button.
+      if (isAuthenticated) {
+        setStatus('success')
+        if (typeof window !== 'undefined') {
+          // Use a hard navigation so the destination paints in its
+          // post-auth SSR state, not a stale client-side route transition.
+          window.location.href = redirectTo
+        }
+        return
+      }
+      setStatus('error')
+      setError(noCodeMessage)
+      return
+    }
+
+    if (status !== 'loading') {
+      return
+    }
+
+    // Module-level lock to prevent multiple instances processing the same code
+    const lockKey = `auth_processing_${code}`
+
+    if (processingLocks.has(lockKey)) {
+      return
+    }
+
+    const processCallback = async () => {
+      processingLocks.add(lockKey)
+
+      try {
+        // PKCE (RFC 7636) — if a same-origin OAuth/login flow stashed a
+        // `code_verifier` in sessionStorage before the redirect, recover it
+        // now and complete the bound exchange. When absent (cross-origin SSO,
+        // or a code minted without a challenge) the exchange runs the legacy
+        // path — backward compatible.
+        //
+        // MED-2 — the verifier is cleared ONLY AFTER a successful exchange
+        // (see below), never before the `await`. Clearing it up-front meant a
+        // transient failure (network blip, cold start) destroyed the verifier
+        // and made any retry impossible: the re-navigation would find an empty
+        // sessionStorage and the (PKCE-bound) code could never be redeemed.
+        // Keeping it on failure lets a remount/retry recover and complete it.
+        const pkceVerifier = safeGetSessionStorage(PKCE_VERIFIER_STORAGE_KEY) ?? undefined
+
+        await handleCallback(code, pkceVerifier)
+
+        // Exchange succeeded — NOW clear the single-use verifier (hygiene).
+        if (pkceVerifier) {
+          safeRemoveSessionStorage(PKCE_VERIFIER_STORAGE_KEY)
+        }
+
+        setStatus('success')
+
+        // The session is now established. Everything below is best-effort
+        // redirect bookkeeping — a `localStorage` failure (Safari private
+        // mode, disabled storage) must NEVER surface "Authentication failed"
+        // when the user is, in fact, authenticated. `safeGetLocalStorage`
+        // returns `null` on failure → we fall back to the prop default.
+        const savedRedirect = safeGetLocalStorage('ezauth_redirect_after_login')
+
+        // Use saved redirect if available, otherwise use prop default
+        const finalRedirect = savedRedirect || redirectTo
+
+        // Clear saved redirect (no-op + non-throwing when storage unavailable)
+        if (savedRedirect) {
+          safeRemoveLocalStorage('ezauth_redirect_after_login')
+        }
+
+        // Redirect after successful auth
+        setTimeout(() => router.push(finalRedirect), 1500)
+      } catch (err) {
+        const message = extractAuthErrorMessage(err, 'Authentication failed. Please try again.')
+        logger.error('[AuthCallback] Authentication failed:', message)
+        setStatus('error')
+        setError(message)
+      } finally {
+        processingLocks.delete(lockKey)
+      }
+    }
+
+    // Add a small delay to avoid race conditions with AuthProvider
+    const timeoutId = setTimeout(() => {
+      processCallback()
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [code, handleCallback, router, status, redirectTo, noCodeMessage, isAuthenticated])
+
+  if (status === 'loading') {
+    return (
+      <Div className="min-h-screen flex items-center justify-center">
+        <Div className="flex flex-col items-center gap-4">
+          <Spinner />
+          <P className="text-muted-foreground">{processingMessage}</P>
+        </Div>
+      </Div>
+    )
+  }
+
+  if (status === 'success') {
+    return (
+      <Div className="min-h-screen flex items-center justify-center">
+        <Div className="text-center">
+          <Div className="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-6 h-6 text-success-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </Div>
+          <P className="text-success font-semibold">{successMessage}</P>
+          <P className="text-muted-foreground text-sm">{redirectMessage}</P>
+        </Div>
+      </Div>
+    )
+  }
+
+  // Error state
+  return (
+    <Div className="min-h-screen flex items-center justify-center">
+      <Div className="text-center">
+        <Div className="w-12 h-12 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg
+            className="w-6 h-6 text-destructive-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </Div>
+        <P className="text-destructive font-semibold">{errorTitle}</P>
+        <P className="text-muted-foreground text-sm mb-4">{error}</P>
+        <Button onClick={() => router.push(fallbackHref)} variant="default">
+          {errorButtonText}
+        </Button>
+      </Div>
+    </Div>
+  )
+}
+
+/**
+ * Standardized OAuth callback page component for EZAuth integration.
+ * Part of @ezstart/auth-sdk - works with AuthProvider and useAuth.
+ *
+ * @example
+ * ```tsx
+ * // Basic usage
+ * export default function CallbackPage() {
+ *   return <AuthCallbackPage />
+ * }
+ *
+ * // With custom redirect and messages
+ * export default function CallbackPage() {
+ *   return (
+ *     <AuthCallbackPage
+ *       redirectTo="/dashboard"
+ *       successMessage="Welcome back!"
+ *       redirectMessage="Taking you to dashboard..."
+ *       errorTitle="Login failed"
+ *       noCodeMessage="Missing authorization code"
+ *     />
+ *   )
+ * }
+ * ```
+ */
+export function AuthCallbackPage(props: AuthCallbackPageProps): React.ReactElement {
+  return (
+    <Suspense
+      fallback={
+        <Div className="min-h-screen flex items-center justify-center">
+          <Spinner />
+        </Div>
+      }
+    >
+      <CallbackContent {...props} />
+    </Suspense>
+  )
+}

@@ -13,7 +13,7 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useMonitoringErrors, type ErrorLog } from '../../hooks'
 
@@ -40,7 +40,7 @@ export function ErrorsFeed() {
             <Icon name="lucide:AlertTriangle" className="w-12 h-12 text-destructive" />
             <P className="text-destructive font-semibold">{t('failedToLoadErrors')}</P>
             <P className="text-muted-foreground text-sm">
-              {error instanceof Error ? error.message : 'Unknown error'}
+              {error instanceof Error ? error.message : t('unknownError')}
             </P>
             <Button onClick={() => refetch()} variant="outline" size="sm">
               {t('retry')}

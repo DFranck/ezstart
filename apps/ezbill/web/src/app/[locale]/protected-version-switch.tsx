@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuthStore } from '@ezstart/auth-sdk'
-import { useRBAC } from '@ezstart/rbac'
+import { useRBAC } from '@ezstart/auth-sdk'
 import { VersionSwitch } from '@ezstart/ui/components'
 
 /**

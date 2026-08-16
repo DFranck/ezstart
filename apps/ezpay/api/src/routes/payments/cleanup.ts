@@ -5,9 +5,11 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -20,7 +22,7 @@ const docRouter = createRouterWithDoc(cleanupPaymentsRegistry, router)
 // ========================================
 
 const cleanupQuerySchema = z.object({
-  appName: z.string().optional().describe('Optional app name to scope deletion'),
+  appName: z.string().optional().openapi({ description: 'Optional app name to scope deletion' }),
 })
 
 const cleanupResponseSchema = z.object({
@@ -29,7 +31,8 @@ const cleanupResponseSchema = z.object({
     .object({
       deletedCount: z.number().describe('Number of records deleted'),
     })
-    .optional(),
+    .optional()
+    .describe('Cleanup result payload (present on success)'),
   error: z.string().optional().describe('Error message if operation failed'),
 })
 
@@ -59,7 +62,18 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
     const Payment = await getPaymentModel()
     const result = await Payment.deleteMany(query)
 
-    logger.info(`🗑️ Cleanup: ${result.deletedCount} test payments deleted${appName ? ` for ${appName}` : ''}`)
+    logger.info(
+      `🗑️ Cleanup: ${result.deletedCount} test payments deleted${appName ? ` for ${appName}` : ''}`
+    )
+
+    void auditLogService.createFromRequest(req, {
+      action: 'payments.cleanup',
+      userId: req.userId,
+      metadata: {
+        deletedCount: result.deletedCount,
+        appName: appName ?? null,
+      },
+    })
 
     sendSuccess(res, { deletedCount: result.deletedCount })
   } catch (error) {
@@ -74,8 +88,7 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
 
 docRouter.delete(
   '/payments/cleanup',
-  authMiddleware,
-  populateUserFromToken,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   cleanupPaymentsHandler,
   {
     summary: 'Delete all payment records (admin only)',

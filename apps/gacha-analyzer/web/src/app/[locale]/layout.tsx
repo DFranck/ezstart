@@ -1,10 +1,12 @@
 import { getTimeZoneFromLocale } from '@/i18n/routing'
 import { Providers } from '@/providers/providers'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { getMessages } from 'next-intl/server'
 import { Inter } from 'next/font/google'
+import { headers } from 'next/headers'
 import ClientLayout from './client-layout'
 
 const inter = Inter({
@@ -43,6 +45,18 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   const messages = await getMessages()
   const timeZone = getTimeZoneFromLocale(locale)
 
+  // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
+  // httpOnly mode. Reads the session cookie from the inbound request,
+  // resolves the user via `/api/auth/me` server-side, and seeds the
+  // Zustand store synchronously when `<AuthProvider>` mounts (via
+  // `initialUser`). Anonymous requests still work: returns `null`.
+  const headersList = await headers()
+  const cookieHeader = headersList.get('cookie')
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+    cookieHeader,
+  })
+
   return (
     <html
       lang={locale}
@@ -57,6 +71,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
             locale={locale}
             timeZone={timeZone}
             enableThemeSelector={true}
+            initialUser={initialUser}
           >
             <ClientLayout>{children}</ClientLayout>
           </Providers>

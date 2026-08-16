@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { MobileNavbar } from '.'
-import { useDevice, useOnScroll } from '../../hooks'
+import { useDeprecationWarning, useDevice, useOnScroll } from '../../hooks'
 import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
@@ -14,6 +14,11 @@ import { Footer } from './footer'
 import { Header } from './header'
 import { NavigationItem, NavigationLink, isNavigationMenu } from './types'
 
+/**
+ * @deprecated Use the `AppLayout` compound component system from `./app-layout` instead.
+ * AppLayout provides a cleaner composition-based approach without prop explosion.
+ * Migration: replace `<ClientLayout>` with `<AppLayout>` + `<AppHeader>` + `<AppMain>` + `<AppFooter>`.
+ */
 export interface ClientLayoutProps {
   children: React.ReactNode
 
@@ -69,6 +74,11 @@ export interface ClientLayoutProps {
   mobileNavbarClassName?: string
 }
 
+/**
+ * @deprecated Use the `AppLayout` compound component system from `./app-layout` instead.
+ * AppLayout provides a cleaner composition-based approach without prop explosion.
+ * Migration: replace `<ClientLayout>` with `<AppLayout>` + `<AppHeader>` + `<AppMain>` + `<AppFooter>`.
+ */
 export function ClientLayout({
   children,
   appName,
@@ -123,6 +133,7 @@ export function ClientLayout({
   footerClassName,
   mobileNavbarClassName,
 }: ClientLayoutProps) {
+  useDeprecationWarning('ClientLayout', 'AppLayout from @ezstart/ui')
   const { isMobile, isTablet, isDesktop } = useDevice()
   const scrollY = useOnScroll()
   const isTop = scrollY === 0

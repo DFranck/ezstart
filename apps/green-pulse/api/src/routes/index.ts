@@ -1,10 +1,7 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import uploadRoutes, { uploadRegistries } from './upload/index.js'
 import esgRoutes, { esgRegistries } from './esg/index.js'
 import webhookRoutes, { webhookRegistries } from './webhooks/index.js'
-import formRoutes, { formRegistries } from './forms/index.js'
-import projectRoutes, { projectRegistries } from './projects/index.js'
-import workspaceRoutes, { workspaceRegistries } from './workspaces/index.js'
 import themeRoutes, { themeRegistries } from './theme/index.js'
 
 const router: import('express').Router = Router()
@@ -13,19 +10,11 @@ export const globalRegistry = [
   ...uploadRegistries,
   ...esgRegistries,
   ...webhookRegistries,
-  ...formRegistries,
-  ...projectRegistries,
-  ...workspaceRegistries,
   ...themeRegistries,
 ]
 
-router
-  .use('/upload', uploadRoutes)
-  .use('/esg', esgRoutes)
-  .use('/webhooks', webhookRoutes)
-  .use('/forms', formRoutes)
-  .use('/projects', projectRoutes)
-  .use('/workspaces', workspaceRoutes)
-  .use('/theme', themeRoutes)
+// Feature children own their basePath via createRouterWithDoc(..., '/<resource>')
+// so they are mounted at '/' here to avoid double-mount with the helper basePath.
+router.use(uploadRoutes).use(esgRoutes).use(webhookRoutes).use(themeRoutes)
 
 export default router

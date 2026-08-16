@@ -12,7 +12,7 @@
  * - PATCH  /api/ai/app-providers/:id/toggle   -> toggle enabled/disabled
  */
 
-import { Router, createRoleMiddleware } from '@ezstart/express-core'
+import { Router, createRoleMiddleware } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listAppProvidersRouter, { listAppProvidersRegistry } from './listAppProviders.js'
@@ -33,19 +33,20 @@ export const appProvidersRegistries = [
 
 const router: import('express').Router = Router()
 
-// All app-provider routes require auth
-router.use(authMiddleware)
+// This parent is mounted at /api/ai (no /app-providers prefix) — children own
+// '/app-providers' basePath via createRouterWithDoc. Scope middlewares to
+// '/app-providers' so they don't leak to sibling AI features.
+router.use('/app-providers', authMiddleware)
+router.use('/app-providers', (req, res, next) => {
+  // Read routes (GET) only require auth; write routes require admin.
+  if (req.method === 'GET') return next()
+  return requireAdmin(req, res, next)
+})
 
-// Read routes — any authenticated user
 router.use(listAppProvidersRouter)
-
-// Write routes — admin only
-const adminRouter: import('express').Router = Router()
-adminRouter.use(requireAdmin)
-adminRouter.use(createAppProviderRouter)
-adminRouter.use(updateAppProviderRouter)
-adminRouter.use(deleteAppProviderRouter)
-adminRouter.use(toggleAppProviderRouter)
-router.use(adminRouter)
+router.use(createAppProviderRouter)
+router.use(updateAppProviderRouter)
+router.use(deleteAppProviderRouter)
+router.use(toggleAppProviderRouter)
 
 export default router

@@ -31,20 +31,6 @@
     "failed": "Échoué",
     "refunded": "Remboursé"
   },
-  "home": {
-    "title": "EZPay",
-    "subtitle": "Système de paiement universel pour l'écosystème EZStart",
-    "donations": "Dons",
-    "donationsDescription": "Acceptez les dons avec témoignages et murs publics",
-    "purchases": "Achats",
-    "purchasesDescription": "Vendez des produits et articles in-app avec Stripe",
-    "subscriptions": "Abonnements",
-    "subscriptionsDescription": "Gérez les paiements récurrents et les plans premium",
-    "gettingStarted": "Pour commencer",
-    "installSdk": "1. Installer le SDK",
-    "setupClient": "2. Configurer le client",
-    "useComponents": "3. Utiliser les composants"
-  },
   "success": {
     "donateTitle": "Merci !",
     "donateMessage": "Votre don a été reçu avec succès. Votre générosité fait la différence !",
@@ -53,6 +39,9 @@
     "subscribeTitle": "Abonnement actif !",
     "subscribeMessage": "Votre abonnement a été activé avec succès. Bienvenue à bord !",
     "backHome": "Retour à l'accueil",
+    "goToBilling": "Aller à la facturation",
+    "redirecting": "Redirection vers votre page de facturation dans {seconds}s…",
+    "reference": "Référence : {id}",
     "whatNext": "Et maintenant ?",
     "emailConfirmation": "Un reçu vous sera envoyé par email via Stripe.",
     "receiptAvailable": "Votre reçu est disponible dans votre email Stripe.",
@@ -121,6 +110,7 @@
     "message": "Votre paiement a été annulé. Aucun montant n'a été débité.",
     "tryAgain": "Réessayer",
     "backHome": "Retour à l'accueil",
+    "backToPricing": "Retour aux offres",
     "needHelp": "Besoin d'aide ?",
     "contactSupport": "Si vous avez rencontré un problème, contactez le support.",
     "noCharge": "Ne vous inquiétez pas, aucun montant n'a été débité de votre compte."

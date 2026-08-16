@@ -5,7 +5,7 @@ import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { Badge, Button, Div, H3, LI, P, ReadMoreText } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import TechList from './TechList'
 
 type Props = {

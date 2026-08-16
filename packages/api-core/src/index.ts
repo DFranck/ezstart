@@ -1,0 +1,291 @@
+/**
+ * @ezstart/api-core
+ *
+ * Unified Express-based API server framework.
+ *
+ * Agnostic primitives live under `./core/*` — zero `@ezstart/*` coupling,
+ * publishable on npm as-is. The monorepo wrapper (`createApiServer`) is
+ * a thin convenience layer that wires `@ezstart/config` + `@ezstart/logger`.
+ */
+
+// Global Express augmentation (req.userId, req.user, req.validated*)
+import './core/express-aug.js'
+
+// ---------------------------------------------------------------------------
+// Agnostic core — factories
+// ---------------------------------------------------------------------------
+//
+// `createBaseApiServer` is the low-level agnostic primitive (publishable as-is,
+// zero `@ezstart/*` coupling). Most monorepo consumers should use the
+// higher-level `createApiServer(appName, options)` wrapper exported below
+// from `./create-api-server.js`, which pre-wires `@ezstart/config` and
+// `@ezstart/logger`.
+//
+// NOTE: prior to v0.x.0 the wrapper was named `createEzstartServer` and the
+// agnostic primitive was named `createApiServer`. Both old names are still
+// re-exported below as deprecated aliases. See CHANGELOG for migration.
+export { createBaseApiServer } from './core/create-server.js'
+export { startServer, type StartServerOptions } from './core/server.js'
+
+// Response helpers
+export {
+  sendError,
+  sendSuccess,
+  sendValidationError,
+  type SendErrorOptions,
+} from './core/responses.js'
+
+// Health checks (`/health/deep` readiness probe)
+export {
+  aggregateStatus,
+  createDbHealthCheck,
+  createDeepHealthHandler,
+  runHealthCheck,
+  type DeepHealthHandlerConfig,
+  type DeepHealthSnapshot,
+  type HealthCheck,
+  type HealthCheckResult,
+  type HealthCheckStatus,
+} from './core/health.js'
+
+// Pre-built health check factories for common dependencies (Mongo, Stripe,
+// Resend, AI providers, generic HTTP).
+export {
+  createAnthropicCheck,
+  createGeminiCheck,
+  createHttpCheck,
+  createMongoosePingCheck,
+  createOpenAICheck,
+  createResendCheck,
+  createStripeBalanceCheck,
+  type DeepHealthCheckOptions,
+  type MongoosePingable,
+  type StripeBalanceClient,
+} from './core/deep-health-checks.js'
+
+// Boot-time gate for the critical-deps contract — see hacker-A8 V3. Use
+// in every API `index.ts` before assembling the deep-health checks so a
+// missing env var fails-fast in prod instead of silently skipping the
+// corresponding readiness check.
+export {
+  assertCriticalDeps,
+  findMissingDeps,
+  type AssertCriticalDepsOptions,
+  type CriticalDepsLogger,
+} from './core/critical-deps.js'
+
+// Middlewares
+export {
+  createCorsMiddleware,
+  createPermissiveCorsMiddleware,
+  createStrictCorsMiddleware,
+  type PermissiveCorsOptions,
+  type StrictCorsEntry,
+  type StrictCorsOptions,
+} from './core/middleware/cors.js'
+export {
+  createIdempotencyMiddleware,
+  createInMemoryIdempotencyStore,
+  type IdempotencyMiddlewareConfig,
+  type IdempotencyRecord,
+  type IdempotencyStore,
+  type InMemoryStoreConfig,
+} from './core/middleware/idempotency.js'
+export {
+  createModerateRateLimiter,
+  createRateLimiter,
+  createStrictRateLimiter,
+  createVeryStrictRateLimiter,
+  type RateLimitOptions,
+} from './core/middleware/rate-limit.js'
+export {
+  createKeyHashRateLimiter,
+  type KeyHashRateLimiter,
+  type KeyHashRateLimiterOptions,
+} from './core/middleware/key-hash-rate-limit.js'
+export {
+  createAuthMiddleware,
+  createRoleMiddleware,
+  type AuthMiddlewareConfig,
+  type AuthMiddlewares,
+} from './core/middleware/auth.js'
+export {
+  createUnifiedAuthMiddleware,
+  type UnifiedApiKeyResult,
+  type UnifiedAuthConfig,
+  type UnifiedAuthScope,
+  type UnifiedJwtResult,
+} from './core/middleware/unified-auth.js'
+export {
+  createTenantScopeMiddleware,
+  type TenantApplicationLoader,
+  type TenantApplicationShape,
+  type TenantScopeLogger,
+  type TenantScopeOptions,
+} from './core/middleware/tenant-scope.js'
+export { createCsrfMiddleware, type CreateCsrfMiddlewareOptions } from './core/middleware/csrf.js'
+export {
+  attachDerivedMode,
+  resolveDerivedMode,
+  withRequestContextMiddleware,
+} from './core/middleware/derive-mode.js'
+export { attachDerivedScope, type DerivedScope } from './core/middleware/derive-scope.js'
+export {
+  testModeScopePlugin,
+  type TestModeScopeOptions,
+} from './core/middleware/test-mode-scope.js'
+export { ttlPlugin, type TTLPluginOptions } from './core/middleware/ttl.js'
+export {
+  createErrorHandler,
+  sanitizeErrorForLog,
+  type ErrorHandlerConfig,
+  type ErrorPersistCallback,
+} from './core/middleware/error-handler.js'
+export {
+  deprecatedRoute,
+  type DeprecatedRouteLogEntry,
+  type DeprecatedRouteOptions,
+} from './core/middleware/deprecated-route.js'
+export { validateBody, validateParams, validateQuery } from './core/middleware/validate.js'
+
+// Request-scoped context (AsyncLocalStorage)
+export {
+  getRequestContext,
+  withRequestContext,
+  type DerivedMode,
+  type RequestContext,
+} from './core/context/request-context.js'
+
+// OpenAPI-aware router
+export {
+  createDocRouter,
+  type DocMethod,
+  type DocRouter,
+  type RouteDocOptions,
+} from './core/router.js'
+
+// Backward compat alias
+export { createDocRouter as createRouterWithDoc } from './core/router.js'
+
+// OpenAPI helpers
+export {
+  checkMissingDescriptions,
+  scanRegistriesForMissingDescriptions,
+} from './core/openapi/check-missing-descriptions.js'
+
+// API versioning
+export {
+  addVersionHeader,
+  createVersionedRouter,
+  extractVersionFromPath,
+} from './core/versioning.js'
+
+// Cryptographic primitives — base64url + HMAC + EZStart-Signature protocol.
+// See `./core/crypto.ts` for the full rationale (single source of truth for
+// the S2S webhook header `X-EZStart-Signature: t=<unix>,v1=<hex>`).
+export {
+  base64urlDecode,
+  base64urlEncode,
+  buildEzstartSignatureHeader,
+  EZSTART_SIGNATURE_FORWARD_SKEW_SECONDS,
+  EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS,
+  hmacSign,
+  hmacVerify,
+  parseEzstartSignatureHeader,
+  verifyEzstartSignature,
+  type EzstartSignatureHeader,
+  type EzstartSignatureVerifyResult,
+  type HmacEncoding,
+} from './core/crypto.js'
+
+// Re-exports from transitive deps — the monorepo centralizes on these
+// symbols so consumers don't need direct dependencies on `express` or
+// `@asteasolutions/zod-to-openapi`.
+export { Router } from 'express'
+export type { Express, NextFunction, Request, RequestHandler, Response } from 'express'
+export { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi'
+
+// Core types
+export type {
+  ApiMeta,
+  ApiServer,
+  AuthenticatedUser,
+  CookieAuthAllowlistEntry,
+  CorsConfig,
+  RateLimitPreset,
+  ServerConfig,
+  ServerLogger,
+  TokenVerifier,
+} from './core/types.js'
+
+// DB connector contract (abstract — consumers inject their impl).
+export type { DbConnector } from './core/db-connector.js'
+
+// Optional Socket.IO helper (dynamic import — truly optional).
+export { createSocketServer, type SocketServerConfig } from './core/sockets.js'
+
+// ---------------------------------------------------------------------------
+// @ezstart monorepo wrapper (optional — requires @ezstart/config + @ezstart/logger)
+// ---------------------------------------------------------------------------
+//
+// `createApiServer(appName, options)` is the recommended factory for any
+// monorepo consumer. It wires `@ezstart/config` (port + first-party CORS
+// origins) and `@ezstart/logger` automatically. For agnostic usage outside
+// the monorepo, drop down to `createBaseApiServer(config)` exported above.
+export {
+  createApiAuth,
+  createApiServer,
+  createEzstartAuth,
+  createEzstartServer,
+  isValidObjectId,
+  type ApiServerOptions,
+  type CreateApiAuthOptions,
+  type EzstartServerOptions,
+} from './create-api-server.js'
+export { connectToMongo } from './connect-to-mongo.js'
+
+// Unified API boot ceremony — shrinks app `index.ts` files to a thin
+// descriptor (slug + routes + per-app warmup). Optional opt-in.
+export {
+  bootApi,
+  type BootApiOptions,
+  type BootApiResult,
+  type BootServerConfig,
+  type OnReadyHook,
+} from './boot-api.js'
+
+// ---------------------------------------------------------------------------
+// Observability — Sentry init + manual capture (no-op when DSN empty)
+// ---------------------------------------------------------------------------
+//
+// Uses `@sentry/node-core` with ZERO auto-integrations to avoid the
+// 2026-04-25 incident (OTEL HTTP/Express auto-instrumentation broke CORS on
+// Railway). We capture manually from `createErrorHandler` — see
+// `core/middleware/error-handler.ts`.
+export { captureException, initSentry, type InitSentryOptions } from './observability/index.js'
+
+// ---------------------------------------------------------------------------
+// Audit log — schema factory + writer service (per-service `audit_logs` coll.)
+// ---------------------------------------------------------------------------
+//
+// Each SaaS service builds its own model + service via the factories below,
+// passing a per-service `actions` enum. Single source of truth for the
+// schema (collection name, indexes, TTL, test/live partition) so ezauth /
+// ezpay / future services never drift on the audit log shape.
+//
+// See `standard-saas-security.md` §3 (audit logs P1-mandatory) and
+// `standard-saas-data.md` §4 (test/live partition).
+export {
+  computeAuditLogExpiry,
+  createAuditLogSchema,
+  createAuditLogService,
+  DEFAULT_AUDIT_LOG_RETENTION_DAYS,
+  type AuditLogDocument,
+  type AuditLogLogger,
+  type AuditLogMetadata,
+  type AuditLogModelLike,
+  type AuditLogService,
+  type CreateAuditLogInput,
+  type CreateAuditLogSchemaOptions,
+  type CreateAuditLogServiceOptions,
+} from './core/audit-log/index.js'

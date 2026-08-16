@@ -17,13 +17,19 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { toast } from 'sonner'
-import { usePay } from '../provider.js'
-import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
+import { usePay, useApplicationContext, usePayLogger } from '../react/pay-provider.js'
+import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
+import { PayNotConfiguredCard, type PayNotConfiguredTexts } from './common/PayNotConfiguredCard.js'
 
 export interface DonationCardProps {
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. This field was never wired into
+   * the donation request — `projectId` carries the routing information.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred, forwarded on the donation request). */
+  applicationId?: string
   projectId: string
   projectName?: string
   className?: string
@@ -44,6 +50,20 @@ export interface DonationCardProps {
   userEmail?: string
   userName?: string
   texts?: Partial<DonationCardTexts>
+  /**
+   * Overrides for the graceful fallback card rendered when the PayProvider
+   * resolution failed (missing / invalid publishable key, ezpay API down on
+   * `/keys/config`). Keys are optional — English defaults are used when
+   * omitted.
+   */
+  notConfiguredTexts?: PayNotConfiguredTexts
+  /**
+   * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * When omitted, inherits from `<PayProvider locale={…}>` context (default `'en'`).
+   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
+   * to `'en'`.
+   */
+  locale?: string
 }
 
 export interface DonationCardTexts {
@@ -84,6 +104,7 @@ const DEFAULT_TEXTS: DonationCardTexts = {
 
 export function DonationCard({
   appName,
+  applicationId,
   projectId,
   projectName,
   className,
@@ -98,9 +119,28 @@ export function DonationCard({
   userEmail,
   userName,
   texts: textsProp,
+  notConfiguredTexts,
+  locale,
 }: DonationCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createDonation, isLoading } = usePay()
+  const log = usePayLogger()
+
+  // Surface deprecation warning when consumer passes the legacy `appName` prop.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    log.warn(
+      '[pay-sdk] DonationCard `appName` prop is deprecated, use `applicationId` instead. ' +
+        '`appName` was never wired into the donation request — `projectId` carries the routing.'
+    )
+  }
+  const {
+    applicationResolutionStatus,
+    payWebUrl,
+    locale: contextLocale,
+    applicationId: contextApplicationId,
+  } = useApplicationContext()
+  const resolvedLocale = locale ?? contextLocale
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
   const [message, setMessage] = useState('')
@@ -125,8 +165,10 @@ export function DonationCard({
     if (amount === 0 && !message.trim()) return // testimonial needs a message
 
     try {
+      const resolvedApplicationId = applicationId ?? contextApplicationId ?? undefined
       const result = await createDonation({
         projectId,
+        ...(resolvedApplicationId ? { applicationId: resolvedApplicationId } : {}),
         amount,
         currency,
         isPublic: true,
@@ -148,8 +190,23 @@ export function DonationCard({
         toast.success(texts.thankYou)
       }
     } catch (error) {
-      logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error))
     }
+  }
+
+  // Graceful fallback — the PayProvider could not resolve the application
+  // context (missing key, ezpay /keys/config down, invalid key). Rendering
+  // the form would break on submit, so we surface a helpful CTA instead.
+  if (applicationResolutionStatus === 'failed') {
+    return (
+      <PayNotConfiguredCard
+        reason="resolve-failed"
+        dashboardUrl={dashboardUrl}
+        texts={notConfiguredTexts}
+        className={className}
+        variant={isCompact ? 'compact' : 'default'}
+      />
+    )
   }
 
   if (isCompact) {

@@ -7,10 +7,11 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { updatePresenceByUserId } from '../../services/presence.service.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
 import {
   verifyRequestSchema,
   verifyResponseSchema,
@@ -36,6 +37,29 @@ const verifyController = async (req: Request, res: Response) => {
     const { token, app } = parsed.data
     const payload = await AuthService.verifyToken(token)
 
+    // Soft-delete gate — a still-unexpired access token (15 min TTL) MUST
+    // not validate against an account that was scheduled for deletion.
+    // Without this lookup the JWT signature alone keeps the session usable
+    // until natural expiry, even after the cookies are cleared and the
+    // refresh tokens revoked. (P0 — see standard-saas-security.md §3.)
+    //
+    // `includeDeleted: true` opts out of the AuthUser pre-find guard so we
+    // can distinguish "user never existed" from "account is soft-deleted"
+    // and return a more precise error message. The model-level guard would
+    // collapse both branches to a generic 'User not found' response.
+    const AuthUser = await getAuthUserModel()
+    const user = await AuthUser.findOne(
+      { _id: payload.userId },
+      { deletedAt: 1 },
+      { includeDeleted: true }
+    ).lean()
+    if (!user) {
+      return sendError(res, 'User not found', 401)
+    }
+    if (user.deletedAt) {
+      return sendError(res, 'Account has been deleted', 401)
+    }
+
     // Check app access if specified
     if (app) {
       const hasAccess = await AuthService.checkAppAccess(payload.userId, app)
@@ -57,8 +81,11 @@ const verifyController = async (req: Request, res: Response) => {
         exp: payload.exp,
       },
     })
-  } catch (error) {
-    sendError(res, error instanceof Error ? error.message : 'Invalid token', 401)
+  } catch {
+    // MED-1 — never echo a raw error.message. `verifyToken` already throws the
+    // intentional 'Invalid token' message and any other (unexpected) error must
+    // collapse to the same stable 401 so internal detail never leaks.
+    sendError(res, 'Invalid token', 401)
   }
 }
 

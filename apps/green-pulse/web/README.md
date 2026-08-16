@@ -16,7 +16,7 @@ GreenPulse Web is a Next.js application that helps users track their carbon foot
 - 🤖 **AI Recommendations** - Get personalized sustainability tips
 - 📈 **Analytics & Insights** - Visualize progress and trends
 - 🌍 **Multilingual** - i18n support with next-intl
-- 🎨 **Dark Mode** - Theme switching with @ezstart/next-theme
+- 🎨 **Dark Mode** - Theme switching with @ezstart/ui/theme
 - 🔐 **Authentication** - Secure login with @ezstart/auth-sdk
 - 📱 **Progressive Web App** - Installable with next-pwa
 
@@ -28,7 +28,7 @@ GreenPulse Web is a Next.js application that helps users track their carbon foot
 - **Components:** @ezstart/ui
 - **Authentication:** @ezstart/auth-sdk
 - **Internationalization:** next-intl
-- **Theme:** @ezstart/next-theme
+- **Theme:** @ezstart/ui/theme
 - **PWA:** next-pwa
 
 ## Installation
@@ -196,7 +196,7 @@ export default function Component() {
 
 ```tsx
 // app/layout.tsx
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { NextIntlClientProvider } from 'next-intl'
 
@@ -311,7 +311,7 @@ export const config = {
 - [API Documentation](../api) - Backend API
 - [@ezstart/ui](../../../packages/ui) - UI components
 - [@ezstart/auth-sdk](../../../packages/auth-sdk) - Auth client
-- [@ezstart/next-theme](../../../packages/next-theme) - Theme provider
+- [@ezstart/ui/theme](../../../packages/ui/src/theme) - Theme provider
 - [Next.js Docs](https://nextjs.org/docs)
 - [next-intl Docs](https://next-intl-docs.vercel.app)
 

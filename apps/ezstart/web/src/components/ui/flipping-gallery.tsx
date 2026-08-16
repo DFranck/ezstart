@@ -4,7 +4,8 @@ import { LibraryItem } from '@/types/library'
 import { Button, Div, H3, Icon, P, Span } from '@ezstart/ui/components'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 export const MotionP = motion.create(P)
@@ -80,12 +81,13 @@ export const FlippingGallery = ({
                   }}
                   className="absolute inset-0 origin-bottom"
                 >
-                  <img
+                  <Image
                     src={item.src}
                     alt={item.title}
                     width={500}
                     height={500}
                     draggable={false}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="h-full w-full rounded-3xl object-cover object-center"
                   />
                 </motion.div>

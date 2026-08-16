@@ -6,7 +6,8 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -20,16 +21,14 @@ const docRouter = createRouterWithDoc(listPurchasesRegistry, router)
 // Zod Schemas
 // ========================================
 
-const purchasesQuerySchema = z.object({
-  userId: z.string().optional().describe('Filter by user ID'),
-  projectId: z.string().optional().describe('Filter by project ID'),
-  limit: z.coerce.number().default(20).describe('Number of purchases to return'),
-  offset: z.coerce.number().default(0).describe('Number of purchases to skip'),
+const purchasesQuerySchema = PaginationQuerySchema.extend({
+  userId: z.string().optional().openapi({ description: 'Filter by user ID' }),
+  projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
 })
 
 const purchasesListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of purchases'),
+  payments: z.array(z.record(z.unknown())).describe('List of purchases'),
   meta: z
     .object({
       total: z.number().describe('Total number of purchases matching the query'),

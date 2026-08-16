@@ -3,23 +3,18 @@
  * Soft delete Client (authenticated)
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { paramsMongoIdSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { paramsMongoIdSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/client/client.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const deleteClientByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const deleteClientByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const deleteClientByIdRouter = createRouterWithDoc(
   deleteClientByIdRegistry,
   router,
   '/clients'
-);
+)
 
 deleteClientByIdRouter.delete(
   '/:id',
@@ -31,6 +26,6 @@ deleteClientByIdRouter.delete(
     tags: ['Clients'],
     paramsSchema: paramsMongoIdSchema,
   }
-);
+)
 
-export default router;
+export default router

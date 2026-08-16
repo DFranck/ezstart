@@ -9,6 +9,32 @@
       "detailsSubtitle": "Detailed health status for each project",
       "noProjects": "No projects found"
     },
+    "charts": {
+      "title": "Historical Trends",
+      "description": "Aggregated latency, uptime and error rate across all services",
+      "period": {
+        "7d": "Last 7 days",
+        "30d": "Last 30 days"
+      },
+      "latency": {
+        "title": "Latency p95",
+        "description": "95th percentile response time per bucket (ms)",
+        "yLabel": "ms"
+      },
+      "uptime": {
+        "title": "Uptime",
+        "description": "Healthy checks ratio per bucket (%)",
+        "yLabel": "%"
+      },
+      "errorRate": {
+        "title": "Error rate per service",
+        "description": "Unhealthy checks over the period (%)",
+        "yLabel": "%"
+      },
+      "empty": "No data available for this period",
+      "error": "Failed to load chart data",
+      "loading": "Loading charts..."
+    },
     "auditsPage": {
       "title": "Quality Audits",
       "description": "Comprehensive quality audits across all categories of the monorepo",
@@ -84,9 +110,10 @@
     "manageDescription": "Manage your monitoring dashboard",
     "failedToLoad": "Failed to load monitoring data",
     "failedToLoadErrors": "Failed to load error logs",
+    "unknownError": "Unknown error",
     "retry": "Retry",
     "errorLogs": "Error Logs",
-    "errorLogsDescription": "Recent errors captured from all projects (Sentry integration)",
+    "errorLogsDescription": "Recent errors captured from all projects",
     "refreshing": "Refreshing...",
     "allClear": "All Clear!",
     "allSystemsOperational": "No errors detected. All systems operational",
@@ -106,7 +133,15 @@
       "noData": "No data available for the selected period",
       "uptime": "Uptime:",
       "avgResponse": "Avg Response:",
-      "checks": "Checks:"
+      "checks": "Checks:",
+      "title": "{serviceId} - Trending",
+      "titleWithHours": "{serviceId} - Last {hours}h",
+      "responseTime": "Response Time",
+      "responseTimeAxis": "Response Time (ms)",
+      "status": "Status",
+      "healthy": "Healthy",
+      "down": "Down",
+      "notAvailable": "N/A"
     },
     "view": "View",
     "occurrences": "{count} occurrences",
@@ -170,7 +205,6 @@
         "viewAllProjects": "View All Projects",
         "runQualityAudits": "Run Quality Audits",
         "viewErrorLogs": "View Error Logs",
-        "openSentry": "Open Sentry Dashboard",
         "viewAnalytics": "View Analytics (Vercel)"
       }
     }

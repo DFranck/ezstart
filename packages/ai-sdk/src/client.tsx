@@ -24,6 +24,12 @@ export type {
 
 // Hooks
 export { useAIChat } from './client/hooks/useAIChat.js'
+export { useAIChatStream } from './client/hooks/useAIChatStream.js'
+export type {
+  UseAIChatStreamConfig,
+  UseAIChatStreamReturn,
+  AIChatStreamEvent,
+} from './client/hooks/useAIChatStream.js'
 export { useAIThread } from './client/hooks/useAIThread.js'
 export type { UseAIThreadConfig, UseAIThreadReturn } from './client/hooks/useAIThread.js'
 export { useProviders } from './client/hooks/useProviders.js'

@@ -1,0 +1,113 @@
+{
+  "components": {
+    "sidebarTitle": "Pay SDK",
+    "sidebarOpen": "Ouvrir la navigation des composants",
+    "sidebarClose": "Fermer la navigation des composants",
+    "sidebarNavLabel": "Navigation des composants Pay SDK",
+    "sidebarSearchPlaceholder": "Filtrer les composants…",
+    "sidebarEmpty": "Aucun composant ne correspond.",
+    "sidebarShortcutHint": "Utilisez le raccourci pour ouvrir la palette.",
+    "sidebarAllEntry": "Toutes les catégories",
+    "backToHome": "Retour à EZPay",
+    "paletteTitle": "Palette de composants Pay SDK",
+    "paletteDescription": "Cherchez parmi tous les composants @ezstart/pay-sdk.",
+    "palettePlaceholder": "Chercher un composant…",
+    "paletteEmpty": "Aucun composant trouvé.",
+    "landingTitle": "Composants Pay SDK",
+    "landingSubtitle": "Composants React pour les dons, abonnements, facturation et l'onboarding Connect dans les applications Next.js.",
+    "landingTotalComponents": "{count} composants",
+    "landingTotalCategories": "{count} catégories",
+    "landingTotalEntries": "{count} entrées",
+    "landingTotalDomains": "{count} domaines",
+    "landingComponentsInDomain": "{count, plural, one {# composant} other {# composants}}",
+    "landingShortcutHint": "⌘K pour chercher",
+    "landingCategoriesHeading": "Parcourir par catégorie",
+    "landingFeatureBadge": "Variantes",
+    "landingFeatureDescription": "{count, plural, one {# variante — Form, Card ou Modal} other {# variantes — Form, Card ou Modal}}",
+    "landingFeatureSwitchLabel": "Changer de variante",
+    "landingFeatureDetailLink": "Ouvrir le détail",
+    "landingFilterActive": "Filtre : {name}",
+    "landingClearFilter": "Effacer le filtre",
+    "landingFooterTitle": "Démarrer",
+    "landingFooterDescription": "Installez le package, configurez le provider, et déposez les composants dans votre app. Chaque composant arrive avec ses types TypeScript, ses textes anglais par défaut, et une prop `texts` pour l'i18n.",
+    "categoryBackToOverview": "Retour à l'aperçu",
+    "categoryComponentCount": "{count, plural, one {# composant} other {# composants}}",
+    "categoryCompoundBadge": "Composé",
+    "categoryNoSummary": "Pas de résumé disponible.",
+    "categoryPropsCount": "{count, plural, one {# prop} other {# props}}",
+    "categoryExamplesCount": "{count, plural, one {# exemple} other {# exemples}}",
+    "detailBreadcrumbRoot": "Composants",
+    "detailCompoundBadge": "Composé",
+    "detailViewSource": "Voir la source",
+    "detailFeatureGroupLabel": "Groupe de variantes",
+    "detailFeatureVariantsCount": "{count, plural, one {# variante} other {# variantes}}",
+    "detailFeatureVariantsAriaLabel": "Variantes de {name}",
+    "detailFeatureVariantsHelp": "Affichage de {name}. Changez d'onglet pour comparer le même flow dans une autre disposition.",
+    "tabPreview": "Aperçu",
+    "tabCode": "Code",
+    "tabProps": "Props",
+    "tabAnatomy": "Anatomie",
+    "previewMissing": "Pas encore de démo live pour ce composant — voir le lien source ou l'onglet Code.",
+    "previewMissingTitle": "Démo indisponible",
+    "demoModeBanner": {
+      "title": "SANDBOX",
+      "description": "Les actions dans cet aperçu sont réelles mais isolées dans une Application sandbox. Les données sont réinitialisées toutes les 24h."
+    },
+    "codeFallbackTitle": "Démarrage rapide",
+    "codeFallbackDescription": "Aucun exemple n'est attaché au TSDoc de ce composant — voici un snippet généré à partir de ses props.",
+    "codeExampleTitle": "Exemple {index}",
+    "codeDescriptionTitle": "Notes",
+    "propsEmpty": "Ce composant n'a pas de props publiques.",
+    "propsHeaderName": "Nom",
+    "propsHeaderType": "Type",
+    "propsHeaderRequired": "Requis",
+    "propsHeaderDescription": "Description",
+    "propsRequired": "requis",
+    "propsOptional": "optionnel",
+    "propsNoDescription": "—",
+    "anatomyTitle": "Anatomie",
+    "anatomySingleDescription": "Composant unique — pas de sous-parties à composer.",
+    "anatomyCompoundDescription": "Ce fichier exporte des éléments supplémentaires que vous pouvez rendre ou étendre.",
+    "anatomyExportsHeading": "Sous-exports",
+    "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Afficher les composants internes",
+    "adminToggleAriaLabel": "Basculer la visibilité des composants internes",
+    "adminToggleAdminView": "VUE ADMIN",
+    "adminToggleInternalBadge": "interne",
+    "adminToggleInternalTooltip": "Composant interne — masqué de la documentation publique.",
+    "domain": {
+      "donations": {
+        "title": "Dons",
+        "description": "Boutons, modals, cartes et murs de donateurs — primitives prêtes à l'emploi pour les dons ponctuels et récurrents via Stripe Checkout."
+      },
+      "subscriptions": {
+        "title": "Abonnements",
+        "description": "Boutons d'abonnement, cartes de plan et flow de changement de plan — toutes les primitives nécessaires pour exposer et gérer les abonnements récurrents."
+      },
+      "billingPricing": {
+        "title": "Facturation & Tarifs",
+        "description": "PricingPage, BillingDashboard, InvoiceHistorySection, bannière past-due et lanceurs Stripe Customer Portal — UI complète du cycle de vie facturation."
+      },
+      "purchases": {
+        "title": "Achats & Marketplace",
+        "description": "Boutons et cartes d'achat unique plus les primitives marketplace (ProductCard, ProductGrid, PaymentHistory) pour les ventes one-shot."
+      },
+      "callbackPages": {
+        "title": "Pages de callback",
+        "description": "Pages success et cancel pré-construites pour Stripe Checkout — déposez-les sur `/subscribe/success`, `/donate/cancel`, etc. pour des flows instantanés."
+      },
+      "connect": {
+        "title": "Stripe Connect",
+        "description": "Formulaire d'onboarding, carte de statut, résumé des frais et dashboard Connect développeur — tout pour les plateformes marketplace multi-vendeurs."
+      },
+      "adminDeveloper": {
+        "title": "Admin & Développeur",
+        "description": "Dashboard admin fédéré, gestionnaire de plans, developer portal, modal de création de clé API et dashboard paiement utilisateur — surfaces avancées pour les owners de plateforme."
+      },
+      "utilities": {
+        "title": "Utilitaires & Gates",
+        "description": "Feature gates, dialogs de confirmation, promo code input, bouton de remboursement et fallback non-configuré — primitives orthogonales réutilisées dans tous les flows."
+      }
+    }
+  }
+}

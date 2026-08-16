@@ -4,7 +4,7 @@ import { getApiUrl, getWebUrl, getPort, URLS, type AppName } from '../urls.js'
 describe('@ezstart/config - URLs', () => {
   describe('URLS constant', () => {
     it('should have all app configurations', () => {
-      const appNames = [
+      const appNames: AppName[] = [
         'ezstart',
         'ezauth',
         'ezbill',
@@ -12,29 +12,51 @@ describe('@ezstart/config - URLs', () => {
         'fengshui',
         'asc-tcd',
         'green-pulse',
-        'monitoring',
+        'gacha-analyzer',
       ]
 
       appNames.forEach(app => {
-        expect(URLS[app as AppName]).toBeDefined()
-        expect(URLS[app as AppName].web).toBeDefined()
+        expect(URLS[app]).toBeDefined()
+        expect(URLS[app].web).toBeDefined()
       })
     })
 
     it('should have API URLs for apps with backends', () => {
-      const appsWithAPI = ['ezauth', 'ezbill', 'ezpay', 'green-pulse', 'monitoring']
+      const appsWithAPI: AppName[] = [
+        'ezstart',
+        'ezauth',
+        'ezbill',
+        'ezpay',
+        'green-pulse',
+        'gacha-analyzer',
+      ]
 
       appsWithAPI.forEach(app => {
-        expect(URLS[app as AppName].api).toBeDefined()
-        expect(URLS[app as AppName].api?.local).toMatch(/^http:\/\/localhost:\d+$/)
+        expect(URLS[app].api).toBeDefined()
+        expect(URLS[app].api?.local).toMatch(/^http:\/\/localhost:\d+$/)
       })
     })
 
     it('should not have API URLs for frontend-only apps', () => {
-      const frontendOnly = ['ezstart', 'fengshui', 'asc-tcd']
+      const frontendOnly: AppName[] = ['asc-tcd']
 
       frontendOnly.forEach(app => {
-        expect(URLS[app as AppName].api).toBeUndefined()
+        expect(URLS[app].api).toBeUndefined()
+      })
+    })
+
+    it('should have staging API URLs for all apps with backends', () => {
+      const appsWithAPI: AppName[] = [
+        'ezstart',
+        'ezauth',
+        'ezbill',
+        'ezpay',
+        'green-pulse',
+        'gacha-analyzer',
+      ]
+
+      appsWithAPI.forEach(app => {
+        expect(URLS[app].api?.staging).toMatch(/^https:\/\//)
       })
     })
   })
@@ -52,25 +74,51 @@ describe('@ezstart/config - URLs', () => {
       expect(url).toBe('https://ezstart-web.vercel.app')
     })
 
+    it('should return staging URL when env is staging', () => {
+      const url = getWebUrl('ezstart', 'staging')
+
+      expect(url).toMatch(/staging/)
+    })
+
     it('should return production URL in production', () => {
       const url = getWebUrl('ezstart', 'production')
 
       expect(url).toBe('https://www.ezstart.xyz')
     })
 
-    it('should return development URL when env not specified (default)', () => {
-      const url = getWebUrl('ezauth')
-
-      // getCurrentEnvironment() defaults to 'development' in test
-      expect(url).toMatch(/^https:/)
-    })
-
     it('should handle all app names', () => {
-      const apps: Array<keyof typeof URLS> = ['ezstart', 'ezauth', 'ezbill', 'ezpay']
+      const apps: AppName[] = ['ezstart', 'ezauth', 'ezbill', 'ezpay']
 
       apps.forEach(app => {
         expect(() => getWebUrl(app)).not.toThrow()
       })
+    })
+
+    it('should return prod URL when no env hints are present (auto-derive default)', () => {
+      // Snapshot + clear env hints that getCurrentEnvironment() inspects
+      const originalDeployEnv = process.env.DEPLOY_ENV
+      const originalVercelEnv = process.env.VERCEL_ENV
+      const originalVercelRef = process.env.VERCEL_GIT_COMMIT_REF
+      const originalNodeEnv = process.env.NODE_ENV
+
+      delete process.env.DEPLOY_ENV
+      delete process.env.VERCEL_ENV
+      delete process.env.VERCEL_GIT_COMMIT_REF
+      process.env.NODE_ENV = 'production'
+
+      try {
+        // With NODE_ENV=production and no Vercel/DEPLOY_ENV hints,
+        // getCurrentEnvironment() returns 'production'
+        const url = getWebUrl('ezstart')
+        expect(url).toBe(URLS.ezstart.web.production)
+        expect(url).toBe('https://www.ezstart.xyz')
+      } finally {
+        // Restore
+        if (originalDeployEnv !== undefined) process.env.DEPLOY_ENV = originalDeployEnv
+        if (originalVercelEnv !== undefined) process.env.VERCEL_ENV = originalVercelEnv
+        if (originalVercelRef !== undefined) process.env.VERCEL_GIT_COMMIT_REF = originalVercelRef
+        if (originalNodeEnv !== undefined) process.env.NODE_ENV = originalNodeEnv
+      }
     })
   })
 
@@ -81,6 +129,12 @@ describe('@ezstart/config - URLs', () => {
       expect(url).toBe('http://localhost:6110')
     })
 
+    it('should return staging API URL when env is staging', () => {
+      const url = getApiUrl('ezbill', 'staging')
+
+      expect(url).toBe('https://ezbill-api-staging.up.railway.app')
+    })
+
     it('should return production API URL in production', () => {
       const url = getApiUrl('ezauth', 'production')
 
@@ -88,11 +142,10 @@ describe('@ezstart/config - URLs', () => {
     })
 
     it('should throw for apps without API', () => {
-      expect(() => getApiUrl('fengshui' as any)).toThrow('does not have an API')
+      expect(() => getApiUrl('asc-tcd' as AppName)).toThrow('does not have an API')
     })
 
     it('should fallback to production when development not defined', () => {
-      // EZBill API doesn't have development URL, should fallback to production
       const url = getApiUrl('ezbill', 'development')
 
       expect(url).toMatch(/^https:/)
@@ -113,7 +166,7 @@ describe('@ezstart/config - URLs', () => {
     })
 
     it('should throw for apps without API when requesting api port', () => {
-      expect(() => getPort('fengshui', 'api')).toThrow('No api URL defined')
+      expect(() => getPort('asc-tcd', 'api')).toThrow('No api URL defined')
     })
 
     it('should return different ports for different apps', () => {
@@ -126,7 +179,7 @@ describe('@ezstart/config - URLs', () => {
     })
 
     it('should follow 61xx port pattern', () => {
-      const apps: Array<keyof typeof URLS> = ['ezstart', 'ezauth', 'ezbill', 'ezpay']
+      const apps: AppName[] = ['ezstart', 'ezauth', 'ezbill', 'ezpay']
 
       apps.forEach(app => {
         const port = getPort(app, 'web')
@@ -138,18 +191,16 @@ describe('@ezstart/config - URLs', () => {
 
   describe('Port pattern consistency', () => {
     it('should have APIs on 6XX0 and Web on 6XX1', () => {
-      // APIs should be on ports ending in 0
       expect(getPort('ezauth', 'api')).toBe(6110)
       expect(getPort('ezbill', 'api')).toBe(6120)
 
-      // Web should be on ports ending in 1
       expect(getPort('ezauth', 'web')).toBe(6111)
       expect(getPort('ezbill', 'web')).toBe(6121)
     })
 
     it('should have unique ports for each service', () => {
       const ports = new Set<number>()
-      const apps: Array<keyof typeof URLS> = ['ezstart', 'ezauth', 'ezbill', 'ezpay', 'green-pulse']
+      const apps: AppName[] = ['ezstart', 'ezauth', 'ezbill', 'ezpay', 'green-pulse']
 
       apps.forEach(app => {
         const webPort = getPort(app, 'web')
@@ -162,9 +213,7 @@ describe('@ezstart/config - URLs', () => {
       })
 
       // 5 unique web ports + 5 API ports = 10 total
-      const expectedCount = 10
-
-      expect(ports.size).toBe(expectedCount)
+      expect(ports.size).toBe(10)
     })
   })
 })

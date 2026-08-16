@@ -24,9 +24,8 @@
     }
   },
   "plans": {
-    "free": "Self-Awareness (Gói miễn phí)",
-    "premium": "Gói Premium",
-    "golden": "Gói Golden"
+    "loading": "Đang tải gói…",
+    "noPlan": "Không có gói đang hoạt động"
   },
   "errors": {
     "sendFailed": "Gửi tin nhắn thất bại. Vui lòng thử lại.",

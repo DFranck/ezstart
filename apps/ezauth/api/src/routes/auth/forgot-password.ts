@@ -3,13 +3,14 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
-  createVeryStrictRateLimiter,
+  createStrictRateLimiter,
   sendSuccess,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'
+import { requireTurnstile } from '../../middleware/turnstile-required.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
@@ -19,15 +20,19 @@ import { forgotPasswordRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 
 export const forgotPasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(forgotPasswordRegistry, router)
 
-/** Strict rate limit: 3 requests per 15 minutes */
-const forgotPasswordRateLimiter = createVeryStrictRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  max: 3,
+// Rate limit — 2 req/min per IP (anti email-bombing).
+// Each successful POST triggers a password-reset email send; we want the tightest
+// safe budget. The handler always returns 200 so legitimate users typing the wrong
+// email won't see the limiter, but a bot spamming addresses hits the wall fast.
+const forgotPasswordRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 2,
   message: 'Too many password reset attempts, please try again later.',
 })
 
@@ -42,8 +47,11 @@ const forgotPasswordController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid email address', parsed.error.issues)
     }
 
-    const { email, app, redirect_uri, locale, emailOverride } = parsed.data
+    const { email, app, redirect_uri, locale: bodyLocale, emailOverride } = parsed.data
     const appKey = app || 'ezstart'
+    // Body-locale wins; otherwise fall back to Accept-Language (pre-auth flow,
+    // no persisted user preference yet).
+    const locale = resolveUserLocale(req, bodyLocale)
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findOne({ email: email.toLowerCase() })
 
@@ -96,20 +104,26 @@ const forgotPasswordController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/forgot-password', forgotPasswordRateLimiter, forgotPasswordController, {
-  summary: 'Request password reset email',
-  tags: ['Authentication'],
-  bodySchema: forgotPasswordRequestSchema,
-  responseSchema: forgotPasswordResponseSchema,
-  extraResponses: {
-    429: {
-      description: 'Too many attempts',
-      schema: z.object({
-        success: z.literal(false).describe('Whether the operation succeeded'),
-        error: z.string().describe('Error message if operation failed'),
-      }),
+docRouter.post(
+  '/forgot-password',
+  forgotPasswordRateLimiter,
+  requireTurnstile(),
+  forgotPasswordController,
+  {
+    summary: 'Request password reset email',
+    tags: ['Authentication'],
+    bodySchema: forgotPasswordRequestSchema,
+    responseSchema: forgotPasswordResponseSchema,
+    extraResponses: {
+      429: {
+        description: 'Too many attempts',
+        schema: z.object({
+          success: z.literal(false).describe('Whether the operation succeeded'),
+          error: z.string().describe('Error message if operation failed'),
+        }),
+      },
     },
-  },
-})
+  }
+)
 
 export default router

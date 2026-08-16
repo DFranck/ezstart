@@ -1,0 +1,333 @@
+{
+  "developer": {
+    "title": "Developer Portal",
+    "subtitle": "Manage your applications, API keys, Stripe Connect account and platform plan",
+    "loginRequired": "Login Required",
+    "loginRequiredDescription": "You must be logged in to access the developer portal.",
+    "tabs": {
+      "applications": "Applications",
+      "apiKeys": "API Keys",
+      "stripeConnect": "Stripe Connect",
+      "plans": "Plans"
+    },
+    "applications": {
+      "title": "My Applications",
+      "description": "Manage your applications and their API keys",
+      "newApplication": "New Application",
+      "loading": "Loading applications...",
+      "errorTitle": "Failed to load applications",
+      "errorDescription": "Something went wrong. Please try again.",
+      "retry": "Retry",
+      "emptyTitle": "No applications yet",
+      "emptyDescription": "Create your first application to start generating API keys.",
+      "emptyCta": "Create Application",
+      "showArchived": "Show archived",
+      "showAll": "Show all applications (superadmin)",
+      "card": {
+        "manage": "Manage",
+        "archive": "Archive",
+        "archiveTitle": "Archive application?",
+        "archiveConfirm": "Are you sure you want to archive this application?",
+        "archiveConfirmCascade": "All API keys scoped to this application will be revoked. This action cannot be undone.",
+        "archiveCancel": "Cancel",
+        "archiveSubmit": "Archive",
+        "archiveSuccess": "Application archived",
+        "archiveFailed": "Failed to archive application",
+        "statusActive": "Active",
+        "statusArchived": "Archived",
+        "createdLabel": "Created",
+        "keysLabel": "keys"
+      },
+      "create": {
+        "title": "Create a new Application",
+        "description": "Applications are your tenants — each has its own API keys scoped to it.",
+        "nameLabel": "Name",
+        "namePlaceholder": "My Awesome App",
+        "slugLabel": "Slug",
+        "slugPlaceholder": "my-awesome-app",
+        "slugHelp": "Lowercase letters, numbers, hyphens. 2-32 characters.",
+        "slugInvalid": "Invalid slug. Use lowercase letters, numbers and hyphens (2-32 chars).",
+        "slugTaken": "This slug is already taken.",
+        "descriptionLabel": "Description (optional)",
+        "descriptionPlaceholder": "What does this application do?",
+        "cancel": "Cancel",
+        "submit": "Create",
+        "submitting": "Creating...",
+        "createFailed": "Failed to create application"
+      },
+      "detail": {
+        "back": "Back to Applications",
+        "tabKeys": "API Keys",
+        "tabSettings": "Settings",
+        "loading": "Loading application...",
+        "errorTitle": "Failed to load application",
+        "errorDescription": "Something went wrong. Please try again.",
+        "retry": "Retry",
+        "settingsTitle": "Settings",
+        "settingsDescription": "Update application name and description. Slug is immutable.",
+        "settingsNameLabel": "Application Name",
+        "settingsDescriptionLabel": "Description",
+        "settingsSave": "Save Changes",
+        "settingsSaving": "Saving...",
+        "settingsSaveSuccess": "Application updated",
+        "settingsSaveFailed": "Failed to update application",
+        "archiveSectionTitle": "Archive application",
+        "archiveSectionDescription": "Archived applications are hidden. Their API keys are revoked.",
+        "archiveButton": "Archive Application",
+        "archiveConfirmTitle": "Archive application?",
+        "archiveConfirmDescription": "All API keys scoped to this application will be revoked. This action cannot be undone.",
+        "archiveConfirmCascade": "This application has active keys. Archiving will also revoke them.",
+        "archiveCancel": "Cancel",
+        "archiveSubmit": "Archive",
+        "archiveSuccess": "Application archived",
+        "archiveFailed": "Failed to archive application"
+      }
+    },
+    "payKeys": {
+      "title": "EZPay API Keys",
+      "subtitle": "Manage your payment API keys scoped to an application",
+      "selectApplicationLabel": "Application context",
+      "selectApplicationDescription": "EZPay API keys are scoped to one of your applications. Select the application whose keys you want to manage.",
+      "applicationLabel": "Application",
+      "selectPlaceholder": "Select an application",
+      "noApplications": "You have no active applications yet. Go to the Applications tab to create one.",
+      "selectApplicationNotice": "Select an application above to view its EZPay keys.",
+      "createKey": "Create New Key",
+      "noKeys": "No EZPay API keys yet. Create one to get started.",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "errors": {
+        "fetchFailed": "Failed to load API keys",
+        "createFailed": "Failed to create API key",
+        "revokeFailed": "Failed to revoke API key",
+        "rotateFailed": "Failed to rotate API key"
+      },
+      "status": {
+        "active": "Active",
+        "revoked": "Revoked"
+      },
+      "table": {
+        "name": "Name",
+        "keyPrefix": "Key",
+        "status": "Status",
+        "created": "Created",
+        "lastUsed": "Last Used",
+        "actions": "Actions",
+        "never": "Never",
+        "usage": "Usage"
+      },
+      "create": {
+        "title": "Create EZPay API Key",
+        "nameLabel": "Key Name",
+        "namePlaceholder": "My App Production",
+        "appScope": "Application",
+        "keyType": "Key Type",
+        "keyTypePublishable": "Publishable (client-side safe)",
+        "keyTypeSecret": "Secret (server-only)",
+        "keyEnv": "Environment",
+        "keyEnvLive": "Live (production)",
+        "keyEnvTest": "Test (sandbox)",
+        "keyScope": "Permission Scope",
+        "keyScopeUser": "User (default)",
+        "keyScopeReadonly": "Read-only",
+        "keyScopeAdmin": "Admin (superadmin only)",
+        "keyScopeAdminWarning": "Admin-scoped keys have elevated permissions. Use with caution.",
+        "expiry": "Expiry",
+        "expiryNever": "Never",
+        "expiry30d": "30 days",
+        "expiry90d": "90 days",
+        "expiry1y": "1 year",
+        "submit": "Create",
+        "submitting": "Creating..."
+      },
+      "created": {
+        "title": "EZPay API Key Created",
+        "warning": "Save this key now. You will not be able to see it again.",
+        "copied": "Key copied to clipboard",
+        "copyKey": "Copy Key",
+        "done": "Done"
+      },
+      "revoke": {
+        "title": "Revoke API Key",
+        "confirm": "Are you sure you want to revoke this API key? This action cannot be undone.",
+        "submit": "Revoke",
+        "success": "API key revoked",
+        "action": "Revoke"
+      },
+      "rotate": {
+        "title": "Rotate API Key",
+        "confirm": "This will revoke the current key and create a new one with the same configuration.",
+        "submit": "Rotate",
+        "success": "API key rotated",
+        "action": "Rotate"
+      }
+    },
+    "connect": {
+      "title": "Stripe Connect",
+      "manageButton": "Manage Connect",
+      "callback": {
+        "complete": "Stripe Connect account activated",
+        "refresh": "Stripe requires more information before your account can be activated"
+      },
+      "notConnected": "No Stripe Account Connected",
+      "notConnectedDescription": "Connect your Stripe account to start accepting payments through the platform.",
+      "connectButton": "Connect your Stripe Account",
+      "accountInfo": "Account Information",
+      "businessName": "Business Name",
+      "accountType": "Account Type",
+      "accountTypeStandard": "Standard",
+      "accountTypeExpress": "Express",
+      "connectedSince": "Connected Since",
+      "status": "Status",
+      "statusPending": "Pending",
+      "statusActive": "Active",
+      "statusRestricted": "Restricted",
+      "statusDisabled": "Disabled",
+      "chargesEnabled": "Charges Enabled",
+      "payoutsEnabled": "Payouts Enabled",
+      "yes": "Yes",
+      "no": "No",
+      "onboard": {
+        "title": "Connect your Stripe Account",
+        "description": "Fill in your details to start the onboarding process.",
+        "email": "Business Email",
+        "emailPlaceholder": "you@business.com",
+        "businessName": "Business Name",
+        "businessNamePlaceholder": "Your Business",
+        "accountType": "Account Type",
+        "standard": "Standard (Full Stripe Dashboard)",
+        "express": "Express (Simplified Onboarding)",
+        "submit": "Start Onboarding",
+        "submitting": "Creating account..."
+      },
+      "disconnect": {
+        "button": "Disconnect Account",
+        "title": "Disconnect Stripe Account?",
+        "description": "This will remove your connected Stripe account from the platform. You will no longer be able to receive payments. This action cannot be undone.",
+        "confirm": "Disconnect",
+        "cancel": "Cancel",
+        "success": "Stripe account disconnected"
+      },
+      "dashboard": {
+        "button": "Open Stripe Dashboard",
+        "loading": "Loading..."
+      },
+      "resume": {
+        "button": "Resume Stripe onboarding",
+        "loading": "Resuming…",
+        "error": "Failed to resume onboarding. Please try again or start a new one."
+      }
+    },
+    "fees": {
+      "title": "Fee Summary",
+      "thisMonth": "This Month",
+      "totalFees": "Total Fees Paid",
+      "averageFee": "Average Fee",
+      "transactions": "Transactions",
+      "noData": "No transaction data available yet"
+    },
+    "transactions": {
+      "title": "Recent Transactions",
+      "date": "Date",
+      "amount": "Amount",
+      "fee": "Platform Fee",
+      "net": "Net Amount",
+      "status": "Status",
+      "noTransactions": "No transactions yet",
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "plans": {
+      "title": "Platform Plans",
+      "subtitle": "Choose a plan that fits your needs. Lower fees, more features.",
+      "current": "Current",
+      "upgrade": "Upgrade",
+      "comingSoon": "Plan upgrades are coming soon!",
+      "platformFee": "platform fee",
+      "perMonth": "/month",
+      "free": "Free",
+      "starter": {
+        "name": "Starter",
+        "description": "Perfect for getting started",
+        "features": "Basic dashboard, Email support"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "For growing businesses",
+        "features": "Advanced analytics, Priority email support"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "For high-volume platforms",
+        "features": "Custom analytics, Priority support, Dedicated account manager"
+      }
+    },
+    "plansManager": {
+      "title": "Plans",
+      "subtitle": "Manage subscription plans for this application",
+      "createButton": "Create Plan",
+      "empty": "No plans yet. Create your first plan.",
+      "columns": {
+        "name": "Name",
+        "price": "Price",
+        "interval": "Interval",
+        "status": "Status",
+        "features": "Features",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "edit": "Edit",
+        "archive": "Archive",
+        "archiveConfirm": "Archive plan",
+        "archiveCancel": "Cancel",
+        "archiveConfirmDescription": "This plan will no longer be available for new subscriptions. Existing subscriptions continue on the archived price."
+      },
+      "editor": {
+        "createTitle": "Create a new plan",
+        "editTitle": "Edit plan",
+        "dialogDescription": "Configure pricing, features and access grants for this plan.",
+        "nameLabel": "Name",
+        "namePlaceholder": "Pro",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Professional plan with advanced features",
+        "amountLabel": "Price",
+        "amountPlaceholder": "19.00",
+        "currencyLabel": "Currency",
+        "intervalLabel": "Billing interval",
+        "intervalMonth": "Monthly",
+        "intervalYear": "Yearly",
+        "intervalCountLabel": "Interval count",
+        "intervalCountHelp": "Bill every N months/years (default 1)",
+        "featuresLabel": "Features",
+        "featuresHelp": "Comma-separated features shown in PricingPage",
+        "grantsRolesLabel": "Grants roles",
+        "grantsRolesHelp": "Comma-separated roles granted to user on subscribe",
+        "grantsFeaturesLabel": "Grants features",
+        "grantsFeaturesHelp": "Comma-separated features granted",
+        "sortOrderLabel": "Sort order",
+        "activeLabel": "Active",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "validation": {
+          "nameRequired": "Name is required",
+          "amountInvalid": "Price must be a positive number",
+          "intervalCountRange": "Interval count must be between 1 and 12"
+        }
+      },
+      "toast": {
+        "created": "Plan created",
+        "updated": "Plan updated",
+        "archived": "Plan archived",
+        "error": "An error occurred"
+      }
+    },
+    "loading": "Loading developer portal...",
+    "error": "Failed to load account data. Please try again."
+  }
+}

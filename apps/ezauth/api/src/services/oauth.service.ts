@@ -1,9 +1,34 @@
 import { getAuthUserModel } from '../models/auth-user.js'
 import { getOAuthAccountModel } from '../models/oauth-account.js'
 import { AuthCodeResponse } from '@ezstart/auth-sdk/server'
-import { AuthService } from './auth.service.js'
+import { AuthService, type AuthCodePkce } from './auth.service.js'
+import { AuditLogService } from './audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { isValidAvatarUrl } from '../utils/avatar.js'
+
+/**
+ * Optional flow context forwarded by the OAuth callback. Defaults to
+ * `intent: 'signin'` for backwards compatibility.
+ */
+export interface OAuthFlowContext {
+  intent?: 'signin' | 'link'
+  /**
+   * Authenticated user the caller is linking the provider to. Required
+   * when `intent === 'link'`. The route layer extracts this from the
+   * active session BEFORE the redirect to Google and signs it into the
+   * state JWT, so by the time we read it here it is already trusted.
+   */
+  linkUserId?: string
+  /**
+   * PKCE (RFC 7636) binding the SDK committed to BEFORE redirecting to Google.
+   * Extracted from the signed OAuth state in the Passport strategy, so it is
+   * tamper-proof by the time we read it here. When set, the minted auth code
+   * carries `code_challenge` and the /token exchange REQUIRES a matching
+   * `code_verifier`. Absent ⇒ legacy (no-PKCE) auth code — backward compatible
+   * with SDKs that never sent a challenge.
+   */
+  pkce?: AuthCodePkce
+}
 
 /**
  * Returns the avatar only if it passes `isValidAvatarUrl` validation.
@@ -49,14 +74,85 @@ export class OAuthService {
    * If either side is unverified, we refuse and require the user to log in first
    * (explicit linkage flow). This prevents an attacker who controls an unverified
    * Google account from hijacking a local account sharing the same email.
+   *
+   * When `flow.intent === 'link'`, the caller is already authenticated and
+   * explicitly requested to link this provider to their existing account
+   * (`flow.linkUserId`) — the email-collision refusal is bypassed because
+   * the session itself is the proof of ownership.
    */
   static async handleOAuthCallback(
     profile: OAuthProfile,
     app: string,
-    redirectUri?: string
+    redirectUri?: string,
+    flow: OAuthFlowContext = {}
   ): Promise<AuthCodeResponse> {
     const AuthUserModel = await getAuthUserModel()
     const OAuthAccountModel = await getOAuthAccountModel()
+
+    // 0. Explicit link flow — bypass the email-collision refusal because the
+    //    caller proved account ownership via the session that was checked
+    //    server-side BEFORE this redirect was issued (state JWT carries the
+    //    userId signed by us, so it cannot be tampered with).
+    if (flow.intent === 'link' && flow.linkUserId) {
+      const linkedUser = await AuthUserModel.findById(flow.linkUserId)
+      if (!linkedUser) {
+        throw new OAuthLinkingRefusedError(
+          'The user account you tried to link no longer exists. Please sign in again and retry.'
+        )
+      }
+
+      // If the provider is already linked to ANY user, refuse — preserves
+      // the "one provider account per user" invariant enforced by the
+      // unique index on { provider, providerId }.
+      const existingOAuthAccount = await OAuthAccountModel.findOne({
+        provider: profile.provider,
+        providerId: profile.providerId,
+      })
+      if (existingOAuthAccount) {
+        if (existingOAuthAccount.userId.toString() !== linkedUser._id!.toString()) {
+          throw new OAuthLinkingRefusedError(
+            `This ${profile.provider} account is already linked to a different user.`
+          )
+        }
+        // Already linked to the same user — idempotent success.
+        return AuthService.generateAuthCodePublic(
+          linkedUser._id!.toString(),
+          app,
+          redirectUri,
+          flow.pkce
+        )
+      }
+
+      // Same safety as auto-link path: provider MUST have verified the email.
+      if (!profile.emailVerified) {
+        throw new OAuthLinkingRefusedError(
+          `Your ${profile.provider} account has no verified email. Please verify it with the provider, then retry.`
+        )
+      }
+
+      try {
+        await this.persistLinkedAccount(linkedUser, profile, app)
+      } catch (err) {
+        // Race-condition guard: a parallel callback may have linked the
+        // same provider id between our findOne above and the insert.
+        if (err instanceof Error && 'code' in err && (err as { code: number }).code === 11000) {
+          throw new OAuthLinkingRefusedError(`This ${profile.provider} account is already linked.`)
+        }
+        throw err
+      }
+      void AuditLogService.create({
+        userId: linkedUser._id!.toString(),
+        action: 'oauth_link',
+        appName: app,
+        metadata: { provider: profile.provider, providerEmail: profile.email },
+      })
+      return AuthService.generateAuthCodePublic(
+        linkedUser._id!.toString(),
+        app,
+        redirectUri,
+        flow.pkce
+      )
+    }
 
     // 1. Existing OAuth link → login
     const existingOAuthAccount = await OAuthAccountModel.findOne({
@@ -79,7 +175,14 @@ export class OAuthService {
         await user.save()
       }
 
-      return AuthService.generateAuthCodePublic(user._id!.toString(), app, redirectUri)
+      void AuditLogService.create({
+        userId: user._id!.toString(),
+        action: 'login',
+        appName: app,
+        metadata: { provider: profile.provider, method: 'oauth' },
+      })
+
+      return AuthService.generateAuthCodePublic(user._id!.toString(), app, redirectUri, flow.pkce)
     }
 
     // 2. Local user exists with this email → only auto-link if BOTH verified
@@ -90,9 +193,7 @@ export class OAuthService {
       // auto-linked when the OAuth provider has verified the email — the local
       // account was never "really" owned by the user via credentials.
       const isQuickSignupGhost =
-        !existingUser.isVerified &&
-        !existingUser.hasSetOwnPassword &&
-        profile.emailVerified
+        !existingUser.isVerified && !existingUser.hasSetOwnPassword && profile.emailVerified
 
       if (isQuickSignupGhost) {
         logger.info(
@@ -119,33 +220,41 @@ export class OAuthService {
         `🔗 [OAuth] Linking ${profile.provider} account to verified user ${existingUser._id}`
       )
 
-      const validatedAvatar = safeAvatar(profile.avatar)
-
-      const oauthAccount = new OAuthAccountModel({
-        userId: existingUser._id,
-        provider: profile.provider,
-        providerId: profile.providerId,
-        email: profile.email,
-        displayName: profile.displayName,
-        avatar: validatedAvatar,
-        accessToken: profile.accessToken,
-        refreshToken: profile.refreshToken,
-        profile: profile.rawProfile,
+      try {
+        await this.persistLinkedAccount(existingUser, profile, app)
+      } catch (err) {
+        if (err instanceof Error && 'code' in err && (err as { code: number }).code === 11000) {
+          // Concurrent callback won the race — fall through to a normal login.
+          logger.warn(
+            { provider: profile.provider, providerId: profile.providerId },
+            '[OAuth] Auto-link race lost — falling back to login'
+          )
+          return AuthService.generateAuthCodePublic(
+            existingUser._id!.toString(),
+            app,
+            redirectUri,
+            flow.pkce
+          )
+        }
+        throw err
+      }
+      void AuditLogService.create({
+        userId: existingUser._id!.toString(),
+        action: 'oauth_link',
+        appName: app,
+        metadata: {
+          provider: profile.provider,
+          providerEmail: profile.email,
+          autoLinked: true,
+        },
       })
 
-      await oauthAccount.save()
-
-      if (!existingUser.avatar && validatedAvatar) {
-        existingUser.avatar = validatedAvatar
-        await existingUser.save()
-      }
-
-      if (!existingUser.apps.includes(app)) {
-        existingUser.apps.push(app)
-        await existingUser.save()
-      }
-
-      return AuthService.generateAuthCodePublic(existingUser._id!.toString(), app, redirectUri)
+      return AuthService.generateAuthCodePublic(
+        existingUser._id!.toString(),
+        app,
+        redirectUri,
+        flow.pkce
+      )
     }
 
     // 3. Brand-new user — still require the provider to have verified the email
@@ -198,9 +307,68 @@ export class OAuthService {
       profile: profile.rawProfile,
     })
 
+    try {
+      await oauthAccount.save()
+    } catch (err) {
+      if (err instanceof Error && 'code' in err && (err as { code: number }).code === 11000) {
+        // A parallel callback created the same provider link between our
+        // earlier findOne and now — log it and continue (the user record
+        // is already there, the linked one will surface on next sign-in).
+        logger.warn(
+          { provider: profile.provider, providerId: profile.providerId },
+          '[OAuth] New-user OAuth link race lost — surfaced as duplicate key'
+        )
+      } else {
+        throw err
+      }
+    }
+
+    return AuthService.generateAuthCodePublic(newUser._id!.toString(), app, redirectUri, flow.pkce)
+  }
+
+  /**
+   * Persist a new OAuthAccount document for `user` and best-effort backfill
+   * the missing avatar / app access. Extracted so the auto-link and explicit
+   * `intent=link` paths share the same persistence logic.
+   *
+   * @internal
+   */
+  private static async persistLinkedAccount(
+    user: Awaited<ReturnType<typeof getAuthUserModel>>['prototype'] & {
+      _id: unknown
+      avatar?: string
+      apps: string[]
+      save(): Promise<unknown>
+    },
+    profile: OAuthProfile,
+    app: string
+  ): Promise<void> {
+    const OAuthAccountModel = await getOAuthAccountModel()
+    const validatedAvatar = safeAvatar(profile.avatar)
+
+    const oauthAccount = new OAuthAccountModel({
+      userId: user._id,
+      provider: profile.provider,
+      providerId: profile.providerId,
+      email: profile.email,
+      displayName: profile.displayName,
+      avatar: validatedAvatar,
+      accessToken: profile.accessToken,
+      refreshToken: profile.refreshToken,
+      profile: profile.rawProfile,
+    })
+
     await oauthAccount.save()
 
-    return AuthService.generateAuthCodePublic(newUser._id!.toString(), app, redirectUri)
+    if (!user.avatar && validatedAvatar) {
+      user.avatar = validatedAvatar
+      await user.save()
+    }
+
+    if (!user.apps.includes(app)) {
+      user.apps.push(app)
+      await user.save()
+    }
   }
 
   /**

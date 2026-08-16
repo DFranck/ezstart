@@ -3,7 +3,7 @@
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { Badge, Card, CardContent, CardHeader, Div, H1, H3, Icon, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export default function AdminDashboardPage() {
   const t = useTranslations('admin')

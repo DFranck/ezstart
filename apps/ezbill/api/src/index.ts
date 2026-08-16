@@ -1,46 +1,59 @@
-// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 // Updated: 2025-11-15 - App-specific roles support
+// Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
-import {
-  connectToMongo,
-  createApp,
-  createRateLimiter,
-  getApiPort,
-  startServer,
-  createVersionedRouter,
-  addVersionHeader,
-} from '@ezstart/express-core'
-import routes, { globalRegistry } from './routes/index.js'
 import { logger } from '@ezstart/logger/server'
+import {
+  assertCriticalDeps,
+  bootApi,
+  createMongoosePingCheck,
+  createResendCheck,
+  createVersionedRouter,
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
+import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp({ apiApp: 'ezbill' })
-const PORT = getApiPort('ezbill')
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3 + A8.5 V5). EZBill is a
+// consumer of ezauth + ezpay so RESEND_API_KEY is the only outbound
+// integration — but it gates email flows (invoice email, reminders) so
+// missing it in prod = silent skip → status page shows "operational"
+// while emails are dead. Mongo + JWT are non-negotiable. Throws in prod,
+// warns in dev. See `.claude/rules/standard-saas-observability.md` §4.
+assertCriticalDeps({
+  app: 'ezbill',
+  required: ['MONGO_URL', 'JWT_SECRET', 'RESEND_API_KEY'],
+  logger,
+})
 
-// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
+// Deep-health checks executed by GET /health/deep. See
+// `.claude/rules/standard-saas-observability.md` §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.RESEND_API_KEY) {
+  deepHealthChecks.push(createResendCheck(process.env.RESEND_API_KEY))
+}
 
-// ✅ Add API version headers to all responses
-app.use(addVersionHeader('v1'))
-
-// ✅ API routes with versioning support (supports both /api and /api/v1)
-app.use(createVersionedRouter('/api', routes))
-
-// Sentry error handler MUST be AFTER all routes
-Sentry.setupExpressErrorHandler(app)
-
-connectToMongo('ezbill')
-  .then(() =>
-    startServer(app, {
+// No cookie-auth routes: EZBill consumes EZAuth for identity, no own cookies.
+// Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
+let app: import('@ezstart/api-core').Express
+try {
+  ;({ app } = await bootApi('ezbill', {
+    mongoDbName: 'ezbill',
+    cookieAuthRoutes: [],
+    deepHealthChecks,
+    onReady: ({ app }) => {
+      // Routes available at /api/* and /api/v1/*
+      app.use(createVersionedRouter('/api', routes))
+    },
+    serverConfig: {
       routes,
       registries: globalRegistry,
       basePath: '/api',
       serviceName: 'EZBill',
-      port: Number(PORT),
-    })
-  )
-  .catch(err => {
-    logger.error('❌ Failed to start EZBill API', err)
-    process.exit(1)
-  })
-// trigger deploy
+    },
+  }))
+} catch (err) {
+  logger.error('Failed to start EZBill API', err)
+  process.exit(1)
+}
+
+export { app }

@@ -1,117 +1,39 @@
 'use client'
 
-import {
-  Badge,
-  Button,
-  Div,
-  P,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  PasswordInput,
-} from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
-import { logger } from '@ezstart/logger'
-import { useLocale } from 'next-intl'
-import Link from 'next/link'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Button, Div, Form } from '@ezstart/ui/components'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
+import { logger } from './internal-logger.js'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { PasswordStrength } from './PasswordStrength.js'
-import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
+import { OAuthButtons } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
-import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
+import { readUtmSource } from './utmSource.js'
+import { DevModeBanner } from './DevModeBanner.js'
+import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
+import { useAuth } from '../react/hooks.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
+import { getAuthTexts } from '../i18n/index.js'
+import {
+  SIGN_UP_DEFAULT_FORM_ID,
+  type SignUpFormData,
+  type SignUpFormProps,
+  type SignUpFormTexts,
+} from './_internal/sign-up-form/types.js'
+import { useAvailabilityCheck } from './_internal/sign-up-form/use-availability-check.js'
+import { SignUpFormFields } from './_internal/sign-up-form/SignUpFormFields.js'
+import { SignUpSuccess } from './_internal/sign-up-form/SignUpSuccess.js'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+export type { SignUpFormProps, SignUpFormTexts } from './_internal/sign-up-form/types.js'
 
-export interface SignUpFormTexts {
-  email: string
-  emailPlaceholder: string
-  emailTaken: string
-  username: string
-  usernamePlaceholder: string
-  usernameTaken: string
-  firstName: string
-  firstNamePlaceholder: string
-  lastName: string
-  lastNamePlaceholder: string
-  password: string
-  passwordPlaceholder: string
-  passwordHint: string
-  confirmPassword: string
-  confirmPasswordPlaceholder: string
-  passwordMismatch: string
-  submit: string
-  submitting: string
-  fallbackError: string
-  // Success state
-  checkEmail: string
-  checkEmailDescription: string
-  backToLogin: string
-  // Password strength
-  passwordWeak: string
-  passwordFair: string
-  passwordGood: string
-  passwordStrong: string
-  // Promo code
-  promoCodeLabel: string
-  promoCodePlaceholder: string
-  promoCodeApplied: string
-  promoCodeToggle: string
-  promoCodeInvalid: string
-  promoCodeRateLimited: string
-  promoCodeChecking: string
-  // OAuth texts (optional — only needed if showOAuth is true)
-  continueWithGoogle?: string
-  orContinueWith?: string
-}
-
-export interface SignUpFormProps {
-  /** App name for the register request */
-  appName: string
-  /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
-  promoCode?: string
-  /** Redirect URI after registration (OAuth code flow) */
-  redirectUri?: string
-  /** Called after successful registration */
-  onSuccess?: () => void
-  /** Called when user clicks "Back to login" after registration */
-  onBackToLogin?: () => void
-  /** Href for back to login link */
-  backToLoginHref?: string
-  /** Show OAuth buttons above the form */
-  showOAuth?: boolean
-  /** OAuth providers to display */
-  oauthProviders?: OAuthProvider[]
-  /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
-   * Any keys provided in `texts` take precedence over the localized defaults.
-   */
-  locale?: AuthLocale | string
-  /** Override texts (merged on top of the localized defaults). */
-  texts?: Partial<SignUpFormTexts>
-}
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const MIN_PASSWORD_LENGTH = 8
-
-// ─── Component ──────────────────────────────────────────────────────────────
-
-interface FormData {
-  email: string
-  username: string
-  password: string
-  confirmPassword: string
-  firstName: string
-  lastName: string
-  promoCode: string
-}
-
+/**
+ * Account creation form with email + password, optional first/last name,
+ * username, and promo code fields.
+ *
+ * @example
+ * ```tsx
+ * <SignUpForm appName="myapp" redirectUri="/welcome" />
+ * ```
+ */
 export function SignUpForm({
   appName,
   promoCode,
@@ -123,19 +45,45 @@ export function SignUpForm({
   oauthProviders,
   locale: propLocale,
   texts,
+  disabled = false,
+  keyStatus,
+  urlKey,
+  promoApiUrl,
+  formId = SIGN_UP_DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
+  turnstileSiteKey,
 }: SignUpFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
-  const t: SignUpFormTexts = { ...getAuthTexts(locale, 'signUp'), ...texts }
   const navigation = useAuthNavigation()
+  const { isAuthenticated, isAuthReady } = useAuth()
+  const locale = propLocale ?? navigation.locale
+  const t: SignUpFormTexts = { ...getAuthTexts(locale, 'signUp'), ...texts }
   const resolvedBackToLoginHref = backToLoginHref ?? navigation.loginHref
+
+  // ── Auto-redirect when already authenticated ─────────────────────────────
+  //
+  // Same rationale as `SignInForm` — if the user already has a valid session
+  // in localStorage / cookie, do not show the signup form. Send them to the
+  // dashboard (or to the explicit `redirectUri` / `?redirect_uri=`).
+  // Cf. SignInForm for the full reasoning (LOGIN-PAGE-NO-REDIRECT-IF-AUTHED).
+  const resolvedRedirectUri =
+    redirectUri ??
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
+      : undefined)
+  useEffect(() => {
+    if (!isAuthReady) return
+    if (!isAuthenticated) return
+    if (typeof window === 'undefined') return
+    if (!resolvedRedirectUri) return
+    window.location.replace(resolvedRedirectUri)
+  }, [isAuthReady, isAuthenticated, resolvedRedirectUri])
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [registered, setRegistered] = useState(false)
-  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
-  const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const {
     promoCode: resolvedPromo,
     setPromoCode: setResolvedPromo,
@@ -144,9 +92,9 @@ export function SignUpForm({
     isValidating: promoIsValidating,
     isOpen: promoOpen,
     setIsOpen: setPromoOpen,
-  } = usePromoCode(appName, promoCode)
+  } = usePromoCode(appName, promoCode, promoApiUrl)
 
-  const form = useForm<FormData>({
+  const form = useForm<SignUpFormData>({
     defaultValues: {
       email: '',
       username: '',
@@ -160,63 +108,31 @@ export function SignUpForm({
   })
 
   const watchPassword = form.watch('password')
-
-  // Debounced availability check
-  const checkAvailability = useCallback(async (field: 'email' | 'username', value: string) => {
-    if (!value || value.length < 3) {
-      if (field === 'email') setEmailAvailable(null)
-      else setUsernameAvailable(null)
-      return
-    }
-
-    try {
-      const params = new URLSearchParams({ [field]: value })
-      const response = await callApi(`/auth/check-availability?${params.toString()}`, {
-        appName: 'ezauth',
-        method: 'GET',
-      })
-
-      if (response.ok) {
-        const data = response.data as {
-          emailAvailable?: boolean
-          usernameAvailable?: boolean
-        }
-        if (field === 'email') setEmailAvailable(data.emailAvailable ?? null)
-        else setUsernameAvailable(data.usernameAvailable ?? null)
-      }
-    } catch {
-      // Silently fail — availability check is non-critical
-    }
-  }, [])
-
   const watchEmail = form.watch('email')
   const watchUsername = form.watch('username')
+  const { emailAvailable, usernameAvailable } = useAvailabilityCheck(watchEmail, watchUsername)
 
+  // Lift `loading` out so a parent (e.g. `<SignUpModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
   useEffect(() => {
-    if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
-    setEmailAvailable(null)
-    emailTimerRef.current = setTimeout(() => checkAvailability('email', watchEmail), 500)
-    return () => {
-      if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
-    }
-  }, [watchEmail, checkAvailability])
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
 
-  useEffect(() => {
-    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
-    setUsernameAvailable(null)
-    usernameTimerRef.current = setTimeout(() => checkAvailability('username', watchUsername), 500)
-    return () => {
-      if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
-    }
-  }, [watchUsername, checkAvailability])
+  const onSubmit = async (formData: SignUpFormData) => {
+    // Block submission when the captcha widget is showing but the user
+    // hasn't completed the challenge yet. Defensive guard for cases where
+    // the submit button lives outside the form (e.g. `<SignUpModal>` footer)
+    // and the caller hasn't wired the disabled state.
+    if (turnstileSiteKey && !turnstileToken) return
 
-  const onSubmit = async (formData: FormData) => {
     setLoading(true)
     setError('')
 
     try {
       const finalPromo = promoIsValid === true ? formData.promoCode?.trim() : undefined
-      const response = await callApi('/auth/register', {
+      const utmSource = readUtmSource()
+      await apiCall('/auth/register', {
         appName: 'ezauth',
         method: 'POST',
         body: {
@@ -229,18 +145,23 @@ export function SignUpForm({
           redirect_uri: redirectUri || undefined,
           locale,
           ...(finalPromo ? { promoCode: finalPromo } : {}),
+          ...(utmSource ? { utmSource } : {}),
+          ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
-
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Registration failed')
-      }
 
       setRegistered(true)
       logger.info('Registration successful, verification email sent')
       onSuccess?.()
     } catch (err) {
-      const message = err instanceof Error ? err.message : t.fallbackError
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
+      const message =
+        ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE'
+          ? t.networkError
+          : ApiError.isApiError(err) || err instanceof Error
+            ? err.message
+            : t.fallbackError
       setError(message)
     } finally {
       setLoading(false)
@@ -249,32 +170,16 @@ export function SignUpForm({
 
   if (registered) {
     return (
-      <Div className="space-y-4 text-center py-4">
-        <Div className="text-4xl">&#9993;</Div>
-        <P className="font-semibold text-lg">{t.checkEmail}</P>
-        <P className="text-sm text-muted-foreground">{t.checkEmailDescription}</P>
-        <Div className="pt-2">
-          {onBackToLogin ? (
-            <Button
-              type="button"
-              variant="link"
-              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-              onClick={onBackToLogin}
-            >
-              {t.backToLogin}
-            </Button>
-          ) : (
-            <Button asChild variant="link" className="text-sm text-muted-foreground">
-              <Link href={resolvedBackToLoginHref}>{t.backToLogin}</Link>
-            </Button>
-          )}
-        </Div>
-      </Div>
+      <SignUpSuccess
+        texts={t}
+        backToLoginHref={resolvedBackToLoginHref}
+        onBackToLogin={onBackToLogin}
+      />
     )
   }
 
   return (
-    <Div className="space-y-3 md:space-y-4">
+    <Div className={`space-y-3 md:space-y-4 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       {showOAuth && (
         <OAuthButtons
           appName={appName}
@@ -288,7 +193,7 @@ export function SignUpForm({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+        <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           {error && (
             <Div
               role="alert"
@@ -298,190 +203,51 @@ export function SignUpForm({
             </Div>
           )}
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.email}</FormLabel>
-                <FormControl>
-                  <Input type="email" required placeholder={t.emailPlaceholder} {...field} />
-                </FormControl>
-                <FormMessage />
-                {emailAvailable === false && (
-                  <P size="xs" className="text-destructive">
-                    {t.emailTaken}
-                  </P>
-                )}
-              </FormItem>
-            )}
+          <SignUpFormFields
+            form={form}
+            texts={t}
+            watchPassword={watchPassword}
+            emailAvailable={emailAvailable}
+            usernameAvailable={usernameAvailable}
+            promoOpen={promoOpen}
+            setPromoOpen={setPromoOpen}
+            setResolvedPromo={setResolvedPromo}
+            promoIsValid={promoIsValid}
+            promoIsRateLimited={promoIsRateLimited}
+            promoIsValidating={promoIsValidating}
           />
 
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.username}</FormLabel>
-                <FormControl>
-                  <Input type="text" required placeholder={t.usernamePlaceholder} {...field} />
-                </FormControl>
-                <FormMessage />
-                {usernameAvailable === false && (
-                  <P size="xs" className="text-destructive">
-                    {t.usernameTaken}
-                  </P>
-                )}
-              </FormItem>
-            )}
-          />
-
-          <Div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs md:text-sm">{t.firstName}</FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder={t.firstNamePlaceholder} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs md:text-sm">{t.lastName}</FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder={t.lastNamePlaceholder} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </Div>
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.password}</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    required
-                    minLength={MIN_PASSWORD_LENGTH}
-                    placeholder={t.passwordPlaceholder}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-                <PasswordStrength
-                  password={watchPassword}
-                  texts={{
-                    weak: t.passwordWeak,
-                    fair: t.passwordFair,
-                    good: t.passwordGood,
-                    strong: t.passwordStrong,
-                  }}
-                />
-                <P className="mt-1 text-xs text-muted-foreground">{t.passwordHint}</P>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            rules={{
-              validate: (value: string) =>
-                value === form.getValues('password') || t.passwordMismatch,
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.confirmPassword}</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    required
-                    minLength={MIN_PASSWORD_LENGTH}
-                    placeholder={t.confirmPasswordPlaceholder}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {!promoOpen ? (
-            <Button
-              type="button"
-              variant="link"
-              className="text-xs text-muted-foreground p-0 h-auto cursor-pointer"
-              onClick={() => setPromoOpen(true)}
-            >
-              {t.promoCodeToggle}
-            </Button>
-          ) : (
-            <FormField
-              control={form.control}
-              name="promoCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs text-muted-foreground">
-                    {t.promoCodeLabel}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder={t.promoCodePlaceholder}
-                      className="h-8 text-sm"
-                      {...field}
-                      onChange={e => {
-                        field.onChange(e)
-                        setResolvedPromo(e.target.value)
-                      }}
-                    />
-                  </FormControl>
-                  {promoIsValidating && (
-                    <P size="xs" className="text-muted-foreground">
-                      {t.promoCodeChecking}
-                    </P>
-                  )}
-                  {promoIsValid === true && (
-                    <Badge variant="success" className="text-xs">
-                      {t.promoCodeApplied}
-                    </Badge>
-                  )}
-                  {promoIsValid === false && !promoIsRateLimited && (
-                    <P size="xs" className="text-destructive">
-                      {t.promoCodeInvalid}
-                    </P>
-                  )}
-                  {promoIsRateLimited && (
-                    <P size="xs" className="text-warning">
-                      {t.promoCodeRateLimited}
-                    </P>
-                  )}
-                </FormItem>
-              )}
+          {turnstileSiteKey && (
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              onSuccess={setTurnstileToken}
+              onExpired={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
             />
           )}
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full cursor-pointer"
-            variant="default"
-          >
-            {loading ? t.submitting : t.submit}
-          </Button>
+          {!hideSubmitButton && (
+            <Button
+              type="submit"
+              disabled={disabled || loading || (Boolean(turnstileSiteKey) && !turnstileToken)}
+              className="w-full cursor-pointer"
+              variant="default"
+            >
+              {loading ? t.submitting : t.submit}
+            </Button>
+          )}
         </form>
       </Form>
+
+      {/* See note in SignInForm.tsx — only override appName when the URL
+          surfaced a real key/legacy app= signal so the first-party early
+          return in DevModeBanner can fire on ezauth's own pages. */}
+      <DevModeBanner
+        {...(urlKey || keyStatus ? { appName } : {})}
+        keyStatus={keyStatus}
+        urlKey={urlKey}
+        locale={navigation.locale}
+      />
     </Div>
   )
 }

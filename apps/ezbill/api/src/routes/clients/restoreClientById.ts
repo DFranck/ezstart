@@ -3,23 +3,18 @@
  * Restore Client (authenticated)
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { paramsMongoIdSchema, clientSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { paramsMongoIdSchema, clientSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/client/client.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const restoreClientByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const restoreClientByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const restoreClientByIdRouter = createRouterWithDoc(
   restoreClientByIdRegistry,
   router,
   '/clients'
-);
+)
 
 restoreClientByIdRouter.post(
   '/:id/restore',
@@ -32,6 +27,6 @@ restoreClientByIdRouter.post(
     paramsSchema: paramsMongoIdSchema,
     responseSchema: clientSchema,
   }
-);
+)
 
-export default router;
+export default router

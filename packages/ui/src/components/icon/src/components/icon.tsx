@@ -97,7 +97,7 @@ export function Icon({
       isUndefined: typeof name === 'undefined',
       isEmptyString: name === '',
     })
-    return <HelpCircle size={size} className="text-gray-400" />
+    return <HelpCircle size={size} className="text-muted-foreground" />
   }
 
   const [prefixRaw, iconNameRaw] = name.includes(':') ? name.split(':') : ['lucide', name]

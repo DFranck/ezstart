@@ -1,3 +1,5 @@
+// allowed: developer example file (not exported to consumers).
+// Hardcoded colors used as visually distinguishable placeholders for layout demonstration.
 import { SplitSection, SplitSectionItem } from './split-section'
 
 /**
@@ -119,12 +121,7 @@ export function SplitSectionExample4() {
  */
 export function SplitSectionExample5() {
   return (
-    <SplitSection
-      diagonal={true}
-      diagonalDirection="right"
-      diagonalAngle={15}
-      padding="lg"
-    >
+    <SplitSection diagonal={true} diagonalDirection="right" diagonalAngle={15} padding="lg">
       <SplitSectionItem className="bg-gradient-to-br from-purple-500 to-pink-500 p-8">
         <h2 className="text-white text-2xl">Left side with diagonal</h2>
       </SplitSectionItem>

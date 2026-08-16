@@ -3,9 +3,9 @@
 import { Badge, Card, CardContent, CardHeader, Icon } from '@ezstart/ui/components'
 import { Div, H2, H3, P, Span } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
-import { useAuth } from '../provider.js'
+import { useAuth } from '../react/hooks.js'
 import { UserAvatar } from './UserAvatar.js'
-import type { AuthUser } from '../types.js'
+import type { AuthUser } from '../core/types.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -21,6 +21,15 @@ export interface UserSettingsTexts {
   roles: string
   noRoles: string
   editProfile: string
+  /** "Not connected" copy under the Google connected-accounts row. */
+  notConnected: string
+  /** Localizable relative-time labels (mirror SessionsManager pattern). */
+  justNow: string
+  minutesAgo: string
+  hoursAgo: string
+  daysAgo: string
+  /** BCP-47 locale used for `Intl.DateTimeFormat` of older dates. */
+  dateLocale?: string
 }
 
 export interface UserSettingsProps {
@@ -54,14 +63,19 @@ const DEFAULT_TEXTS: UserSettingsTexts = {
   roles: 'Roles',
   noRoles: 'No roles assigned',
   editProfile: 'Edit Profile',
+  notConnected: 'Not connected',
+  justNow: 'Just now',
+  minutesAgo: '{n}m ago',
+  hoursAgo: '{n}h ago',
+  daysAgo: '{n}d ago',
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatDate(dateStr: string | undefined | null): string {
+function formatDate(dateStr: string | undefined | null, locale?: string): string {
   if (!dateStr) return '-'
   try {
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -71,7 +85,7 @@ function formatDate(dateStr: string | undefined | null): string {
   }
 }
 
-function formatRelativeDate(dateStr: string | undefined | null): string {
+function formatRelativeDate(dateStr: string | undefined | null, t: UserSettingsTexts): string {
   if (!dateStr) return '-'
   try {
     const date = new Date(dateStr)
@@ -81,11 +95,11 @@ function formatRelativeDate(dateStr: string | undefined | null): string {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return formatDate(dateStr)
+    if (diffMins < 1) return t.justNow
+    if (diffMins < 60) return t.minutesAgo.replace('{n}', String(diffMins))
+    if (diffHours < 24) return t.hoursAgo.replace('{n}', String(diffHours))
+    if (diffDays < 7) return t.daysAgo.replace('{n}', String(diffDays))
+    return formatDate(dateStr, t.dateLocale)
   } catch {
     return dateStr
   }
@@ -122,6 +136,15 @@ function getFullName(user: AuthUser): string {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+/**
+ * Account settings panel with avatar, email + verification, connected
+ * accounts (OAuth), and password change actions.
+ *
+ * @example
+ * ```tsx
+ * <UserSettings editable />
+ * ```
+ */
 export function UserSettings({
   showAvatar = true,
   showEmail = true,
@@ -174,12 +197,12 @@ export function UserSettings({
           <InfoRow
             icon="lucide:Calendar"
             label={texts.memberSince}
-            value={formatDate(user.createdAt)}
+            value={formatDate(user.createdAt, texts.dateLocale)}
           />
           <InfoRow
             icon="lucide:Clock"
             label={texts.lastActive}
-            value={formatRelativeDate(user.lastActiveAt)}
+            value={formatRelativeDate(user.lastActiveAt, texts)}
           />
         </CardContent>
       </Card>
@@ -214,7 +237,7 @@ export function UserSettings({
               <Div className="flex-1 min-w-0">
                 <P className="text-sm font-medium text-foreground">Google</P>
                 <P className="text-xs text-muted-foreground truncate">
-                  {isGoogleAvatar(user.avatar) ? user.email : 'Not connected'}
+                  {isGoogleAvatar(user.avatar) ? user.email : texts.notConnected}
                 </P>
               </Div>
               {isGoogleAvatar(user.avatar) && (

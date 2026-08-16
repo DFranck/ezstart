@@ -5,7 +5,7 @@ import {
   Router,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { getThemeOverrideModel } from '../../models/ThemeOverride.js'
 

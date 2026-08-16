@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * CTA Component - Call-to-Action Section
  *
@@ -6,8 +8,10 @@
  */
 
 import * as React from 'react'
-import { cn } from '../../lib/utils'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 import { ctaVariantConfig } from '../../lib/design-system/variants'
+import { cn } from '../../lib/utils'
 import { Button } from '../button'
 
 // ========== Types ==========
@@ -19,14 +23,18 @@ export interface CTAProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
   /** Description text */
   description?: string
-  /** Primary button text */
-  primaryText: string
+  /** Primary button text (use primaryCTASlot to override with a custom ReactNode) */
+  primaryText?: string
   /** Primary button href */
   primaryHref?: string
-  /** Secondary button text */
+  /** Custom primary CTA ReactNode (overrides primaryText) */
+  primaryCTASlot?: React.ReactNode
+  /** Secondary button text (use secondaryCTASlot to override with a custom ReactNode) */
   secondaryText?: string
   /** Secondary button href */
   secondaryHref?: string
+  /** Custom secondary CTA ReactNode (overrides secondaryText) */
+  secondaryCTASlot?: React.ReactNode
   /** @deprecated Use intent instead */
   bgColor?: 'default' | 'primary' | 'muted'
   /** Standard intent token — maps to bgColor (default→default, primary→primary) */
@@ -48,8 +56,10 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
       description,
       primaryText,
       primaryHref = '#',
+      primaryCTASlot,
       secondaryText,
       secondaryHref = '#',
+      secondaryCTASlot,
       bgColor,
       intent,
       className,
@@ -57,6 +67,15 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
     },
     ref
   ) => {
+    // Surface deprecation warning when consumer passes the legacy `bgColor` prop.
+    React.useEffect(() => {
+      if (bgColor !== undefined) {
+        warnDeprecation('CTA.bgColor', 'intent prop', {
+          toast: msg => toast.warning(msg),
+        })
+      }
+    }, [bgColor])
+
     const resolvedBgColor: 'default' | 'primary' | 'muted' =
       bgColor ?? (intent ? intentToBgColor[intent] : 'default')
     const containerClasses = cn(
@@ -78,7 +97,9 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
 
     const buttonClasses = cn(
       'flex flex-wrap gap-4',
-      ctaVariantConfig.buttons[variant === 'centered' ? 'centered' : variant === 'split' ? 'split' : 'default']
+      ctaVariantConfig.buttons[
+        variant === 'centered' ? 'centered' : variant === 'split' ? 'split' : 'default'
+      ]
     )
 
     return (
@@ -111,32 +132,38 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
             {/* CTA Buttons */}
             {variant !== 'split' && (
               <div className={buttonClasses}>
-                <Button
-                  asChild
-                  size="lg"
-                  variant={
-                    variant === 'gradient' || resolvedBgColor === 'primary'
-                      ? 'secondary'
-                      : 'default'
-                  }
-                  className="text-base px-8 py-6"
-                >
-                  <a href={primaryHref}>{primaryText}</a>
-                </Button>
-                {secondaryText && (
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className={cn(
-                      'text-base px-8 py-6',
-                      (variant === 'gradient' || resolvedBgColor === 'primary') &&
-                        'border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10'
+                {primaryCTASlot
+                  ? primaryCTASlot
+                  : primaryText && (
+                      <Button
+                        asChild
+                        size="lg"
+                        variant={
+                          variant === 'gradient' || resolvedBgColor === 'primary'
+                            ? 'secondary'
+                            : 'default'
+                        }
+                        className="text-base px-8 py-6"
+                      >
+                        <a href={primaryHref}>{primaryText}</a>
+                      </Button>
                     )}
-                  >
-                    <a href={secondaryHref}>{secondaryText}</a>
-                  </Button>
-                )}
+                {secondaryCTASlot
+                  ? secondaryCTASlot
+                  : secondaryText && (
+                      <Button
+                        asChild
+                        size="lg"
+                        variant="outline"
+                        className={cn(
+                          'text-base px-8 py-6',
+                          (variant === 'gradient' || resolvedBgColor === 'primary') &&
+                            'border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10'
+                        )}
+                      >
+                        <a href={secondaryHref}>{secondaryText}</a>
+                      </Button>
+                    )}
               </div>
             )}
           </div>
@@ -144,24 +171,30 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
           {/* Buttons for Split Layout */}
           {variant === 'split' && (
             <div className="flex flex-col gap-4">
-              <Button
-                asChild
-                size="lg"
-                variant={resolvedBgColor === 'primary' ? 'secondary' : 'default'}
-                className="text-base px-8 py-6 w-full sm:w-auto"
-              >
-                <a href={primaryHref}>{primaryText}</a>
-              </Button>
-              {secondaryText && (
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base px-8 py-6 w-full sm:w-auto"
-                >
-                  <a href={secondaryHref}>{secondaryText}</a>
-                </Button>
-              )}
+              {primaryCTASlot
+                ? primaryCTASlot
+                : primaryText && (
+                    <Button
+                      asChild
+                      size="lg"
+                      variant={resolvedBgColor === 'primary' ? 'secondary' : 'default'}
+                      className="text-base px-8 py-6 w-full sm:w-auto"
+                    >
+                      <a href={primaryHref}>{primaryText}</a>
+                    </Button>
+                  )}
+              {secondaryCTASlot
+                ? secondaryCTASlot
+                : secondaryText && (
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="text-base px-8 py-6 w-full sm:w-auto"
+                    >
+                      <a href={secondaryHref}>{secondaryText}</a>
+                    </Button>
+                  )}
             </div>
           )}
         </div>

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { Button, Div, H1, P } from '@ezstart/ui/components'
 
 const tabs = [

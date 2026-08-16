@@ -10,7 +10,7 @@ import {
   createRouterWithDoc,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 
 const generateReportSchema = z.object({

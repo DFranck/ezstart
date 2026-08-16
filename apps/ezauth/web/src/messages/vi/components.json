@@ -1,0 +1,113 @@
+{
+  "components": {
+    "sidebarTitle": "Auth SDK",
+    "sidebarOpen": "Mở điều hướng thành phần",
+    "sidebarClose": "Đóng điều hướng thành phần",
+    "sidebarNavLabel": "Điều hướng thành phần Auth SDK",
+    "sidebarSearchPlaceholder": "Lọc thành phần…",
+    "sidebarEmpty": "Không có thành phần nào phù hợp.",
+    "sidebarShortcutHint": "Nhấn phím tắt để mở bảng lệnh.",
+    "sidebarAllEntry": "Tất cả danh mục",
+    "backToHome": "Quay lại EZAuth",
+    "paletteTitle": "Bảng lệnh thành phần Auth SDK",
+    "paletteDescription": "Tìm kiếm trong tất cả thành phần @ezstart/auth-sdk.",
+    "palettePlaceholder": "Tìm thành phần…",
+    "paletteEmpty": "Không tìm thấy thành phần nào.",
+    "landingTitle": "Thành phần Auth SDK",
+    "landingSubtitle": "Các thành phần React cho xác thực, quản lý tài khoản và bảng quản trị trong các ứng dụng Next.js.",
+    "landingTotalComponents": "{count} thành phần",
+    "landingTotalCategories": "{count} danh mục",
+    "landingTotalEntries": "{count} mục",
+    "landingTotalDomains": "{count} miền",
+    "landingComponentsInDomain": "{count} thành phần",
+    "landingShortcutHint": "⌘K để tìm kiếm",
+    "landingCategoriesHeading": "Duyệt theo danh mục",
+    "landingFeatureBadge": "Biến thể",
+    "landingFeatureDescription": "{count} biến thể — Form, Card hoặc Modal",
+    "landingFeatureSwitchLabel": "Chuyển biến thể",
+    "landingFeatureDetailLink": "Mở chi tiết",
+    "landingFilterActive": "Đang lọc: {name}",
+    "landingClearFilter": "Xóa bộ lọc",
+    "landingFooterTitle": "Bắt đầu",
+    "landingFooterDescription": "Cài đặt package, cấu hình provider và thả các thành phần vào ứng dụng của bạn. Mỗi thành phần đi kèm với các kiểu TypeScript, mặc định tiếng Anh và prop `texts` cho i18n.",
+    "categoryBackToOverview": "Quay lại tổng quan",
+    "categoryComponentCount": "{count} thành phần",
+    "categoryCompoundBadge": "Hợp thành",
+    "categoryNoSummary": "Không có tóm tắt.",
+    "categoryPropsCount": "{count} props",
+    "categoryExamplesCount": "{count} ví dụ",
+    "detailBreadcrumbRoot": "Thành phần",
+    "detailCompoundBadge": "Hợp thành",
+    "detailViewSource": "Xem nguồn",
+    "detailFeatureGroupLabel": "Nhóm tính năng",
+    "detailFeatureVariantsCount": "{count} biến thể",
+    "detailFeatureVariantsAriaLabel": "Biến thể của {name}",
+    "detailFeatureVariantsHelp": "Đang hiển thị {name}. Chuyển tab phía trên để so sánh cùng một flow ở bố cục khác.",
+    "tabPreview": "Xem trước",
+    "tabCode": "Mã",
+    "tabProps": "Props",
+    "tabAnatomy": "Cấu trúc",
+    "previewMissing": "Chưa có demo trực tiếp cho thành phần này — xem liên kết nguồn hoặc tab Mã.",
+    "previewMissingTitle": "Demo không khả dụng",
+    "demoModeBanner": {
+      "title": "SANDBOX",
+      "description": "Các hành động trong bản xem trước này là thực nhưng được cô lập trong một Application sandbox. Dữ liệu được đặt lại mỗi 24h."
+    },
+    "codeFallbackTitle": "Bắt đầu nhanh",
+    "codeFallbackDescription": "Không có ví dụ nào được đính kèm vào TSDoc của thành phần này — đây là đoạn mã được tạo dựa trên props của nó.",
+    "codeExampleTitle": "Ví dụ {index}",
+    "codeDescriptionTitle": "Ghi chú",
+    "propsEmpty": "Thành phần này không có props công khai.",
+    "propsHeaderName": "Tên",
+    "propsHeaderType": "Kiểu",
+    "propsHeaderRequired": "Bắt buộc",
+    "propsHeaderDescription": "Mô tả",
+    "propsRequired": "bắt buộc",
+    "propsOptional": "tùy chọn",
+    "propsNoDescription": "—",
+    "anatomyTitle": "Cấu trúc",
+    "anatomySingleDescription": "Thành phần đơn — không có phần phụ để kết hợp.",
+    "anatomyCompoundDescription": "Tệp thành phần này xuất các phần bổ sung mà bạn có thể render hoặc mở rộng.",
+    "anatomyExportsHeading": "Xuất phụ",
+    "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Hiển thị thành phần nội bộ",
+    "adminToggleAriaLabel": "Bật/tắt hiển thị các thành phần nội bộ",
+    "adminToggleAdminView": "CHẾ ĐỘ ADMIN",
+    "adminToggleInternalBadge": "nội bộ",
+    "adminToggleInternalTooltip": "Thành phần nội bộ — ẩn khỏi tài liệu công khai.",
+    "domain": {
+      "authForms": {
+        "title": "Biểu mẫu xác thực",
+        "description": "Đăng nhập, đăng ký, đặt lại mật khẩu và xác minh email — mỗi luồng đi kèm dưới dạng Form, Card hoặc Modal."
+      },
+      "authButtons": {
+        "title": "Nút xác thực",
+        "description": "CTA sẵn sàng cho luồng xác thực được lưu trữ — login, register, OAuth, magic link."
+      },
+      "userProfile": {
+        "title": "Hồ sơ người dùng",
+        "description": "Menu người dùng, ảnh đại diện, modal tài khoản, cài đặt, phiên và quản lý nhà cung cấp OAuth."
+      },
+      "dashboards": {
+        "title": "Bảng điều khiển",
+        "description": "Bảng điều khiển dựng sẵn: người dùng cuối, admin, và shell EZAuth liên kết hub @ezstart."
+      },
+      "applicationsKeys": {
+        "title": "Ứng dụng & khóa",
+        "description": "CRUD ứng dụng, Developer Portal, bảng khóa API, huy hiệu sử dụng, và các modal tạo / đã tạo."
+      },
+      "guardsBanners": {
+        "title": "Guard & banner",
+        "description": "Auth guards, loaders, và banner hệ thống (bảo trì, chế độ dev, scope context, lỗi)."
+      },
+      "security": {
+        "title": "Bảo mật",
+        "description": "Chỉ báo độ mạnh mật khẩu, widget Turnstile, và các thành phần 2FA (settings + prompt)."
+      },
+      "audit": {
+        "title": "Audit",
+        "description": "Phần audit log — bề mặt drop-in cho các sự kiện liên quan đến bảo mật của tài khoản."
+      }
+    }
+  }
+}

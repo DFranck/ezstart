@@ -12,36 +12,11 @@ if [ -z "$FILES" ]; then
 fi
 
 # ============================================================
-# 1. No raw HTML tags outside packages/ui
+# NOTE: Raw HTML (#1), console.log (#2), alert/confirm (#4) and
+# new Error(response.error) (previously grep-based) are now codified
+# as AST rules in `@ezstart/eslint-plugin-ezstart`. See
+# `packages/eslint-config/src/base.js` and `src/next.js` for activation.
 # ============================================================
-RAW_HTML=$(echo "$FILES" | xargs grep -ln '<div \|<div>\|<p \|<p>\|<span \|<span>\|<table \|<table>\|<thead\|<tbody\|<button \|<button>' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'packages/email-service/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v '/lib/emails/' | grep -v 'node_modules' | grep -v '.test.' | grep -v '\.md$' | grep -v '\.sh$' | grep -v 'CHANGELOG')
-
-if [ -n "$RAW_HTML" ]; then
-  echo ""
-  echo "❌ RAW HTML DETECTED — Use @ezstart/ui components (Div, P, Span, Card, DataTable, Button, Input...)"
-  echo "$RAW_HTML" | while read f; do
-    echo "   $f"
-    grep -n '<div \|<div>\|<p \|<p>\|<span \|<span>\|<table \|<table>\|<thead\|<tbody\|<button \|<button>\|<input \|<input>' "$f" 2>/dev/null | head -5
-  done
-  echo ""
-  EXIT_CODE=1
-fi
-
-# ============================================================
-# 2. No console.log/warn/error (use @ezstart/logger)
-# ============================================================
-CONSOLE=$(echo "$FILES" | xargs grep -ln 'console\.\(log\|warn\|error\)' 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'vitest.config' | grep -v 'scripts/' | grep -v '\.md$' | grep -v '\.sh$' | grep -v 'CHANGELOG')
-
-if [ -n "$CONSOLE" ]; then
-  echo ""
-  echo "❌ CONSOLE.LOG DETECTED — Use @ezstart/logger (logger.debug/info/warn/error)"
-  echo "$CONSOLE" | while read f; do
-    echo "   $f"
-    grep -n 'console\.\(log\|warn\|error\)' "$f" 2>/dev/null | head -3
-  done
-  echo ""
-  EXIT_CODE=1
-fi
 
 # ============================================================
 # 3. No hardcoded Tailwind classes outside packages/ui
@@ -49,7 +24,7 @@ fi
 #    className="bg-xxx text-xxx" with hardcoded Tailwind is NOT OK
 #    SDK packages (pay-sdk, auth-sdk) are excluded — they consume UI components with className
 # ============================================================
-TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'packages/monitoring/' | grep -v 'node_modules')
+TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep -E '(^|/)packages/' | grep -v '/apps/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'packages/monitoring/' | grep -v 'packages/eslint-plugin-ezstart/' | grep -v 'node_modules' | grep -v '\.test\.' | grep -v '__tests__')
 
 if [ -n "$TAILWIND" ]; then
   echo ""
@@ -57,22 +32,6 @@ if [ -n "$TAILWIND" ]; then
   echo "$TAILWIND" | while read f; do
     echo "   $f"
     grep -n 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|border\|rounded\)' "$f" 2>/dev/null | head -3
-  done
-  echo ""
-  EXIT_CODE=1
-fi
-
-# ============================================================
-# 4. No alert() / window.confirm (use sonner toast / AlertDialog)
-# ============================================================
-ALERT=$(echo "$FILES" | xargs grep -ln 'alert(\|window\.confirm(' 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'scripts/')
-
-if [ -n "$ALERT" ]; then
-  echo ""
-  echo "❌ ALERT/CONFIRM DETECTED — Use sonner toast or AlertDialog from @ezstart/ui"
-  echo "$ALERT" | while read f; do
-    echo "   $f"
-    grep -n 'alert(\|window\.confirm(' "$f" 2>/dev/null | head -3
   done
   echo ""
   EXIT_CODE=1
@@ -113,7 +72,7 @@ fi
 # 7. No direct Dialog usage outside UI kit (use <Modal> instead)
 #    Modal abstracts Dialog with proper max-h, sticky header/footer, scroll, size variants
 # ============================================================
-DIRECT_DIALOG=$(echo "$FILES" | xargs grep -lEn '(^|[^a-zA-Z])DialogContent|(^|[^a-zA-Z])DialogHeader|(^|[^a-zA-Z])DialogFooter|(^|[^a-zA-Z])DialogBody' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'node_modules' | grep -v '.test.' | grep -v '.generated.' | grep -v '\.md$' | grep -v '\.sh$' | grep -v 'CHANGELOG')
+DIRECT_DIALOG=$(echo "$FILES" | xargs grep -lEn '(^|[^a-zA-Z])DialogContent|(^|[^a-zA-Z])DialogHeader|(^|[^a-zA-Z])DialogFooter|(^|[^a-zA-Z])DialogBody' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'packages/eslint-plugin-ezstart/' | grep -v 'node_modules' | grep -v '\.test\.' | grep -v '__tests__' | grep -v '.generated.' | grep -v '\.md$' | grep -v '\.sh$' | grep -v 'CHANGELOG')
 
 if [ -n "$DIRECT_DIALOG" ]; then
   echo ""

@@ -1,14 +1,52 @@
 /**
  * Anthropic (Claude) Provider
+ *
+ * Implements `IAIProvider` on top of `@anthropic-ai/sdk`.
+ *
+ * Supports:
+ * - Non-streaming `sendMessage` via Messages API
+ * - Streaming via `messages.stream` (SSE events handled by the SDK)
+ * - Vision (base64 images)
+ * - System prompts (passed via `system` param, not as a message role)
+ * - JSON extraction (`extractJson: true`)
+ *
+ * Errors are surfaced as `Anthropic.APIError` subclasses:
+ * - `AuthenticationError` (401) — invalid API key
+ * - `RateLimitError` (429) — rate limit / quota exceeded
+ * - `InternalServerError` (5xx) — including `overloaded_error`
+ * - `APIConnectionError` — network failures
  */
 
+import '../_internal/server-only.js'
+
 import Anthropic from '@anthropic-ai/sdk'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse, ChatMessage } from './base.js'
+import {
+  assertValidModelName,
+  extractErrorMessage,
+  type HealthCheckResult,
+  type IAIProvider,
+  type ProviderSendOptions,
+  type ProviderResponse,
+} from './base.js'
 
 export interface AnthropicProviderConfig {
   apiKey?: string
   model?: string
 }
+
+/** Default model — latest Sonnet (stable alias). */
+const DEFAULT_MODEL = 'claude-sonnet-4-5'
+
+/**
+ * Sensible defaults applied when the caller (prompt config, AppProvider config,
+ * or direct `options`) does NOT provide an explicit value. Exported so tests
+ * and other providers can reference the same source of truth.
+ *
+ * Mirrored in {@link GeminiProvider} / {@link OpenAIProvider} for consistent
+ * conversational behaviour across providers.
+ */
+export const DEFAULT_MAX_TOKENS = 4096
+export const DEFAULT_TEMPERATURE = 0.7
 
 export class AnthropicProvider implements IAIProvider {
   private client: Anthropic
@@ -17,7 +55,7 @@ export class AnthropicProvider implements IAIProvider {
   constructor(config: AnthropicProviderConfig = {}) {
     const apiKey = config.apiKey || process.env.ANTHROPIC_API_KEY
     this.client = new Anthropic({ apiKey })
-    this.model = config.model || 'claude-sonnet-4-20250514'
+    this.model = config.model || DEFAULT_MODEL
     this.validateConfig()
   }
 
@@ -27,7 +65,46 @@ export class AnthropicProvider implements IAIProvider {
     }
   }
 
+  getModel(): string {
+    return this.model
+  }
+
+  setModel(newModel: string): void {
+    assertValidModelName(newModel)
+    this.model = newModel
+  }
+
+  /**
+   * Cheap health check — sends a 1-token ping. Anthropic has no no-cost
+   * auth probe (no list-models endpoint equivalent in the SDK), so we use
+   * `max_tokens: 1` to minimize cost while still validating credentials.
+   */
+  async healthCheck(signal?: AbortSignal): Promise<HealthCheckResult> {
+    const started = Date.now()
+    try {
+      await this.client.messages.create(
+        {
+          model: this.model,
+          max_tokens: 1,
+          messages: [{ role: 'user', content: 'ping' }],
+        },
+        { signal }
+      )
+      return { ok: true, latencyMs: Date.now() - started }
+    } catch (error) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - started,
+        error: extractErrorMessage(error),
+      }
+    }
+  }
+
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
+    // Per-request model override — does NOT mutate `this.model` so concurrent
+    // calls and parallel `setModel()` updates stay isolated.
+    const requestModel = options.model ?? this.model
+    if (options.model !== undefined) assertValidModelName(options.model)
     // Build messages array (Anthropic uses user/assistant roles only, system is separate)
     const messages: Anthropic.MessageParam[] = []
 
@@ -65,16 +142,16 @@ export class AnthropicProvider implements IAIProvider {
 
     // Streaming mode
     if (options.streaming?.enabled) {
-      return this.handleStreaming(messages, options)
+      return this.handleStreaming(messages, options, requestModel)
     }
 
     // Regular mode (non-streaming)
     const response = await this.client.messages.create({
-      model: this.model,
+      model: requestModel,
       messages,
       system: options.systemPrompt || undefined,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens || 4096,
+      temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
     })
 
     const textBlock = response.content.find(block => block.type === 'text')
@@ -114,14 +191,15 @@ export class AnthropicProvider implements IAIProvider {
 
   private async handleStreaming(
     messages: Anthropic.MessageParam[],
-    options: ProviderSendOptions
+    options: ProviderSendOptions,
+    model: string
   ): Promise<ProviderResponse> {
     const stream = this.client.messages.stream({
-      model: this.model,
+      model,
       messages,
       system: options.systemPrompt || undefined,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens || 4096,
+      temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
     })
 
     let fullText = ''

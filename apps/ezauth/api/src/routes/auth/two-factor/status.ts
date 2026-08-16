@@ -1,17 +1,15 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
-  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { TotpService } from '../../../services/totp.service.js'
 import { logger } from '@ezstart/logger/server'
-
-const { authMiddleware } = createAuthMiddleware()
+import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
 
 export const twoFactorStatusRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -25,8 +23,9 @@ const statusController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { isEnabled })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('2FA status error:', error)
-    sendError(res, error instanceof Error ? error.message : '2FA status check failed', 500)
+    sendError(res, '2FA status check failed', 500)
   }
 }
 

@@ -14,7 +14,7 @@ describe('AuthCode Model', () => {
     // Drop all indexes and recreate to ensure correct indexes
     try {
       await AuthCodeModel.collection.dropIndexes()
-    } catch (error) {
+    } catch {
       // Ignore error if collection doesn't exist yet
     }
     await AuthCodeModel.createIndexes()

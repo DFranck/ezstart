@@ -5,11 +5,11 @@
  *
  * - JWT_SECRET is SHARED across all apps (SSO). A single line in root
  *   `.env.local` / `.env.production` is rewritten.
- * - OAUTH_ENCRYPTION_KEY is EZAUTH-only, stored as `EZAUTH_OAUTH_ENCRYPTION_KEY`
- *   in the root env file.
+ * - OAUTH_ENCRYPTION_KEY is consumed only by ezauth. Stored with its generic
+ *   name in the root env file (no per-app prefix).
  *
  * Shared root env file is the source of truth. Platform env (Railway + Vercel)
- * is pushed with the UNPREFIXED names (`JWT_SECRET`, `OAUTH_ENCRYPTION_KEY`).
+ * is pushed with the same generic names.
  *
  * Usage:
  *   pnpm rotate-secrets                 # rotate dev + prod, push to Railway + Vercel
@@ -115,7 +115,7 @@ if (doBoth || devOnly) {
   console.log('── DEV (root .env.local) ──')
   updateEnvFile('.env.local', {
     JWT_SECRET: devJwtSecret,
-    EZAUTH_OAUTH_ENCRYPTION_KEY: devOauthEncKey,
+    OAUTH_ENCRYPTION_KEY: devOauthEncKey,
   })
   console.log('')
 }
@@ -125,7 +125,7 @@ if (doBoth || prodOnly) {
   console.log('── PROD (root .env.production) ──')
   updateEnvFile('.env.production', {
     JWT_SECRET: prodJwtSecret,
-    EZAUTH_OAUTH_ENCRYPTION_KEY: prodOauthEncKey,
+    OAUTH_ENCRYPTION_KEY: prodOauthEncKey,
   })
   console.log('')
 }

@@ -15,15 +15,15 @@ import {
   Input,
 } from '@ezstart/ui/components'
 import { toast } from 'sonner'
-import { logger } from '@ezstart/logger'
-import { useLocale } from 'next-intl'
-import { useAuthContext } from '../provider.js'
-import { useAuthStore } from '../store.js'
+import { logger } from './internal-logger.js'
+import { useAuthContext, useAuthStoreApi } from '../react/auth-provider.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { usePromoCode } from './usePromoCode.js'
+import { readUtmSource } from './utmSource.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
-import type { EmailOverrideRequest } from '../types.js'
+import type { EmailOverrideRequest } from '../core/types.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -65,12 +65,21 @@ export interface QuickSignUpFormProps {
   /** Called after successful signup */
   onSuccess?: () => void
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
-   * Any keys provided in `texts` take precedence over the localized defaults.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname. Any keys provided in `texts`
+   * take precedence over the localized defaults.
    */
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<QuickSignUpFormTexts>
+  /**
+   * EZPay-compatible API base URL used to validate promo codes. When
+   * omitted, promo validation is disabled. Pass the same value the
+   * consumer already uses for `<PayProvider apiUrl=...>`.
+   *
+   * @example 'https://pay.example.com'
+   */
+  promoApiUrl?: string
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -81,6 +90,16 @@ type FormData = {
   promoCode: string
 }
 
+/**
+ * Single-step sign-up form (username + email) without a separate password
+ * step. The user receives a sign-in link by email to complete account
+ * creation.
+ *
+ * @example
+ * ```tsx
+ * <QuickSignUpForm appName="myapp" />
+ * ```
+ */
 export function QuickSignUpForm({
   appName,
   description,
@@ -90,11 +109,12 @@ export function QuickSignUpForm({
   onSuccess,
   locale: propLocale,
   texts,
+  promoApiUrl,
 }: QuickSignUpFormProps) {
   const { client } = useAuthContext()
-  const store = useAuthStore()
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
+  const storeApi = useAuthStoreApi()
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
   const t: QuickSignUpFormTexts = {
     ...getAuthTexts(locale, 'quickSignup'),
     ...texts,
@@ -109,7 +129,7 @@ export function QuickSignUpForm({
     isValidating: promoIsValidating,
     isOpen: promoOpen,
     setIsOpen: setPromoOpen,
-  } = usePromoCode(appName, promoCode)
+  } = usePromoCode(appName, promoCode, promoApiUrl)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -127,12 +147,18 @@ export function QuickSignUpForm({
 
     try {
       const finalPromo = promoIsValid === true ? formData.promoCode?.trim() : undefined
+      // Marketing attribution: read utm_source persisted client-side (by the
+      // landing page or router middleware) and forward it to the backend so
+      // it can be stored on the user alongside the promo code. Trimmed and
+      // capped client-side; the API schema enforces max 128 chars as well.
+      const utmSource = readUtmSource()
       const result = await client.quickSignUp({
         username: formData.username,
         email: formData.email,
         app: appName,
         locale,
         ...(finalPromo ? { promoCode: finalPromo } : {}),
+        ...(utmSource ? { utmSource } : {}),
         ...(emailOverride ? { emailOverride } : {}),
       })
 
@@ -140,7 +166,9 @@ export function QuickSignUpForm({
       // green-pulse/earthday) can read the applied promo immediately.
       // The user still needs to click the emailed set-password link to
       // flip isVerified=true and set a real password.
-      store.setAuth(result.user, result.accessToken, 'localStorage', result.refreshToken)
+      storeApi
+        .getState()
+        .setAuth(result.user, result.accessToken, 'localStorage', result.refreshToken)
       logger.info('Quick signup successful')
       toast.success(t.successToast)
       onSuccess?.()

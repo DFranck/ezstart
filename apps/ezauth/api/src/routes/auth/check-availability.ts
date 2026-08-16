@@ -6,7 +6,7 @@ import {
   createRateLimiter,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
@@ -45,8 +45,9 @@ const checkAvailabilityController = async (req: Request, res: Response) => {
 
     sendSuccess(res, result)
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('Check availability error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Availability check failed', 500)
+    sendError(res, 'Availability check failed', 500)
   }
 }
 

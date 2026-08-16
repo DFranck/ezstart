@@ -53,7 +53,7 @@ export async function fetchStatus(): Promise<ProviderStatus> {
       ...base,
       status: 'unknown',
       statusMessage:
-        'STRIPE_SECRET_KEY not set in ezstart API env. Add it to apps/ezstart/api/.env.local (or root .env.local to share across apps). Read-only usage — same key as ezpay is fine.',
+        'STRIPE_SECRET_KEY not set in ezstart API env. Add it to apps/ezstart/api/.env.local. Read-only usage — same key as ezpay is fine.',
     }
   }
 

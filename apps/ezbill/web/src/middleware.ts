@@ -1,4 +1,5 @@
 import { createAuthMiddleware } from '@ezstart/auth-sdk'
+import { getWebUrl } from '@ezstart/config'
 import createIntlMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
@@ -12,6 +13,7 @@ const intlMiddleware = createIntlMiddleware(routing)
 export default createAuthMiddleware({
   appName: 'ezbill',
   authMode: 'httpOnly', // Auto-switches to localStorage in localhost
+  ezauthUrl: getWebUrl('ezauth'),
   protectedPaths: ['/dashboard'],
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,

@@ -1,0 +1,333 @@
+{
+  "developer": {
+    "title": "Portail Développeur",
+    "subtitle": "Gérez vos applications, clés API, compte Stripe Connect et votre plan plateforme",
+    "loginRequired": "Connexion requise",
+    "loginRequiredDescription": "Vous devez être connecté pour accéder au portail développeur.",
+    "tabs": {
+      "applications": "Applications",
+      "apiKeys": "Clés API",
+      "stripeConnect": "Stripe Connect",
+      "plans": "Plans"
+    },
+    "applications": {
+      "title": "Mes Applications",
+      "description": "Gérez vos applications et leurs clés API",
+      "newApplication": "Nouvelle application",
+      "loading": "Chargement des applications...",
+      "errorTitle": "Impossible de charger les applications",
+      "errorDescription": "Une erreur est survenue. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "emptyTitle": "Aucune application",
+      "emptyDescription": "Créez votre première application pour commencer à générer des clés API.",
+      "emptyCta": "Créer une application",
+      "showArchived": "Afficher les archivées",
+      "showAll": "Afficher toutes les applications (superadmin)",
+      "card": {
+        "manage": "Gérer",
+        "archive": "Archiver",
+        "archiveTitle": "Archiver l'application ?",
+        "archiveConfirm": "Êtes-vous sûr de vouloir archiver cette application ?",
+        "archiveConfirmCascade": "Toutes les clés API liées à cette application seront révoquées. Cette action est irréversible.",
+        "archiveCancel": "Annuler",
+        "archiveSubmit": "Archiver",
+        "archiveSuccess": "Application archivée",
+        "archiveFailed": "Impossible d'archiver l'application",
+        "statusActive": "Active",
+        "statusArchived": "Archivée",
+        "createdLabel": "Créée le",
+        "keysLabel": "clés"
+      },
+      "create": {
+        "title": "Créer une nouvelle application",
+        "description": "Les applications sont vos tenants — chacune a ses propres clés API.",
+        "nameLabel": "Nom",
+        "namePlaceholder": "Mon application géniale",
+        "slugLabel": "Slug",
+        "slugPlaceholder": "mon-application-geniale",
+        "slugHelp": "Lettres minuscules, chiffres et tirets. 2 à 32 caractères.",
+        "slugInvalid": "Slug invalide. Utilisez lettres minuscules, chiffres et tirets (2-32 caractères).",
+        "slugTaken": "Ce slug est déjà utilisé.",
+        "descriptionLabel": "Description (optionnelle)",
+        "descriptionPlaceholder": "Que fait cette application ?",
+        "cancel": "Annuler",
+        "submit": "Créer",
+        "submitting": "Création...",
+        "createFailed": "Impossible de créer l'application"
+      },
+      "detail": {
+        "back": "Retour aux applications",
+        "tabKeys": "Clés API",
+        "tabSettings": "Paramètres",
+        "loading": "Chargement de l'application...",
+        "errorTitle": "Impossible de charger l'application",
+        "errorDescription": "Une erreur est survenue. Veuillez réessayer.",
+        "retry": "Réessayer",
+        "settingsTitle": "Paramètres",
+        "settingsDescription": "Modifiez le nom et la description. Le slug est immuable.",
+        "settingsNameLabel": "Nom de l'application",
+        "settingsDescriptionLabel": "Description",
+        "settingsSave": "Enregistrer",
+        "settingsSaving": "Enregistrement...",
+        "settingsSaveSuccess": "Application mise à jour",
+        "settingsSaveFailed": "Impossible de mettre à jour l'application",
+        "archiveSectionTitle": "Archiver l'application",
+        "archiveSectionDescription": "Les applications archivées sont masquées. Leurs clés API sont révoquées.",
+        "archiveButton": "Archiver l'application",
+        "archiveConfirmTitle": "Archiver l'application ?",
+        "archiveConfirmDescription": "Toutes les clés API liées à cette application seront révoquées. Cette action est irréversible.",
+        "archiveConfirmCascade": "Cette application a des clés actives. L'archivage les révoquera également.",
+        "archiveCancel": "Annuler",
+        "archiveSubmit": "Archiver",
+        "archiveSuccess": "Application archivée",
+        "archiveFailed": "Impossible d'archiver l'application"
+      }
+    },
+    "payKeys": {
+      "title": "Clés API EZPay",
+      "subtitle": "Gérez vos clés API de paiement liées à une application",
+      "selectApplicationLabel": "Contexte applicatif",
+      "selectApplicationDescription": "Les clés API EZPay sont liées à une de vos applications. Sélectionnez l'application dont vous souhaitez gérer les clés.",
+      "applicationLabel": "Application",
+      "selectPlaceholder": "Sélectionnez une application",
+      "noApplications": "Vous n'avez aucune application active. Rendez-vous dans l'onglet Applications pour en créer une.",
+      "selectApplicationNotice": "Sélectionnez une application ci-dessus pour voir ses clés EZPay.",
+      "createKey": "Créer une clé",
+      "noKeys": "Aucune clé API EZPay. Créez-en une pour commencer.",
+      "retry": "Réessayer",
+      "cancel": "Annuler",
+      "errors": {
+        "fetchFailed": "Impossible de charger les clés API",
+        "createFailed": "Impossible de créer la clé API",
+        "revokeFailed": "Impossible de révoquer la clé API",
+        "rotateFailed": "Impossible de renouveler la clé API"
+      },
+      "status": {
+        "active": "Active",
+        "revoked": "Révoquée"
+      },
+      "table": {
+        "name": "Nom",
+        "keyPrefix": "Clé",
+        "status": "Statut",
+        "created": "Créée le",
+        "lastUsed": "Dernière utilisation",
+        "actions": "Actions",
+        "never": "Jamais",
+        "usage": "Utilisation"
+      },
+      "create": {
+        "title": "Créer une clé API EZPay",
+        "nameLabel": "Nom de la clé",
+        "namePlaceholder": "Mon App Production",
+        "appScope": "Application",
+        "keyType": "Type de clé",
+        "keyTypePublishable": "Publishable (exposable côté client)",
+        "keyTypeSecret": "Secret (serveur uniquement)",
+        "keyEnv": "Environnement",
+        "keyEnvLive": "Live (production)",
+        "keyEnvTest": "Test (sandbox)",
+        "keyScope": "Portée",
+        "keyScopeUser": "Utilisateur (par défaut)",
+        "keyScopeReadonly": "Lecture seule",
+        "keyScopeAdmin": "Admin (superadmin uniquement)",
+        "keyScopeAdminWarning": "Les clés avec portée Admin ont des permissions élevées. À utiliser avec précaution.",
+        "expiry": "Expiration",
+        "expiryNever": "Jamais",
+        "expiry30d": "30 jours",
+        "expiry90d": "90 jours",
+        "expiry1y": "1 an",
+        "submit": "Créer",
+        "submitting": "Création..."
+      },
+      "created": {
+        "title": "Clé API EZPay créée",
+        "warning": "Sauvegardez cette clé maintenant. Vous ne pourrez plus la voir.",
+        "copied": "Clé copiée dans le presse-papier",
+        "copyKey": "Copier la clé",
+        "done": "Terminé"
+      },
+      "revoke": {
+        "title": "Révoquer la clé API",
+        "confirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible.",
+        "submit": "Révoquer",
+        "success": "Clé API révoquée",
+        "action": "Révoquer"
+      },
+      "rotate": {
+        "title": "Renouveler la clé API",
+        "confirm": "Cela révoquera la clé actuelle et en créera une nouvelle avec la même configuration.",
+        "submit": "Renouveler",
+        "success": "Clé API renouvelée",
+        "action": "Renouveler"
+      }
+    },
+    "connect": {
+      "title": "Stripe Connect",
+      "manageButton": "Gérer Connect",
+      "callback": {
+        "complete": "Compte Stripe Connect activé",
+        "refresh": "Stripe demande plus d'informations avant d'activer votre compte"
+      },
+      "notConnected": "Aucun compte Stripe connecté",
+      "notConnectedDescription": "Connectez votre compte Stripe pour commencer à accepter des paiements via la plateforme.",
+      "connectButton": "Connecter votre compte Stripe",
+      "accountInfo": "Informations du compte",
+      "businessName": "Nom de l'entreprise",
+      "accountType": "Type de compte",
+      "accountTypeStandard": "Standard",
+      "accountTypeExpress": "Express",
+      "connectedSince": "Connecté depuis",
+      "status": "Statut",
+      "statusPending": "En attente",
+      "statusActive": "Actif",
+      "statusRestricted": "Restreint",
+      "statusDisabled": "Désactivé",
+      "chargesEnabled": "Paiements activés",
+      "payoutsEnabled": "Versements activés",
+      "yes": "Oui",
+      "no": "Non",
+      "onboard": {
+        "title": "Connecter votre compte Stripe",
+        "description": "Remplissez vos informations pour démarrer le processus d'intégration.",
+        "email": "Email professionnel",
+        "emailPlaceholder": "vous@entreprise.com",
+        "businessName": "Nom de l'entreprise",
+        "businessNamePlaceholder": "Votre Entreprise",
+        "accountType": "Type de compte",
+        "standard": "Standard (Tableau de bord Stripe complet)",
+        "express": "Express (Intégration simplifiée)",
+        "submit": "Démarrer l'intégration",
+        "submitting": "Création du compte..."
+      },
+      "disconnect": {
+        "button": "Déconnecter le compte",
+        "title": "Déconnecter le compte Stripe ?",
+        "description": "Cela supprimera votre compte Stripe connecté de la plateforme. Vous ne pourrez plus recevoir de paiements. Cette action est irréversible.",
+        "confirm": "Déconnecter",
+        "cancel": "Annuler",
+        "success": "Compte Stripe déconnecté"
+      },
+      "dashboard": {
+        "button": "Ouvrir le tableau de bord Stripe",
+        "loading": "Chargement..."
+      },
+      "resume": {
+        "button": "Reprendre l'intégration Stripe",
+        "loading": "Reprise en cours…",
+        "error": "Échec de la reprise. Veuillez réessayer ou démarrer une nouvelle intégration."
+      }
+    },
+    "fees": {
+      "title": "Résumé des frais",
+      "thisMonth": "Ce mois-ci",
+      "totalFees": "Total des frais payés",
+      "averageFee": "Frais moyens",
+      "transactions": "Transactions",
+      "noData": "Aucune donnée de transaction disponible"
+    },
+    "transactions": {
+      "title": "Transactions récentes",
+      "date": "Date",
+      "amount": "Montant",
+      "fee": "Frais plateforme",
+      "net": "Montant net",
+      "status": "Statut",
+      "noTransactions": "Aucune transaction",
+      "completed": "Terminé",
+      "pending": "En attente",
+      "failed": "Échoué"
+    },
+    "plans": {
+      "title": "Plans de la plateforme",
+      "subtitle": "Choisissez le plan qui vous convient. Moins de frais, plus de fonctionnalités.",
+      "current": "Actuel",
+      "upgrade": "Changer",
+      "comingSoon": "Les changements de plan arrivent bientôt !",
+      "platformFee": "frais plateforme",
+      "perMonth": "/mois",
+      "free": "Gratuit",
+      "starter": {
+        "name": "Starter",
+        "description": "Parfait pour débuter",
+        "features": "Tableau de bord basique, Support par email"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Pour les entreprises en croissance",
+        "features": "Analytiques avancées, Support email prioritaire"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Pour les plateformes à fort volume",
+        "features": "Analytiques personnalisées, Support prioritaire, Gestionnaire de compte dédié"
+      }
+    },
+    "plansManager": {
+      "title": "Plans",
+      "subtitle": "Gérez les plans d'abonnement de cette application",
+      "createButton": "Créer un plan",
+      "empty": "Aucun plan pour le moment. Créez votre premier plan.",
+      "columns": {
+        "name": "Nom",
+        "price": "Prix",
+        "interval": "Intervalle",
+        "status": "Statut",
+        "features": "Fonctionnalités",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "actions": {
+        "edit": "Modifier",
+        "archive": "Archiver",
+        "archiveConfirm": "Archiver le plan",
+        "archiveCancel": "Annuler",
+        "archiveConfirmDescription": "Ce plan ne sera plus disponible pour de nouveaux abonnements. Les abonnements existants continuent au tarif archivé."
+      },
+      "editor": {
+        "createTitle": "Créer un nouveau plan",
+        "editTitle": "Modifier le plan",
+        "dialogDescription": "Configurez les tarifs, fonctionnalités et accès accordés par ce plan.",
+        "nameLabel": "Nom",
+        "namePlaceholder": "Pro",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Plan professionnel avec fonctionnalités avancées",
+        "amountLabel": "Prix",
+        "amountPlaceholder": "19.00",
+        "currencyLabel": "Devise",
+        "intervalLabel": "Intervalle de facturation",
+        "intervalMonth": "Mensuel",
+        "intervalYear": "Annuel",
+        "intervalCountLabel": "Nombre d'intervalles",
+        "intervalCountHelp": "Facturer tous les N mois/années (par défaut 1)",
+        "featuresLabel": "Fonctionnalités",
+        "featuresHelp": "Fonctionnalités séparées par des virgules, affichées dans PricingPage",
+        "grantsRolesLabel": "Rôles accordés",
+        "grantsRolesHelp": "Rôles séparés par des virgules, accordés à l'utilisateur à la souscription",
+        "grantsFeaturesLabel": "Fonctionnalités accordées",
+        "grantsFeaturesHelp": "Fonctionnalités séparées par des virgules, accordées à la souscription",
+        "sortOrderLabel": "Ordre d'affichage",
+        "activeLabel": "Actif",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "validation": {
+          "nameRequired": "Le nom est obligatoire",
+          "amountInvalid": "Le prix doit être un nombre positif",
+          "intervalCountRange": "Le nombre d'intervalles doit être entre 1 et 12"
+        }
+      },
+      "toast": {
+        "created": "Plan créé",
+        "updated": "Plan mis à jour",
+        "archived": "Plan archivé",
+        "error": "Une erreur est survenue"
+      }
+    },
+    "loading": "Chargement du portail développeur...",
+    "error": "Impossible de charger les données du compte. Veuillez réessayer."
+  }
+}

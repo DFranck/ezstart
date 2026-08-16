@@ -1,22 +1,28 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
-  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
   sendError,
   sendValidationError,
   createStrictRateLimiter,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { getAuthCodeModel } from '../../models/auth-code.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
-
-const { authMiddleware } = createAuthMiddleware()
+import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
+import {
+  assertPasswordStrength,
+  WeakPasswordError,
+  PwnedPasswordError,
+} from '../../services/password-policy.service.js'
 
 export const changePasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -27,7 +33,16 @@ const changePasswordSchema = z.object({
     .string()
     .optional()
     .describe('Current password (not required for OAuth-only users)'),
-  newPassword: z.string().min(8).describe('New password (min 8 chars)'),
+  // HAC-HIGH-5 (2026-05-17) — bumped from min(8) → min(12) to align with
+  // `RegisterRequestSchema` / `ResetPasswordRequestSchema`. Previously a
+  // user could downgrade their password floor from 12 chars (set at
+  // registration) to 8 chars via this route — see `standard-saas-security.md`
+  // §2. Server SHOULD also enforce zxcvbn + HIBP at runtime.
+  newPassword: z
+    .string()
+    .min(12, 'newPassword must be at least 12 characters')
+    .max(128)
+    .describe('New password (12-128 characters; server must also enforce zxcvbn + HIBP check)'),
 })
 
 const changePasswordController = async (req: Request, res: Response) => {
@@ -58,16 +73,44 @@ const changePasswordController = async (req: Request, res: Response) => {
     }
     // If user has no password (OAuth-only), allow setting one without currentPassword
 
+    // MED-1 — enforce password strength (zxcvbn + HIBP) BEFORE hashing/saving.
+    // Penalize passwords derived from the account identity. A failure here
+    // returns 422 with a stable code and the password is left unchanged.
+    await assertPasswordStrength(newPassword, [user.email, user.username])
+
     // Set new password — pre-save hook will hash it automatically
     user.passwordHash = newPassword
     user.hasSetOwnPassword = true
     await user.save()
 
+    // Invalidate any pending password-reset tokens for this user
+    try {
+      const AuthCodeModel = await getAuthCodeModel()
+      await AuthCodeModel.updateMany(
+        { userId, type: 'password-reset', isUsed: false },
+        { $set: { isUsed: true } }
+      )
+    } catch (err) {
+      logger.warn('Failed to invalidate reset tokens after password change:', err)
+    }
+
     logger.info(`Password changed for user ${userId}`)
+    void AuditLogService.createFromRequest(req, {
+      userId,
+      action: 'password_change',
+    })
     sendSuccess(res, { message: 'Password changed successfully' })
   } catch (error) {
+    // MED-1 — surface password-policy rejections with a stable, non-leaking
+    // code (422 Unprocessable Entity).
+    if (error instanceof WeakPasswordError || error instanceof PwnedPasswordError) {
+      return sendError(res, error.message, error.statusCode, { code: error.code })
+    }
+    // MED-3 — never echo a raw `error.message` to the client for unexpected
+    // failures (could leak DB/internal structure). Log the detail server-side
+    // and return a stable generic message.
     logger.error('Change password error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to change password', 500)
+    sendError(res, 'Unable to change password', 500)
   }
 }
 
@@ -76,6 +119,11 @@ docRouter.put(
   createStrictRateLimiter(),
   verifyCookieCsrf,
   authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — anti account-takeover: an unverified account
+  // (potentially controlled only because the attacker grabbed a victim's
+  // email at signup but never proved control) must not be able to change
+  // its password. Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
   changePasswordController,
   {
     summary: 'Change own password (or create password for OAuth users)',
@@ -84,7 +132,15 @@ docRouter.put(
     extraResponses: {
       400: { description: 'Current password required', schema: errorResponseSchema },
       401: { description: 'Current password incorrect', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
       404: { description: 'User not found', schema: errorResponseSchema },
+      422: {
+        description: 'Password too weak (`WEAK_PASSWORD`) or breached (`PWNED_PASSWORD`)',
+        schema: errorResponseSchema,
+      },
     },
   }
 )

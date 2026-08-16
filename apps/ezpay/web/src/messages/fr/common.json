@@ -12,5 +12,17 @@
       "error": "Échec de l'authentification",
       "noCode": "Aucun code d'autorisation trouvé"
     }
+  },
+  "error": {
+    "title": "Une erreur est survenue",
+    "message": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "backHome": "Retour à l'accueil"
+  },
+  "docs": {
+    "title": "Documentation du SDK EZPay",
+    "subtitle": "Démarrez avec @ezstart/pay-sdk",
+    "apiReferenceButton": "Référence API (Swagger)",
+    "viewOnGithub": "Voir sur GitHub"
   }
 }

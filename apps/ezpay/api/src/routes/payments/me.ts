@@ -5,9 +5,10 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -19,26 +20,24 @@ const docRouter = createRouterWithDoc(myPaymentsRegistry, router)
 // Zod Schemas
 // ========================================
 
-const myPaymentsQuerySchema = z.object({
+const myPaymentsQuerySchema = PaginationQuerySchema.extend({
   type: z
     .enum(['donation', 'purchase', 'subscription', 'invoice'])
     .optional()
-    .describe('Filter by payment type'),
+    .openapi({ description: 'Filter by payment type' }),
   status: z
     .enum(['pending', 'completed', 'failed', 'refunded', 'cancelled'])
     .optional()
-    .describe('Filter by payment status'),
+    .openapi({ description: 'Filter by payment status' }),
   liveMode: z
     .enum(['true', 'false'])
     .optional()
-    .describe('Filter by live mode (true=production, false=test)'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Number of payments to return'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of payments to skip'),
+    .openapi({ description: 'Filter by live mode (true=production, false=test)' }),
 })
 
 const myPaymentsResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of payments'),
+  payments: z.array(z.record(z.unknown())).describe('List of payments'),
   meta: z
     .object({
       total: z.number().describe('Total number of payments matching the query'),
@@ -56,7 +55,7 @@ const myPaymentsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
     if (!req.userId) {
-      return sendSuccess(res, [], { total: 0, limit: 20, offset: 0 })
+      return sendSuccess(res, [], { total: 0, limit: 50, offset: 0 })
     }
 
     const parsed = myPaymentsQuerySchema.safeParse(req.query)
@@ -87,7 +86,7 @@ const myPaymentsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/payments/me', authMiddleware, populateUserFromToken, myPaymentsHandler, {
+docRouter.get('/payments/me', authJwtOrKey(), myPaymentsHandler, {
   summary: 'List authenticated user payments',
   tags: ['Payments'],
   querySchema: myPaymentsQuerySchema,

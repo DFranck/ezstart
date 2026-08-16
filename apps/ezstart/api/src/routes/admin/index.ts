@@ -2,7 +2,7 @@
  * Admin routes — superadmin-only endpoints.
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import servicesRouter, { registry as servicesRegistry } from './services.js'
 
 const router = Router()

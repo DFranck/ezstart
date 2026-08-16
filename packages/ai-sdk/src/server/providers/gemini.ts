@@ -2,9 +2,18 @@
  * Google Gemini Provider
  */
 
+import '../_internal/server-only.js'
+
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Content, Part } from '@google/generative-ai'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse, ChatMessage } from './base.js'
+import {
+  assertValidModelName,
+  extractErrorMessage,
+  type HealthCheckResult,
+  type IAIProvider,
+  type ProviderSendOptions,
+  type ProviderResponse,
+} from './base.js'
 
 export interface GeminiProviderConfig {
   apiKey?: string
@@ -42,6 +51,45 @@ export class GeminiProvider implements IAIProvider {
     }
   }
 
+  getModel(): string {
+    return this.model
+  }
+
+  setModel(newModel: string): void {
+    assertValidModelName(newModel)
+    this.model = newModel
+  }
+
+  /**
+   * Cheap health check — sends a minimal generateContent call with
+   * `maxOutputTokens: 1`. The Gemini SDK does not expose a no-cost auth
+   * probe, so a 1-token ping is the cheapest path that still validates
+   * credentials and network. Aborts with the provided signal.
+   */
+  async healthCheck(signal?: AbortSignal): Promise<HealthCheckResult> {
+    const started = Date.now()
+    try {
+      const model = this.genAI.getGenerativeModel({
+        model: this.model,
+        generationConfig: { maxOutputTokens: 1 },
+      })
+      await model.generateContent(
+        {
+          contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
+          // Gemini SDK supports AbortSignal via the request options arg
+        },
+        { signal }
+      )
+      return { ok: true, latencyMs: Date.now() - started }
+    } catch (error) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - started,
+        error: extractErrorMessage(error),
+      }
+    }
+  }
+
   /**
    * Build Gemini content parts from message text and optional images
    */
@@ -63,8 +111,12 @@ export class GeminiProvider implements IAIProvider {
   }
 
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
+    // Per-request model override — does NOT mutate `this.model`.
+    if (options.model !== undefined) assertValidModelName(options.model)
+    const requestModel = options.model ?? this.model
+
     const model = this.genAI.getGenerativeModel({
-      model: this.model,
+      model: requestModel,
       systemInstruction: options.systemPrompt,
       generationConfig: {
         temperature: options.temperature ?? DEFAULT_TEMPERATURE,

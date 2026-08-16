@@ -1,46 +1,58 @@
-// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+// Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
-  connectToMongo,
-  createApp,
-  createRateLimiter,
-  startServer,
-  Router,
-  getApiPort,
+  assertCriticalDeps,
+  bootApi,
+  createGeminiCheck,
+  createMongoosePingCheck,
   createVersionedRouter,
-  addVersionHeader
-} from '@ezstart/express-core'
+  type HealthCheck,
+} from '@ezstart/api-core'
+import mongoose from 'mongoose'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp({ apiApp: 'gacha-analyzer' })
-const PORT = getApiPort('gacha-analyzer')
+// 🔒 Boot-time critical-deps gate (hacker-A8 V3 + A8.5 V5). Mongo + JWT
+// are non-negotiable. GEMINI_API_KEY gates the core AI analyzer feature
+// so it MUST be present in prod — without it the /health/deep probe
+// silently skips its check and the status page shows "operational"
+// while the analyzer is broken. Throws in prod, warns in dev. See
+// `.claude/rules/standard-saas-observability.md` §4.
+assertCriticalDeps({
+  app: 'gacha-analyzer',
+  required: ['MONGO_URL', 'JWT_SECRET', 'GEMINI_API_KEY'],
+  logger,
+})
 
-// Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
+// Deep-health checks executed by GET /health/deep. See
+// `.claude/rules/standard-saas-observability.md` §4.
+const deepHealthChecks: HealthCheck[] = [createMongoosePingCheck(mongoose)]
+if (process.env.GEMINI_API_KEY) {
+  deepHealthChecks.push(createGeminiCheck(process.env.GEMINI_API_KEY))
+}
 
-// Add API version headers to all responses
-app.use(addVersionHeader('v1'))
-
-// API routes with versioning support (supports both /api and /api/v1)
-app.use(createVersionedRouter('/api', routes))
-
-// Sentry error handler MUST be AFTER all routes
-Sentry.setupExpressErrorHandler(app)
-
-// Start server with MongoDB
-connectToMongo('game-analyzer')
-  .then(async () => {
-    return startServer(app, {
+// No cookie-auth routes: gacha-analyzer consumes EZAuth for identity, no own cookies.
+// Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
+let app: import('@ezstart/api-core').Express
+try {
+  ;({ app } = await bootApi('gacha-analyzer', {
+    mongoDbName: 'game-analyzer',
+    cookieAuthRoutes: [],
+    deepHealthChecks,
+    onReady: ({ app }) => {
+      // Routes available at /api/* and /api/v1/*
+      app.use(createVersionedRouter('/api', routes))
+    },
+    serverConfig: {
       routes,
       registries: globalRegistry,
       basePath: '/api',
       serviceName: 'GachaAnalyzer',
-      port: PORT,
-    })
-  })
-  .catch(err => {
-    logger.error('Failed to start Gacha Analyzer API', err)
-    process.exit(1)
-  })
+    },
+  }))
+} catch (err) {
+  logger.error('Failed to start Gacha Analyzer API', err)
+  process.exit(1)
+}
+
+export { app }

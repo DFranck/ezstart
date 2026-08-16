@@ -1,0 +1,31 @@
+{
+  "security": {
+    "title": "Sécurité",
+    "lead": "Nous prenons très au sérieux la sécurité d'EZPay et des données de paiement que nous manipulons. Cette page décrit comment signaler une vulnérabilité, ce qui entre dans le périmètre et comment nous coordonnons la divulgation.",
+    "contactHeading": "Signaler une vulnérabilité",
+    "contactBody": "Envoyez un e-mail à security@ezstart.xyz avec une description claire du problème, les étapes pour le reproduire et tout matériel de preuve de concept. Nous accusons réception des nouveaux rapports sous deux jours ouvrés. Une clé PGP pour les rapports chiffrés sera publiée ici une fois finalisée.",
+    "scopeHeading": "Périmètre",
+    "scopeBody": "Tous les domaines de production EZPay sont dans le périmètre, y compris ezpay.ezstart.xyz et l'API api.ezpay.ezstart.xyz. Hors périmètre : déni de service, ingénierie sociale, attaques physiques, rapports nécessitant des identifiants déjà compromis, et l'infrastructure Stripe (à signaler directement à Stripe).",
+    "disclosureHeading": "Divulgation coordonnée",
+    "disclosureBody": "Nous suivons un modèle de divulgation coordonnée : merci de nous laisser un délai raisonnable pour enquêter et publier un correctif avant toute divulgation publique. Nous créditons volontiers les chercheurs dans notre changelog lorsqu'un correctif est publié, sauf si vous préférez rester anonyme.",
+    "txtLinkLabel": "Voir security.txt (RFC 9116)"
+  },
+  "refundPolicy": {
+    "title": "Politique de remboursement",
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "lastUpdatedValue": "3 mai 2026",
+    "lead": "Nous voulons que vous puissiez payer en toute confiance via EZPay. Cette page résume le fonctionnement des remboursements pour les dons et les abonnements traités par notre plateforme.",
+    "euRightHeading": "Droit de rétractation européen de 14 jours",
+    "euRightBody": "Les clients résidant dans l'Union européenne bénéficient d'un droit de rétractation de 14 jours en vertu de la directive 2011/83/UE pour les services par abonnement. Vous pouvez demander un remboursement intégral dans les 14 jours suivant votre premier abonnement payant, sans avoir à vous justifier, sauf si vous avez explicitement renoncé à ce droit en commençant à consommer le service.",
+    "eligibilityHeading": "Conditions",
+    "eligibilityBody": "Les remboursements d'abonnement sont calculés au prorata du temps non utilisé après les 14 jours. Les achats uniques portant sur du contenu numérique livré ne sont pas remboursables une fois la livraison effectuée. Les dons ne sont par nature pas remboursables ; si un don a été effectué par erreur, contactez-nous dans les 7 jours et nous étudierons la demande.",
+    "processHeading": "Traitement des remboursements",
+    "processBody": "Les remboursements approuvés sont reversés sur le moyen de paiement initial via Stripe sous 5 à 10 jours ouvrés, selon votre établissement bancaire. Vous recevrez une confirmation par e-mail dès l'initiation du remboursement. Les frais de conversion de devises éventuellement appliqués par votre banque ne sont pas pris en charge.",
+    "disputesHeading": "Litiges et rétrofacturations",
+    "disputesBody": "Avant de contester un débit auprès de votre banque, veuillez nous contacter afin que nous puissions résoudre le problème directement. Les rétrofacturations engendrent des frais supplémentaires facturés par Stripe et peuvent entraîner la suspension de votre compte le temps de l'enquête."
+  },
+  "login": {
+    "title": "Connexion à EZPay",
+    "redirecting": "Redirection vers la page d'authentification unique EZAuth…"
+  }
+}

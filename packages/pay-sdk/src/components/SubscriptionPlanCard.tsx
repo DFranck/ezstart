@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePayContext } from '../provider.js'
-import type { Plan } from '../types.js'
+import { usePayContext, useApplicationContext, usePayLogger } from '../react/pay-provider.js'
+import type { Plan } from '../core/types.js'
 import {
   Badge,
   Button,
@@ -18,10 +18,15 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { SubscribeButton } from './SubscribeButton.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface SubscriptionPlanCardProps {
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred over `appName`). Falls back to context when absent. */
+  applicationId?: string
   planId?: string
   planName?: string
   className?: string
@@ -57,6 +62,7 @@ const DEFAULT_TEXTS: SubscriptionPlanCardTexts = {
 
 export function SubscriptionPlanCard({
   appName,
+  applicationId,
   planId,
   planName,
   className,
@@ -68,13 +74,30 @@ export function SubscriptionPlanCard({
   texts: textsProp,
 }: SubscriptionPlanCardProps) {
   const { client } = usePayContext()
+  const log = usePayLogger()
+  const { applicationId: ctxApplicationId, appSlug: ctxAppSlug } = useApplicationContext()
   const [plan, setPlan] = useState<Plan | null>(null)
   const [loading, setLoading] = useState(true)
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
 
+  // Surface deprecation warning when consumer passes the legacy `appName` prop.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    log.warn(
+      '[pay-sdk] SubscriptionPlanCard `appName` prop is deprecated, use `applicationId` instead.'
+    )
+  }
+
+  const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+  const effectiveAppName =
+    appName ?? (effectiveApplicationId ? undefined : (ctxAppSlug ?? undefined))
+
   useEffect(() => {
     client
-      .listPlans({ appName, active: true })
+      .listPlans({
+        applicationId: effectiveApplicationId,
+        appName: effectiveAppName,
+        active: true,
+      })
       .then(res => {
         const plans = res.data || []
         const found = planId
@@ -84,7 +107,7 @@ export function SubscriptionPlanCard({
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [client, appName, planId, planName])
+  }, [client, effectiveApplicationId, effectiveAppName, planId, planName])
 
   if (loading) {
     return <Skeleton className={`h-[400px] w-full rounded-xl`} />
@@ -116,7 +139,8 @@ export function SubscriptionPlanCard({
             <Span className={`text-muted-foreground text-sm`}> / {intervalLabel}</Span>
           </Div>
           <SubscribeButton
-            projectId={appName}
+            projectId={effectiveAppName ?? effectiveApplicationId ?? ''}
+            applicationId={effectiveApplicationId}
             priceId={plan.stripePriceId || plan.id}
             planName={plan.name}
             amount={plan.amount / 100}
@@ -165,7 +189,8 @@ export function SubscriptionPlanCard({
       </CardContent>
       <CardFooter>
         <SubscribeButton
-          projectId={appName}
+          projectId={effectiveAppName ?? effectiveApplicationId ?? ''}
+          applicationId={effectiveApplicationId}
           priceId={plan.stripePriceId || plan.id}
           planName={plan.name}
           amount={plan.amount / 100}

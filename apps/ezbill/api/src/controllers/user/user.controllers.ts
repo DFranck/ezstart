@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { UserModel } from '../../models/user.js'
 import { toApiObject } from '../../utils/mongoose/to-api-object.js'
 import { logger } from '@ezstart/logger/server'
-import { sendSuccess, sendError } from '@ezstart/express-core'
+import { sendSuccess, sendError } from '@ezstart/api-core'
 
 export const createUser = async (req: Request, res: Response) => {
   try {

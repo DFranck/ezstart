@@ -12,5 +12,17 @@
       "error": "Authentication failed",
       "noCode": "No authorization code found"
     }
+  },
+  "error": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "backHome": "Back to Home"
+  },
+  "docs": {
+    "title": "EZPay SDK Documentation",
+    "subtitle": "Get started with @ezstart/pay-sdk",
+    "apiReferenceButton": "API Reference (Swagger)",
+    "viewOnGithub": "View on GitHub"
   }
 }

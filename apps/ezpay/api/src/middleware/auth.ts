@@ -1,14 +1,35 @@
-import { createAuthMiddleware } from '@ezstart/express-core'
-import { hasAnyRole } from '@ezstart/rbac/client'
+import { createApiAuth, type RequestHandler } from '@ezstart/api-core'
+import { hasAnyRole } from '@ezstart/auth-sdk/rbac/client'
 import type { Request, Response, NextFunction } from 'express'
 
-export const { authMiddleware, optionalAuthMiddleware } = createAuthMiddleware()
+// HAC-CRIT-2 — enforce iss/aud on every JWT verify so an ezauth-issued
+// token for `aud: ['ezauth', 'ezbill', ...]` (without 'ezpay' in the
+// audience list) is rejected here as 401. Even though every @ezstart API
+// trusts the same shared `JWT_SECRET`, the audience acts as a second
+// factor that ties the token to the consumer it was minted for. See
+// apps/ezauth/api/src/config/jwt.ts for the sign-side mirror.
+const auth = createApiAuth({
+  issuer: 'ezauth',
+  audience: 'ezpay',
+})
+export const authMiddleware: RequestHandler = auth.authMiddleware
+export const optionalAuthMiddleware: RequestHandler = auth.optionalAuthMiddleware
 
 /** User info decoded from the JWT token */
 export interface JwtUser {
   userId: string
   email?: string
   username?: string
+  /**
+   * Email-verification status carried by the ezauth JWT
+   * (`buildJwtPayload` → `isVerified: user.isVerified === true`). The token
+   * signature only proves the account exists, NOT that the email was
+   * verified — ezauth intentionally lets unverified accounts log in (Clerk
+   * pattern). Downstream sinks that email the account (dunning) MUST gate on
+   * this flag so an attacker who registers with a victim's email cannot make
+   * us mail that address. Absent on legacy tokens → treated as `false`.
+   */
+  isVerified?: boolean
   apps?: string[]
   globalRoles?: string[]
   appRoles?: Record<string, string[]>
@@ -56,6 +77,9 @@ export function populateUserFromToken(req: Request, _res: Response, next: NextFu
           userId: req.userId,
           email: decoded.email as string | undefined,
           username: decoded.username as string | undefined,
+          // Only `true` counts as verified — a missing/legacy claim or any
+          // non-true value is treated as unverified (fail-closed).
+          isVerified: decoded.isVerified === true,
           apps: decoded.apps as string[] | undefined,
           globalRoles: decoded.globalRoles as string[] | undefined,
           appRoles: decoded.appRoles as Record<string, string[]> | undefined,
@@ -73,7 +97,7 @@ export function populateUserFromToken(req: Request, _res: Response, next: NextFu
 
 /**
  * Check if the authenticated user has admin/superadmin role.
- * Delegates to @ezstart/rbac hasAnyRole for consistent role checking.
+ * Delegates to @ezstart/auth-sdk hasAnyRole for consistent role checking.
  */
 export function isAdminUser(req: Request): boolean {
   if (!req.user) return false

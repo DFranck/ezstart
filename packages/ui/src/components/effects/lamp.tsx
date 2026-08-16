@@ -1,4 +1,6 @@
 'use client'
+// allowed: decorative cyan glow effect (Aceternity Lamp port).
+// The cyan tone IS the visual identity of this effect — not theme-controlled.
 import { Div, Section } from '../tag'
 import { cn } from '../../lib/utils'
 import { motion } from 'motion/react'

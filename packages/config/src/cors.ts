@@ -10,7 +10,7 @@ import { URLS, AppName, getAllWebUrls, getRegistry } from './urls.js'
 const CORS_DEPENDENCIES: Record<string, 'all' | string[]> = {
   ezauth: 'all', // SSO — called by ALL web apps
   ezstart: 'all', // Monitoring — called by ALL web apps
-  ezpay: ['ezpay', 'ezbill', 'fengshui', 'ezstart', 'green-pulse'], // Payment callers
+  ezpay: ['ezpay', 'ezbill', 'fengshui', 'ezstart', 'green-pulse', 'ezauth'], // Payment callers (incl. ezauth web embedding PricingPage)
   ezbill: ['ezbill'],
   'green-pulse': ['green-pulse'],
   'gacha-analyzer': ['gacha-analyzer'],
@@ -50,7 +50,7 @@ function collectWebUrls(appName: string): string[] {
   const entry = registry[appName]
   if (!entry) return []
   const { web } = entry.urls
-  return [web.local, web.development, web.production].filter(Boolean)
+  return [web.local, web.development, web.staging, web.production].filter(Boolean) as string[]
 }
 
 /**
@@ -91,6 +91,15 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
 
 /**
  * Express CORS middleware configuration
+ *
+ * @deprecated Use the 3-tier policy from `@ezstart/api-core`:
+ * `createApiServer(appName, { cookieAuthRoutes, cookieAuthAllowlist })`
+ * applies permissive CORS globally and strict CORS only on cookie-auth
+ * prefixes. See `.claude/rules/standard-saas-cors.md`.
+ *
+ * This helper is kept for backwards compatibility during the migration
+ * window — it will be removed once all APIs have switched to the 3-tier
+ * model.
  *
  * @example
  * ```typescript

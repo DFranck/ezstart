@@ -9,15 +9,14 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPerformanceMetricModel } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 
-const endpointsQuerySchema = z.object({
+const endpointsQuerySchema = PaginationQuerySchema.extend({
   hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
-  limit: z.coerce.number().min(1).max(50).default(50).describe('Number of endpoints to return'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const router: ReturnType<typeof Router> = Router()
@@ -30,7 +29,7 @@ const getEndpointsHandler = async (req: Request, res: Response) => {
       ? parsed.data
       : {
           hours: Math.min(Number(req.query.hours) || 24, 168),
-          limit: Math.min(Number(req.query.limit) || 50, 50),
+          limit: Math.min(Number(req.query.limit) || 50, 100),
           offset: Math.max(Number(req.query.offset) || 0, 0),
         }
 

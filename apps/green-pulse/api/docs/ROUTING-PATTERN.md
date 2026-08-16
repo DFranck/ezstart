@@ -71,7 +71,7 @@ routes/conversations/
  * Create a new conversation
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { createConversationController } from '../../controllers/conversations/createConversation.js'
 
 export const createConversationRouter = Router()
@@ -87,7 +87,7 @@ createConversationRouter.post('/', createConversationController)
  * Base path: /api/conversations
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import createConversationRouter, { createConversationRegistry } from './createConversation.js'
 import listConversationsRouter, { listConversationsRegistry } from './listConversations.js'
 import getConversationByIdRouter, { getConversationByIdRegistry } from './getConversationById.js'
@@ -118,20 +118,16 @@ export default router
 ### Main router: `routes/index.ts`
 
 ```typescript
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import conversationsRouter, { conversationRegistries } from './conversations/index.js'
-import formsRouter, { formRegistries } from './forms/index.js'
 import chatRouter, { chatRegistries } from './chat/index.js'
 
 const router = Router()
 
 // Combine all OpenAPI registries
-export const globalRegistry = [...conversationRegistries, ...formRegistries, ...chatRegistries]
+export const globalRegistry = [...conversationRegistries, ...chatRegistries]
 
-router
-  .use('/conversations', conversationsRouter)
-  .use('/forms', formsRouter)
-  .use('/chat', chatRouter)
+router.use('/conversations', conversationsRouter).use('/chat', chatRouter)
 
 export default router
 ```
@@ -142,7 +138,7 @@ Each action file exports its own OpenAPI registry for documentation:
 
 ```typescript
 // createConversation.ts
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/api-core'
 
 export const createConversationRegistry = new OpenAPIRegistry()
 const router = Router()
@@ -237,7 +233,7 @@ router.delete('/:id', ...)
 ```typescript
 // routes/api.ts
 router.post('/conversations', ...)
-router.post('/forms', ...)
+router.post('/messages', ...)
 router.post('/chat', ...)
 ```
 

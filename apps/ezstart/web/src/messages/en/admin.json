@@ -8,7 +8,8 @@
       "ezpay": "EZPay",
       "monitoring": "Monitoring",
       "services": "Services",
-      "ai": "AI"
+      "ai": "AI",
+      "e2eTests": "E2E Tests"
     },
     "services": {
       "title": "External Services",
@@ -187,6 +188,111 @@
       "save": "Save",
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "e2eTests": {
+      "title": "E2E Test Matrix",
+      "subtitle": "Auto-recorded test runs across all apps, grouped by environment.",
+      "failedToLoad": "Failed to load E2E tests",
+      "stats": {
+        "totalLabel": "Total tests",
+        "passRateLabel": "Pass rate",
+        "failingLabel": "Failing",
+        "needsRerunLabel": "Needs re-run",
+        "envPassLabel": "Passing",
+        "envBreakdown": "{fail} fail · {blocked} blocked · {never} never",
+        "tierPassLabel": "Passing",
+        "tierBreakdown": "{fail} fail · {blocked} blocked · {never} never"
+      },
+      "panel": {
+        "passing": "passing"
+      },
+      "filters": {
+        "app": "App",
+        "env": "Env",
+        "tier": "Tier",
+        "status": "Status",
+        "freshness": "Freshness",
+        "needsRerunOnly": "Needs re-run only",
+        "allApps": "All apps",
+        "allStatuses": "All statuses",
+        "allFreshness": "All freshness",
+        "fresh24h": "Last 24h",
+        "fresh7d": "Last 7 days",
+        "fresh30d": "Last 30 days",
+        "stale30d": "Older than 30 days",
+        "never": "Never run"
+      },
+      "env": {
+        "all": "All envs",
+        "local": "Local",
+        "staging": "Staging",
+        "production": "Production",
+        "envBadge": {
+          "tooltip": "Environment in which the run was executed"
+        }
+      },
+      "tier": {
+        "all": "All tiers",
+        "smoke": "Smoke",
+        "browserE2E": "Browser E2E",
+        "unit": "Unit",
+        "tierBadge": {
+          "tooltip": "Tier of the run — what the test actually exercised (smoke = curl HTTP, browser-e2e = full UI flow, unit = vitest/jest)"
+        }
+      },
+      "columns": {
+        "testId": "Test ID",
+        "app": "App",
+        "category": "Category",
+        "feature": "Feature",
+        "status": "Status",
+        "env": "Env",
+        "tier": "Tier",
+        "note": "Note",
+        "lastRun": "Last run",
+        "agent": "Agent",
+        "actions": "Actions"
+      },
+      "status": {
+        "pass": "Pass",
+        "fail": "Fail",
+        "blocked": "Blocked",
+        "skip": "Skipped",
+        "never": "Never"
+      },
+      "lastRun": {
+        "never": "Never",
+        "minutesAgo": "{count}m ago",
+        "hoursAgo": "{count}h ago",
+        "daysAgo": "{count}d ago"
+      },
+      "actions": {
+        "viewHistory": "View history",
+        "rerun": "Re-run"
+      },
+      "needsRerun": {
+        "badge": "Stale",
+        "tooltip": "Files exercised by this test were modified since last run"
+      },
+      "history": {
+        "title": "Run history",
+        "noRuns": "No runs recorded yet",
+        "passRate": "Pass rate",
+        "avgDuration": "Avg duration",
+        "exercises": "Exercised files",
+        "runs": "Recent runs",
+        "agent": "Agent",
+        "failedToLoad": "Failed to load history",
+        "envTabs": "Filter by env",
+        "tierTabs": "Filter by tier"
+      },
+      "table": {
+        "rows": "{count} test(s)",
+        "previous": "Previous",
+        "next": "Next",
+        "pageOf": "Page {current} of {total}",
+        "empty": "No tests match the current filters."
+      }
     },
     "ezpay": {
       "stats": {

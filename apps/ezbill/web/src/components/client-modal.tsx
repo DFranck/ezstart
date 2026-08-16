@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, parseApiError, runWithFeedback } from '@/config/api'
+import { callApi, runWithFeedback } from '@/config/api'
 import { BillingClient, Client } from '@ezbill/types'
 import {
   Button,
@@ -91,22 +91,22 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const headers = user?._id ? { 'X-User-Id': user._id } : undefined
+
     return runWithFeedback({
       action: async () => {
         if (client) {
-          const res = await callApi(`/clients/${client._id}`, {
+          await callApi(`/clients/${client._id}`, {
             method: 'PUT',
-            userId: user?._id,
+            headers,
             body: formData,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
-          const res = await callApi('/clients', {
+          await callApi('/clients', {
             method: 'POST',
-            userId: user?._id,
+            headers,
             body: formData,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

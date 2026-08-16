@@ -14,12 +14,18 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
-import { usePay } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { toast } from '@ezstart/ui/utils'
+import { usePay, useApplicationContext, usePayLogger } from '../react/pay-provider.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface PurchaseCardProps {
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Forwarded as `projectId` on the
+   * purchase request for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred, forwarded on the purchase request). */
+  applicationId?: string
   productId: string
   productName: string
   amount: number
@@ -61,6 +67,7 @@ const DEFAULT_TEXTS: PurchaseCardTexts = {
 
 export function PurchaseCard({
   appName,
+  applicationId,
   productId,
   productName,
   amount,
@@ -76,6 +83,16 @@ export function PurchaseCard({
 }: PurchaseCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createPurchase, isLoading } = usePay()
+  const log = usePayLogger()
+  const { applicationId: ctxApplicationId, appSlug: ctxAppSlug } = useApplicationContext()
+
+  // Surface deprecation warning when consumer passes the legacy `appName` prop.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    log.warn('[pay-sdk] PurchaseCard `appName` prop is deprecated, use `applicationId` instead.')
+  }
+
+  const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+  const effectiveProjectId = appName ?? ctxAppSlug ?? ''
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const price = formatCurrency(amount, currency)
@@ -83,7 +100,8 @@ export function PurchaseCard({
   const handlePurchase = async () => {
     try {
       const result = await createPurchase({
-        projectId: appName,
+        projectId: effectiveProjectId,
+        ...(effectiveApplicationId ? { applicationId: effectiveApplicationId } : {}),
         productId,
         productName,
         amount,
@@ -97,7 +115,7 @@ export function PurchaseCard({
         window.location.href = result.checkoutUrl
       }
     } catch (error) {
-      logger.error('Purchase failed:', error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error))
     }
   }
 

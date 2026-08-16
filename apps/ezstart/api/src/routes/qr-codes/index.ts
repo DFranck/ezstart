@@ -10,7 +10,7 @@
  * - DELETE /api/qr-codes/:id      -> deleteQRCode
  */
 
-import { Router, createStrictRateLimiter } from '@ezstart/express-core'
+import { Router, createStrictRateLimiter } from '@ezstart/api-core'
 import { authMiddleware } from '../../middleware/auth.js'
 
 import createQRCodeRouter, { createQRCodeRegistry } from './createQRCode.js'
@@ -26,10 +26,14 @@ export const qrCodeRegistries = [
 ]
 
 const router: import('express').Router = Router()
-router.use(authMiddleware)
+
+// This parent router is mounted at /api (not /api/qr-codes) — child routers
+// carry the '/qr-codes' basePath via createRouterWithDoc. Scope middlewares to
+// '/qr-codes' so auth + rate limiter don't leak to other features.
+router.use('/qr-codes', authMiddleware)
 
 // Rate limit creation (5 req/min)
-router.post('/', createStrictRateLimiter())
+router.post('/qr-codes', createStrictRateLimiter())
 
 router
   .use('/', createQRCodeRouter)

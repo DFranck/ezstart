@@ -11,13 +11,16 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  Span,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
-import { logger } from '@ezstart/logger'
-import { useLocale } from 'next-intl'
-import { useState } from 'react'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
+import { logger } from './internal-logger.js'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { DevModeBanner } from './DevModeBanner.js'
+import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
+import { useAuth } from '../react/hooks.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -32,9 +35,17 @@ export interface ForgotPasswordFormTexts {
   success: string
   backToLogin: string
   fallbackError: string
+  /**
+   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
+   * (server unreachable: offline, DNS down, server crashed). Replaces the
+   * raw browser `"Failed to fetch"` message which is non-actionable.
+   */
+  networkError: string
 }
 
 export interface ForgotPasswordFormProps {
+  /** App name for the forgot-password request. Falls back to `?app=` param, then `'ezauth'`. */
+  appName?: string
   /** Called after successful password reset request */
   onSuccess?: () => void
   /** Called when user clicks "Back to login" */
@@ -42,13 +53,54 @@ export interface ForgotPasswordFormProps {
   /** Href for back to login link (used if onBack is not provided) */
   backHref?: string
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
-   * Any keys provided in `texts` take precedence over the localized defaults.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/forgot-password` →
+   * `'fr'`). Any keys provided in `texts` take precedence over the
+   * localized defaults.
    */
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<ForgotPasswordFormTexts>
+  /**
+   * Key validation status for the DevModeBanner. Matches the prop on
+   * `SignInForm` / `SignUpForm` so all three auth forms surface the same
+   * dev-mode diagnostic when a consumer key is attached to the URL.
+   * - `'valid'`   — key was validated successfully
+   * - `'invalid'` — key is invalid, revoked, or expired
+   * - `'missing'` — no key provided
+   */
+  keyStatus?: 'valid' | 'invalid' | 'missing'
+  /** Raw publishable key from URL (for DevModeBanner display). */
+  urlKey?: string
+  /**
+   * DOM `id` of the underlying `<form>` element. Used by
+   * `<ForgotPasswordModal>` to render its primary submit button OUTSIDE the
+   * form (in the Modal footer slot) via the standard HTML `<button form="...">`
+   * association.
+   */
+  formId?: string
+  /**
+   * Hide the in-form primary submit button. Used by `<ForgotPasswordModal>`
+   * so the submit button can be rendered in the Modal footer instead.
+   * Secondary controls ("Back to login" link) STAY visible.
+   */
+  hideSubmitButton?: boolean
+  /**
+   * Notified whenever the form's internal `loading` state flips. Lets a
+   * parent (e.g. `<ForgotPasswordModal>`) wire its external submit button's
+   * spinner + disabled state without owning the submission logic.
+   */
+  onSubmittingChange?: (isSubmitting: boolean) => void
+  /**
+   * Cloudflare Turnstile site key — when provided, renders a captcha widget
+   * above the submit button and blocks submission until a token is obtained.
+   * The token is sent as `body.turnstileToken` to the backend. When omitted
+   * the widget is not rendered (no-op) and submission is unrestricted.
+   */
+  turnstileSiteKey?: string
 }
+
+const DEFAULT_FORM_ID = 'ezstart-forgot-password-form'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -56,58 +108,114 @@ type FormData = {
   email: string
 }
 
+/**
+ * Forgot-password form that sends a password reset link to the user's
+ * email. The response is intentionally generic (anti-enumeration: the
+ * user is told the same thing whether or not the account exists).
+ *
+ * @example
+ * ```tsx
+ * <ForgotPasswordForm appName="myapp" onSuccess={() => router.push('/login')} />
+ * ```
+ */
 export function ForgotPasswordForm({
+  appName,
   onSuccess,
   onBack,
   backHref,
   locale: propLocale,
   texts,
+  keyStatus,
+  urlKey,
+  formId = DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
+  turnstileSiteKey,
 }: ForgotPasswordFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
+  const navigation = useAuthNavigation()
+  const { isAuthenticated, isAuthReady } = useAuth()
+  const locale = propLocale ?? navigation.locale
   const t: ForgotPasswordFormTexts = {
     ...getAuthTexts(locale, 'forgotPassword'),
     ...texts,
   }
-  const navigation = useAuthNavigation()
   const resolvedBackHref = backHref ?? navigation.loginHref
+
+  // ── Auto-redirect when already authenticated ─────────────────────────────
+  //
+  // Same rationale as `SignInForm` — a logged-in user landing on
+  // `/forgot-password` likely typed the URL by mistake or clicked a stale
+  // link. Send them to the dashboard rather than letting them request a
+  // reset for an account they are already signed into.
+  // Cf. SignInForm for the full reasoning (LOGIN-PAGE-NO-REDIRECT-IF-AUTHED).
+  const resolvedRedirectUri =
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
+      : undefined)
+  useEffect(() => {
+    if (!isAuthReady) return
+    if (!isAuthenticated) return
+    if (typeof window === 'undefined') return
+    if (!resolvedRedirectUri) return
+    window.location.replace(resolvedRedirectUri)
+  }, [isAuthReady, isAuthenticated, resolvedRedirectUri])
+
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   const form = useForm<FormData>({
     defaultValues: { email: '' },
   })
 
+  // Lift `loading` out so a parent (e.g. `<ForgotPasswordModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
+  useEffect(() => {
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
+
   const onSubmit = async (formData: FormData) => {
     if (loading) return
+    // Block submission when the captcha widget is showing but the user
+    // hasn't completed the challenge yet. Defensive guard for cases where
+    // the submit button lives outside the form (e.g. `<ForgotPasswordModal>`
+    // footer) and the caller hasn't wired the disabled state.
+    if (turnstileSiteKey && !turnstileToken) return
 
     setLoading(true)
     setError('')
 
-    const { app, redirectUri } = navigation
+    const { app: queryApp, redirectUri } = navigation
+    const resolvedApp = appName || queryApp || 'ezauth'
 
     try {
-      const response = await callApi('/auth/forgot-password', {
+      await apiCall('/auth/forgot-password', {
         appName: 'ezauth',
         method: 'POST',
         body: {
           email: formData.email,
           locale,
-          ...(app && { app }),
+          app: resolvedApp,
           ...(redirectUri && { redirect_uri: redirectUri }),
+          ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
-
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Request failed')
-      }
 
       setSuccess(true)
       logger.info('Password reset email requested')
       onSuccess?.()
     } catch (err) {
-      const message = err instanceof Error ? err.message : t.fallbackError
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
+      const message =
+        ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE'
+          ? t.networkError
+          : err instanceof Error
+            ? err.message
+            : t.fallbackError
       setError(message)
     } finally {
       setLoading(false)
@@ -143,7 +251,7 @@ export function ForgotPasswordForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
           <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
             {error}
@@ -162,23 +270,48 @@ export function ForgotPasswordForm({
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t.email}</FormLabel>
+              <FormLabel>
+                {t.email}
+                <Span aria-hidden="true" className="text-destructive ml-0.5">
+                  *
+                </Span>
+              </FormLabel>
               <FormControl>
-                <Input type="email" placeholder={t.emailPlaceholder} {...field} />
+                <Input
+                  type="email"
+                  required
+                  aria-required="true"
+                  autoComplete="email"
+                  placeholder={t.emailPlaceholder}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button
-          type="submit"
-          disabled={loading || !form.formState.isValid}
-          className="w-full cursor-pointer"
-          variant="default"
-        >
-          {loading ? t.submitting : t.submit}
-        </Button>
+        {turnstileSiteKey && (
+          <TurnstileWidget
+            siteKey={turnstileSiteKey}
+            onSuccess={setTurnstileToken}
+            onExpired={() => setTurnstileToken(null)}
+            onError={() => setTurnstileToken(null)}
+          />
+        )}
+
+        {!hideSubmitButton && (
+          <Button
+            type="submit"
+            disabled={
+              loading || !form.formState.isValid || (Boolean(turnstileSiteKey) && !turnstileToken)
+            }
+            className="w-full cursor-pointer"
+            variant="default"
+          >
+            {loading ? t.submitting : t.submit}
+          </Button>
+        )}
 
         <Div className="text-center">
           {onBack ? (
@@ -199,6 +332,16 @@ export function ForgotPasswordForm({
             </a>
           )}
         </Div>
+
+        {/* See note in SignInForm.tsx — only override appName when the URL
+            surfaced a real key/legacy app= signal so the first-party early
+            return in DevModeBanner can fire on ezauth's own pages. */}
+        <DevModeBanner
+          {...(appName && (urlKey || keyStatus) ? { appName } : {})}
+          keyStatus={keyStatus}
+          urlKey={urlKey}
+          locale={navigation.locale}
+        />
       </form>
     </Form>
   )

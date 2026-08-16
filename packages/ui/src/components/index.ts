@@ -2,7 +2,14 @@
 export * from './data-display/accordion'
 export * from './data-display/badge'
 export * from './data-display/card'
+export * from './data-display/code-block'
+export * from './data-display/product-card'
+export * from './data-display/product-grid'
+
+// Landing
+export * from './landing'
 export * from './data-display/data-table'
+export * from './data-display/markdown-content'
 export * from './data-display/simple-badge'
 export * from './data-display/table'
 
@@ -20,11 +27,20 @@ export * from './effects/typewriter-effect'
 
 // Feedback
 export * from './feedback/alert-dialog'
+export * from './feedback/confirm-action-dialog'
+export * from './feedback/dependency-list'
+export * from './feedback/error-alert'
+export * from './feedback/maintenance-banner'
 export * from './feedback/progress'
+export * from './feedback/progress-badge'
 export * from './feedback/skeleton'
 export * from './feedback/sonner'
 export * from './feedback/spinner'
+export * from './feedback/status-page'
 export * from './feedback/tooltip'
+
+// Checkout templates (Stripe success/cancel landing pages)
+export * from './checkout-templates'
 
 // Forms
 export * from './forms/checkbox'
@@ -32,6 +48,7 @@ export * from './forms/form'
 export * from './forms/input'
 export * from './forms/label'
 export * from './forms/password-input'
+export * from './forms/password-strength'
 export * from './forms/select'
 export * from './forms/switch'
 export * from './forms/textarea'
@@ -47,6 +64,7 @@ export * from './media/uptime-graph'
 export * from './navigation/back-button'
 export * from './navigation/command'
 export * from './navigation/dropdown'
+export * from './navigation/scope-context-switcher'
 export * from './navigation/stepper'
 export * from './navigation/tabs'
 

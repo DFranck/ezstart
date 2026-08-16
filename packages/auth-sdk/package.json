@@ -2,52 +2,145 @@
   "name": "@ezstart/auth-sdk",
   "version": "1.0.0",
   "description": "EZAuth React SDK for authentication",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/auth-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/auth-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "auth",
+    "sdk",
+    "react",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./components/registry": {
+      "types": "./dist/components/auth-sdk-registry.d.ts",
+      "import": "./dist/components/auth-sdk-registry.js"
     },
     "./server": {
-      "import": "./dist/server.js",
-      "types": "./dist/server.d.ts"
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     },
     "./middleware": {
-      "import": "./dist/middleware/index.js",
-      "types": "./dist/middleware/index.d.ts"
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js"
+    },
+    "./rbac": {
+      "types": "./dist/rbac/index.d.ts",
+      "import": "./dist/rbac/index.js"
+    },
+    "./rbac/client": {
+      "types": "./dist/rbac/client.d.ts",
+      "import": "./dist/rbac/client.js"
+    },
+    "./rbac/server": {
+      "types": "./dist/rbac/server.d.ts",
+      "import": "./dist/rbac/server.js"
+    },
+    "./rbac/types": {
+      "types": "./dist/rbac/types.d.ts",
+      "import": "./dist/rbac/types.js"
+    },
+    "./rbac/helpers": {
+      "types": "./dist/rbac/helpers.d.ts",
+      "import": "./dist/rbac/helpers.js"
     }
   },
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
-    "typecheck": "tsc --noEmit"
+    "generate": "node scripts/generate-registry.cjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@ezstart/capture-sdk": "workspace:*",
+    "@ezstart/api-contracts": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/fetch-client": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
+    "jsonwebtoken": "^9.0.3",
     "react-hook-form": "^7.68.0",
+    "recharts": "2.15.4",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
+    "@tanstack/react-query": "^5.80.7",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.3",
     "@types/node": "^20",
     "@types/react": "^19.1.12",
+    "jsdom": "^29.0.2",
+    "mongoose": "^8.20.2",
     "next": "^15.5.9",
     "next-intl": "^4.3.12",
     "react": "^19.1.1",
     "sonner": "^2.0.7",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
+    "@ezstart/capture-sdk": "workspace:*",
+    "@tanstack/react-query": "^5",
+    "mongoose": "^8.0.0",
     "next": "^15",
-    "next-intl": "^4",
     "react": "^18",
     "sonner": "^1 || ^2"
+  },
+  "peerDependenciesMeta": {
+    "@ezstart/capture-sdk": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "mongoose": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -1,4 +1,4 @@
-import { findOneAndUpdate } from '@ezstart/express-core'
+import { findOneAndUpdate } from '../utils/mongoose-query.js'
 import { getMonsterModel } from '../models/monster.js'
 
 const SWARFARM_API = 'https://swarfarm.com/api/v2/monsters/'

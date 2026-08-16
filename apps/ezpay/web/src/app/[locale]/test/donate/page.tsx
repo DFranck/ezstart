@@ -14,7 +14,6 @@ export default function TestDonatePage() {
     <Div className="w-full space-y-8">
       {/* Donation Card */}
       <DonationCard
-        appName="ezpay"
         projectId="ezpay"
         projectName="EZPay Development"
         presetAmounts={[5, 10]}
@@ -28,7 +27,7 @@ export default function TestDonatePage() {
       {/* Donation Wall */}
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle>Donation Wall</CardTitle>
+          <CardTitle>{t('sections.donations')}</CardTitle>
         </CardHeader>
         <CardContent>
           <DonationWall limit={20} texts={{ noDonationsText: t('noDonations') }} />

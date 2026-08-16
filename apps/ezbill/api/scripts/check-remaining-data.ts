@@ -6,7 +6,7 @@
  *   tsx scripts/check-remaining-data.ts
  */
 
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { getClientModel } from '../src/models/client.js'
 import { getInvoiceModel } from '../src/models/billing/invoice.js'
 import { getQuoteModel } from '../src/models/billing/quote.js'
@@ -28,7 +28,7 @@ async function checkRemainingData() {
   // Companies
   const companies = await Company.find({})
   console.log(`✅ Companies: ${companies.length}`)
-  companies.forEach((c) => {
+  companies.forEach(c => {
     console.log(`   - ${c.companyName} (userId: ${c.userId})`)
   })
 
@@ -36,7 +36,7 @@ async function checkRemainingData() {
   const clients = await Client.find({})
   console.log(`\n📋 Clients: ${clients.length}`)
   if (clients.length > 0) {
-    clients.forEach((c) => {
+    clients.forEach(c => {
       console.log(`   - ${c.clientName} (userId: ${c.userId})`)
     })
   } else {
@@ -47,7 +47,7 @@ async function checkRemainingData() {
   const invoices = await Invoice.find({})
   console.log(`\n🧾 Invoices: ${invoices.length}`)
   if (invoices.length > 0) {
-    invoices.forEach((i) => {
+    invoices.forEach(i => {
       console.log(`   - ${i.invoiceNumber} (${i.status})`)
     })
   } else {
@@ -58,7 +58,7 @@ async function checkRemainingData() {
   const quotes = await Quote.find({})
   console.log(`\n💰 Quotes: ${quotes.length}`)
   if (quotes.length > 0) {
-    quotes.forEach((q) => {
+    quotes.forEach(q => {
       console.log(`   - ${q.quoteNumber} (${q.status})`)
     })
   } else {
@@ -69,7 +69,7 @@ async function checkRemainingData() {
   const receipts = await Receipt.find({})
   console.log(`\n🧾 Receipts: ${receipts.length}`)
   if (receipts.length > 0) {
-    receipts.forEach((r) => {
+    receipts.forEach(r => {
       console.log(`   - ${r.receiptNumber}`)
     })
   } else {
@@ -80,7 +80,7 @@ async function checkRemainingData() {
   process.exit(0)
 }
 
-checkRemainingData().catch((error) => {
+checkRemainingData().catch(error => {
   console.error('❌ Error:', error)
   process.exit(1)
 })

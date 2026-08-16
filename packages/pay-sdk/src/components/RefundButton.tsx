@@ -1,11 +1,9 @@
 'use client'
 
-import { Button, Icon } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
+import { Button, ConfirmActionDialog, Icon } from '@ezstart/ui/components'
 import { useCallback, useState } from 'react'
-import { usePayContext } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
-import { ConfirmActionDialog } from './ConfirmActionDialog.js'
+import { useRefundPayment } from '../react/hooks/useRefundPayment.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface RefundButtonTexts {
   refund?: string
@@ -42,7 +40,7 @@ export function RefundButton({
   className,
   texts,
 }: RefundButtonProps) {
-  const { client } = usePayContext()
+  const refundMutation = useRefundPayment()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const t = {
@@ -66,16 +64,18 @@ export function RefundButton({
       if (onRefund) {
         await onRefund(paymentId)
       } else {
-        await client.refundPayment(paymentId)
+        // Uses `useRefundPayment` — on success the mutation invalidates the
+        // shared `SUBSCRIPTIONS_QUERY_KEY` cache so the dashboard reflects
+        // the refunded status without a manual reload.
+        await refundMutation.mutateAsync(paymentId)
       }
       onSuccess?.()
     } catch (err) {
       const message = err instanceof Error ? err.message : t.error
-      logger.error('Refund failed:', message)
       onError?.(message)
       throw err
     }
-  }, [paymentId, onRefund, client, onSuccess, onError, t.error])
+  }, [paymentId, onRefund, refundMutation, onSuccess, onError, t.error])
 
   return (
     <>

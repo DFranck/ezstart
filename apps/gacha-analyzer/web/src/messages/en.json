@@ -11,7 +11,8 @@
     "bench": "Bench",
     "history": "History",
     "data": "Data",
-    "sources": "Sources"
+    "sources": "Sources",
+    "calculate": "Calculate"
   },
   "actions": {
     "upload": "Upload",
@@ -334,5 +335,115 @@
     "archetype": "Archetype",
     "description": "Description",
     "statPriority": "Stat Priority"
+  },
+  "calculate": {
+    "title": "Calculate",
+    "form": {
+      "title": "Rune Data",
+      "slot": "Slot",
+      "slotMainHint": "Main stat options: {stats}",
+      "set": "Set",
+      "quality": "Quality",
+      "quality_normal": "Normal",
+      "quality_magic": "Magic",
+      "quality_rare": "Rare",
+      "quality_hero": "Hero",
+      "quality_legend": "Legend",
+      "level": "Level",
+      "ancient": "Ancient rune",
+      "mainStat": "Main stat",
+      "substats": "Sub-stats",
+      "substatsHint": "({expected} expected)",
+      "substatN": "Sub {n}",
+      "innate": "Innate stat",
+      "optional": "Optional",
+      "statType": "Stat type",
+      "none": "None",
+      "profile": "Profile",
+      "profile_early": "Early",
+      "profile_mid": "Mid",
+      "profile_late": "Late",
+      "analyze": "Analyze",
+      "analyzing": "Analyzing...",
+      "reset": "Reset"
+    },
+    "output": {
+      "placeholder": "Fill in the rune data and click Analyze.",
+      "success": "Analysis complete",
+      "marker": "Marker",
+      "rarityComparison": "Rarity comparison",
+      "stat": "Stat",
+      "value": "Value",
+      "heroMax": "Hero max",
+      "legendMax": "Legend max",
+      "status": "Status",
+      "aboveHero": "Above hero",
+      "structure": "Structure",
+      "grindable": "Grindable substats",
+      "deadStats": "Dead stats",
+      "efficiency": "Efficiency (Barion)",
+      "current": "Current",
+      "afterGrind": "After max grind",
+      "potential12": "Potential at +12",
+      "gemSimulation": "Gem simulation",
+      "gem": "{from} → {to}",
+      "recommendation": "Player recommendation",
+      "error": "Analysis failed"
+    }
+  },
+  "runeMarker": {
+    "TRUE_LEG_MIN": "True Legend Min",
+    "TRUE_HERO_MIN": "True Hero Min",
+    "TRUE_RARE_MIN": "True Rare Min",
+    "REAPP": "Reappraise",
+    "GEM": "Gem First",
+    "GRIND": "Grind First",
+    "TEST": "Test",
+    "SELL": "Sell",
+    "descriptions": {
+      "TRUE_LEG_MIN": "Exceeds the theoretical maximum of a perfect Hero rune",
+      "TRUE_HERO_MIN": "Exceeds the theoretical maximum of a perfect Rare rune",
+      "TRUE_RARE_MIN": "Valid structure, keep for early/mid game",
+      "REAPP": "Premium slot/set, reappraise for better rolls",
+      "GEM": "Gem the dead stat first, then re-evaluate",
+      "GRIND": "Valid structure, grind to finalize value",
+      "TEST": "Continue upgrading to evaluate",
+      "SELL": "Does not meet minimum rarity thresholds"
+    }
+  },
+  "status": {
+    "title": "Status",
+    "intro": "Real-time health of Gacha Analyzer platform services. Auto-refreshed every 30s.",
+    "componentsHeading": "Service components",
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "No active incidents reported.",
+    "lastCheckedLabel": "Last checked",
+    "responseTimeLabel": "Response time",
+    "refreshHint": "Auto-refreshes every {seconds}s",
+    "refreshButton": "Refresh now",
+    "dependenciesLabel": "Dependencies",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Slow",
+      "down": "Down"
+    },
+    "summary": {
+      "operational": "All systems operational",
+      "degraded": "Partial service disruption",
+      "down": "Major outage",
+      "checking": "Checking services"
+    },
+    "state": {
+      "operational": "Operational",
+      "degraded": "Degraded",
+      "down": "Down",
+      "checking": "Checking"
+    },
+    "services": {
+      "gachaApi": "Gacha Analyzer API",
+      "gachaApiDescription": "Vision scans, history, recommendations",
+      "ezauthApi": "EZAuth API",
+      "ezauthApiDescription": "Authentication, sessions, OAuth, API keys"
+    }
   }
 }

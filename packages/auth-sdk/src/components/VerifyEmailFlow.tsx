@@ -1,10 +1,10 @@
 'use client'
 
 import { Div, P, Spinner } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
-import { logger } from '@ezstart/logger'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
+import { logger } from './internal-logger.js'
 import { useCallback, useEffect, useState } from 'react'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -56,6 +56,15 @@ const DEFAULT_TEXTS: VerifyEmailFlowTexts = {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Email verification flow that consumes a token from `/verify-email?token=...`
+ * and renders success / already-verified / invalid / error states.
+ *
+ * @example
+ * ```tsx
+ * <VerifyEmailFlow token={searchParams.token} backHref="/login" />
+ * ```
+ */
 export function VerifyEmailFlow({
   token,
   backHref,
@@ -77,24 +86,12 @@ export function VerifyEmailFlow({
     }
 
     try {
-      const response = await callApi('/auth/verify-email', {
+      const result = await apiCall<{ message?: string }>('/auth/verify-email', {
         appName: 'ezauth',
         method: 'POST',
         body: { token },
       })
 
-      if (!response.ok) {
-        const errorMsg = response.error || parseApiError(response.data) || ''
-        if (errorMsg.includes('already verified')) {
-          setState('already-verified')
-          onSuccess?.()
-        } else {
-          setState('invalid')
-        }
-        return
-      }
-
-      const result = response.data as { message?: string }
       if (result?.message?.includes('already verified')) {
         setState('already-verified')
       } else {
@@ -104,6 +101,15 @@ export function VerifyEmailFlow({
 
       logger.info('Email verified successfully')
     } catch (err) {
+      if (ApiError.isApiError(err)) {
+        if (err.message.includes('already verified')) {
+          setState('already-verified')
+          onSuccess?.()
+        } else {
+          setState('invalid')
+        }
+        return
+      }
       logger.error('Email verification failed:', err)
       setState('error')
     }

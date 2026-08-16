@@ -2,6 +2,8 @@
 
 import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 
 import { cn } from '../../lib/utils'
 import { skeletonVariants, skeletonCardSizeConfig } from '../../lib/design-system/variants'
@@ -72,6 +74,16 @@ function SkeletonText({
   density,
 }: SkeletonTextProps) {
   const inherited = useDesignTokens()
+
+  // Surface deprecation warning when consumer passes the legacy `spacing` prop.
+  React.useEffect(() => {
+    if (spacing !== undefined) {
+      warnDeprecation('SkeletonText.spacing', 'density prop', {
+        toast: msg => toast.warning(msg),
+      })
+    }
+  }, [spacing])
+
   const resolvedSpacing: 'tight' | 'normal' | 'loose' =
     spacing ??
     (density

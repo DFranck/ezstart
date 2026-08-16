@@ -1,6 +1,6 @@
 import { useNavLinks } from '@/hooks/useNavLinks'
 import { Button, Dropdown, Icon, Nav } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useRouter } from 'next/navigation'
 
 interface NavMenuProps {

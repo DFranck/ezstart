@@ -1,20 +1,20 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
-  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { hashRefreshToken } from '../../models/refresh-token.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../utils/safe-error.js'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
-
-const { authMiddleware } = createAuthMiddleware()
+import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 
 export const sessionsRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -47,8 +47,9 @@ const listSessionsController = async (req: Request, res: Response) => {
     const sessions = await AuthService.getUserSessions(req.userId!, currentTokenHash)
     sendSuccess(res, { sessions })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('List sessions error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to list sessions', 500)
+    sendError(res, 'Failed to list sessions', 500)
   }
 }
 
@@ -60,10 +61,24 @@ const revokeSessionController = async (req: Request, res: Response) => {
       return sendError(res, 'Session ID is required', 400)
     }
     await AuthService.revokeRefreshToken(id, req.userId!)
+    void AuditLogService.createFromRequest(req, {
+      userId: req.userId!,
+      action: 'session_revoked',
+      metadata: { sessionId: id },
+    })
     sendSuccess(res, { message: 'Session revoked successfully' })
   } catch (error) {
+    // MED-1 — preserve the intentional 'Session not found' UX message via the
+    // allowlist; anything else collapses to a stable generic message.
     logger.error('Revoke session error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to revoke session', 400)
+    sendError(
+      res,
+      toSafeErrorMessage(error, {
+        allow: ['Session not found'],
+        fallback: 'Failed to revoke session',
+      }),
+      400
+    )
   }
 }
 
@@ -73,8 +88,9 @@ const revokeAllSessionsController = async (req: Request, res: Response) => {
     const count = await AuthService.revokeAllUserTokens(req.userId!)
     sendSuccess(res, { message: `${count} session(s) revoked` })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('Revoke all sessions error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to revoke sessions', 500)
+    sendError(res, 'Failed to revoke sessions', 500)
   }
 }
 

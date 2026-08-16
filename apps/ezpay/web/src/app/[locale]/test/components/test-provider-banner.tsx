@@ -17,7 +17,7 @@ export function TestProviderBanner() {
   const t = useTranslations('test')
 
   return (
-    <Div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
+    <Div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg border border-success/30 bg-success/5">
       <Div className="flex items-center gap-3">
         <Badge variant="success" dot>
           {t('banner.provider')}

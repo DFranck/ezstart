@@ -5,7 +5,7 @@ import { useClickOutside, useDevice, useOnScroll } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { logger } from '@ezstart/logger'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { MobileNavMenu } from '../mobile-nav-menu'
 import { NavMenu } from '../nav-menu'
@@ -61,7 +61,9 @@ export default function Header() {
         <Div className="flex items-center gap-2">
           {isDesktop && (
             <NavMenu
-              className={cn('sticky top-14 flex items-center justify-center gap-2 w-full z-20')}
+              className={cn(
+                'sticky top-14 flex flex-row items-center justify-center gap-2 w-full z-20'
+              )}
             />
           )}
           {/* <HeaderControls /> */}

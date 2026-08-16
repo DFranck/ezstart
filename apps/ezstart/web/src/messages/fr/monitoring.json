@@ -9,6 +9,32 @@
       "detailsSubtitle": "État de santé détaillé pour chaque projet",
       "noProjects": "Aucun projet trouvé"
     },
+    "charts": {
+      "title": "Tendances historiques",
+      "description": "Latence, disponibilité et taux d'erreur agrégés sur tous les services",
+      "period": {
+        "7d": "7 derniers jours",
+        "30d": "30 derniers jours"
+      },
+      "latency": {
+        "title": "Latence p95",
+        "description": "Temps de réponse au 95e percentile par intervalle (ms)",
+        "yLabel": "ms"
+      },
+      "uptime": {
+        "title": "Disponibilité",
+        "description": "Ratio de checks réussis par intervalle (%)",
+        "yLabel": "%"
+      },
+      "errorRate": {
+        "title": "Taux d'erreur par service",
+        "description": "Checks en échec sur la période (%)",
+        "yLabel": "%"
+      },
+      "empty": "Aucune donnée disponible pour cette période",
+      "error": "Échec du chargement des graphiques",
+      "loading": "Chargement des graphiques..."
+    },
     "auditsPage": {
       "title": "Audits de Qualité",
       "description": "Audits de qualité complets sur toutes les catégories du monorepo",
@@ -84,9 +110,10 @@
     "manageDescription": "Gérer votre tableau de bord de surveillance",
     "failedToLoad": "Échec du chargement des données de surveillance",
     "failedToLoadErrors": "Échec du chargement des logs d'erreurs",
+    "unknownError": "Erreur inconnue",
     "retry": "Réessayer",
     "errorLogs": "Journaux d'Erreurs",
-    "errorLogsDescription": "Erreurs récentes capturées de tous les projets (intégration Sentry)",
+    "errorLogsDescription": "Erreurs récentes capturées de tous les projets",
     "refreshing": "Rafraîchissement...",
     "allClear": "Tout est OK !",
     "allSystemsOperational": "Aucune erreur détectée. Tous les systèmes opérationnels",
@@ -106,7 +133,15 @@
       "noData": "Aucune donnée disponible pour la période sélectionnée",
       "uptime": "Disponibilité :",
       "avgResponse": "Réponse moy. :",
-      "checks": "Vérifications :"
+      "checks": "Vérifications :",
+      "title": "{serviceId} - Tendance",
+      "titleWithHours": "{serviceId} - Dernières {hours}h",
+      "responseTime": "Temps de réponse",
+      "responseTimeAxis": "Temps de réponse (ms)",
+      "status": "Statut",
+      "healthy": "Sain",
+      "down": "Hors ligne",
+      "notAvailable": "N/A"
     },
     "view": "Voir",
     "occurrences": "{count} occurrences",
@@ -170,7 +205,6 @@
         "viewAllProjects": "Voir Tous les Projets",
         "runQualityAudits": "Lancer les Audits Qualité",
         "viewErrorLogs": "Voir les Logs d'Erreurs",
-        "openSentry": "Ouvrir Sentry",
         "viewAnalytics": "Voir Analytics (Vercel)"
       }
     }

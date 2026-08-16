@@ -13,7 +13,7 @@
  * - DELETE /api/clients/:id/hard-delete    -> hardDeleteClientById
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import createClientRouter, { createClientRegistry } from './createClient.js'

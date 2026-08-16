@@ -154,7 +154,7 @@ CORS is automatically configured via `@ezstart/config` to allow:
 ## 🔗 Related Packages
 
 - `@ezstart/monitoring` - Types and utilities
-- `@ezstart/express-core` - Express infrastructure
+- `@ezstart/api-core` - Express infrastructure
 - `@ezstart/config` - CORS and URL configuration
 
 ## 📝 Development

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Hero Component - Landing Page Hero Section
  *
@@ -15,11 +17,11 @@
  */
 
 import * as React from 'react'
-import { cn } from '../../lib/utils'
 import { landingHeroVariantConfig } from '../../lib/design-system/variants'
+import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Badge } from '../data-display/badge'
-import { Section, Div, H1, P } from '../tag'
+import { Div, H1, P, Section } from '../tag'
 
 // ========== Base Types ==========
 
@@ -40,16 +42,22 @@ export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
   title: string
   /** Hero description */
   description: string
-  /** Primary CTA text */
+  /** Primary CTA text (string-based — use primaryCTASlot for custom ReactNode) */
   primaryCTA?: string
   /** Primary CTA link */
   primaryCTAHref?: string
-  /** Secondary CTA text */
+  /** Custom primary CTA ReactNode (overrides primaryCTA when provided) */
+  primaryCTASlot?: React.ReactNode
+  /** Secondary CTA text (string-based — use secondaryCTASlot for custom ReactNode) */
   secondaryCTA?: string
   /** Secondary CTA link */
   secondaryCTAHref?: string
+  /** Custom secondary CTA ReactNode (overrides secondaryCTA when provided) */
+  secondaryCTASlot?: React.ReactNode
   /** Badge text (appears above title) */
   badge?: string
+  /** Text alignment override (independent of variant). Defaults derived from variant. */
+  align?: 'left' | 'center'
   /** Image URL (for withImage variant) */
   image?: string
   /** Video URL (for withVideo variant) */
@@ -58,6 +66,55 @@ export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
   stats?: { label: string; value: string }[]
   /** Background scroll behavior */
   bgMode?: 'scroll' | 'fixed'
+  /**
+   * Custom background rendered behind the hero content (`absolute inset-0
+   * z-0`, `pointer-events-none`). Accepts ANY ReactNode — `<img>`, `<video>`,
+   * Three.js canvas, Lottie animation, gradient div, particle system, etc.
+   * Replaces the variant-derived background (`withImage` / `withVideo` /
+   * `withGradient`) when provided — the variant still drives layout/typography
+   * but the background comes from this slot.
+   *
+   * To darken the background for text legibility, add an overlay layer in the
+   * slot itself :
+   *
+   * ```tsx
+   * <Hero backgroundSlot={
+   *   <>
+   *     <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
+   *     <Div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40" />
+   *   </>
+   * } ... />
+   * ```
+   *
+   * @example Image background
+   * ```tsx
+   * <Hero
+   *   variant="full"
+   *   backgroundSlot={
+   *     <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
+   *   }
+   *   title="..."
+   *   description="..."
+   * />
+   * ```
+   *
+   * @example Video background
+   * ```tsx
+   * <Hero
+   *   variant="full"
+   *   backgroundSlot={
+   *     <video src="/hero.mp4" autoPlay loop muted playsInline className="h-full w-full object-cover" />
+   *   }
+   *   ...
+   * />
+   * ```
+   *
+   * @example Custom component (Three.js, Lottie, particle, etc.)
+   * ```tsx
+   * <Hero variant="full" backgroundSlot={<MyThreeScene />} ... />
+   * ```
+   */
+  backgroundSlot?: React.ReactNode
   /** Custom content below description */
   children?: React.ReactNode
 }
@@ -72,13 +129,17 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
       description,
       primaryCTA,
       primaryCTAHref = '#',
+      primaryCTASlot,
       secondaryCTA,
       secondaryCTAHref = '#',
+      secondaryCTASlot,
       badge,
+      align,
       image,
       video,
       stats,
       bgMode = 'scroll',
+      backgroundSlot,
       className,
       children,
       style,
@@ -87,6 +148,14 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     ref
   ) => {
     const [isVideoLoaded, setIsVideoLoaded] = React.useState(false)
+
+    // backgroundSlot wins over variant-driven backgrounds (image/video/gradient).
+    // Skip the built-in renderers when a custom slot is provided so we don't
+    // stack two backgrounds on top of each other.
+    const hasCustomBackground = Boolean(backgroundSlot)
+
+    // Resolve alignment: explicit prop wins, else 'centered' variant defaults to center
+    const isCentered = align === 'center' || (align === undefined && variant === 'centered')
 
     // Merge background-attachment into style when bgMode is fixed
     const mergedStyle =
@@ -102,7 +171,8 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     // Content wrapper classes
     const contentWrapperClasses = cn(
       'container mx-auto px-4 sm:px-6 lg:px-8',
-      landingHeroVariantConfig.contentWrapper[variant]
+      landingHeroVariantConfig.contentWrapper[variant],
+      isCentered && variant !== 'split' && 'text-center'
     )
 
     // Title classes
@@ -111,18 +181,30 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     // Description classes
     const descriptionClasses = cn(
       'text-muted-foreground',
-      landingHeroVariantConfig.description[variant]
+      landingHeroVariantConfig.description[variant],
+      isCentered && 'mx-auto'
     )
 
     const hasBackgroundImage = mergedStyle?.backgroundImage
 
     return (
       <Section ref={ref} className={containerClasses} {...props} style={mergedStyle}>
-        {/* Dark overlay for background images */}
-        {hasBackgroundImage && <Div className="absolute inset-0 bg-black/50 z-0" />}
+        {/* Custom background slot (wins over variant-driven backgrounds).
+            `pointer-events-none` so interactive content (CTAs, video controls)
+            stays clickable. Inner content is free to override per-element. */}
+        {backgroundSlot && (
+          <Div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            {backgroundSlot}
+          </Div>
+        )}
 
-        {/* Background Video */}
-        {variant === 'withVideo' && video && (
+        {/* Dark overlay for background images (skipped when custom slot wins). */}
+        {!hasCustomBackground && hasBackgroundImage && (
+          <Div className="absolute inset-0 bg-black/50 z-0" />
+        )}
+
+        {/* Background Video (skipped when custom slot wins). */}
+        {!hasCustomBackground && variant === 'withVideo' && video && (
           <Div className="absolute inset-0 -z-10">
             <video
               autoPlay
@@ -141,8 +223,8 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
           </Div>
         )}
 
-        {/* Gradient Background */}
-        {variant === 'withGradient' && (
+        {/* Gradient Background (skipped when custom slot wins). */}
+        {!hasCustomBackground && variant === 'withGradient' && (
           <Div className="absolute inset-0 -z-10">
             <Div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
             <Div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
@@ -154,7 +236,7 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
           <Div className={variant === 'split' ? 'order-1' : ''}>
             {/* Badge */}
             {badge && (
-              <Div className={cn('mb-6', variant === 'centered' && 'flex justify-center')}>
+              <Div className={cn('mb-6', isCentered && 'flex justify-center')}>
                 <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
                   {badge}
                 </Badge>
@@ -168,17 +250,21 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
             <P className={cn(descriptionClasses, 'mb-8')}>{description}</P>
 
             {/* CTAs */}
-            <Div className={cn('flex flex-wrap gap-4', variant === 'centered' && 'justify-center')}>
-              {primaryCTA && (
-                <Button asChild size="lg" className="text-base px-8 py-6">
-                  <a href={primaryCTAHref}>{primaryCTA}</a>
-                </Button>
-              )}
-              {secondaryCTA && (
-                <Button asChild size="lg" variant="outline" className="text-base px-8 py-6">
-                  <a href={secondaryCTAHref}>{secondaryCTA}</a>
-                </Button>
-              )}
+            <Div className={cn('flex flex-wrap gap-4', isCentered && 'justify-center')}>
+              {primaryCTASlot
+                ? primaryCTASlot
+                : primaryCTA && (
+                    <Button asChild size="lg" className="text-base px-8 py-6">
+                      <a href={primaryCTAHref}>{primaryCTA}</a>
+                    </Button>
+                  )}
+              {secondaryCTASlot
+                ? secondaryCTASlot
+                : secondaryCTA && (
+                    <Button asChild size="lg" variant="outline" className="text-base px-8 py-6">
+                      <a href={secondaryCTAHref}>{secondaryCTA}</a>
+                    </Button>
+                  )}
             </Div>
 
             {/* Stats (for withStats variant) */}

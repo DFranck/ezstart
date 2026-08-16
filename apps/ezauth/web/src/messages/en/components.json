@@ -1,0 +1,113 @@
+{
+  "components": {
+    "sidebarTitle": "Auth SDK",
+    "sidebarOpen": "Open component navigation",
+    "sidebarClose": "Close component navigation",
+    "sidebarNavLabel": "Auth SDK component navigation",
+    "sidebarSearchPlaceholder": "Filter components…",
+    "sidebarEmpty": "No components match your search.",
+    "sidebarShortcutHint": "Press the shortcut to open the command palette.",
+    "sidebarAllEntry": "All categories",
+    "backToHome": "Back to EZAuth",
+    "paletteTitle": "Auth SDK component palette",
+    "paletteDescription": "Search across every @ezstart/auth-sdk component.",
+    "palettePlaceholder": "Search components…",
+    "paletteEmpty": "No components found.",
+    "landingTitle": "Auth SDK Components",
+    "landingSubtitle": "React components for authentication, account management, and admin dashboards in Next.js applications.",
+    "landingTotalComponents": "{count} components",
+    "landingTotalCategories": "{count} categories",
+    "landingTotalEntries": "{count} entries",
+    "landingTotalDomains": "{count} domains",
+    "landingComponentsInDomain": "{count, plural, one {# component} other {# components}}",
+    "landingShortcutHint": "⌘K to search",
+    "landingCategoriesHeading": "Browse by category",
+    "landingFeatureBadge": "Variants",
+    "landingFeatureDescription": "{count, plural, one {# variant — Form, Card, or Modal} other {# variants — Form, Card, or Modal}}",
+    "landingFeatureSwitchLabel": "Switch variant",
+    "landingFeatureDetailLink": "Open detail",
+    "landingFilterActive": "Filtering: {name}",
+    "landingClearFilter": "Clear filter",
+    "landingFooterTitle": "Get started",
+    "landingFooterDescription": "Install the package, configure the provider, and start dropping components into your app. Every component ships with TypeScript types, English defaults, and a `texts` prop for i18n.",
+    "categoryBackToOverview": "Back to overview",
+    "categoryComponentCount": "{count, plural, one {# component} other {# components}}",
+    "categoryCompoundBadge": "Compound",
+    "categoryNoSummary": "No summary available.",
+    "categoryPropsCount": "{count, plural, one {# prop} other {# props}}",
+    "categoryExamplesCount": "{count, plural, one {# example} other {# examples}}",
+    "detailBreadcrumbRoot": "Components",
+    "detailCompoundBadge": "Compound",
+    "detailViewSource": "View source",
+    "detailFeatureGroupLabel": "Feature group",
+    "detailFeatureVariantsCount": "{count, plural, one {# variant} other {# variants}}",
+    "detailFeatureVariantsAriaLabel": "{name} variants",
+    "detailFeatureVariantsHelp": "Showing {name}. Switch tabs above to compare the same flow in a different layout.",
+    "tabPreview": "Preview",
+    "tabCode": "Code",
+    "tabProps": "Props",
+    "tabAnatomy": "Anatomy",
+    "previewMissing": "No live demo for this component yet — see the source link or the Code tab for a snippet.",
+    "previewMissingTitle": "Demo unavailable",
+    "demoModeBanner": {
+      "title": "SANDBOX",
+      "description": "Actions in this preview are real but isolated to a sandbox Application. Data resets every 24h."
+    },
+    "codeFallbackTitle": "Quick start",
+    "codeFallbackDescription": "No example was attached to this component's TSDoc — here's a generated snippet based on its props.",
+    "codeExampleTitle": "Example {index}",
+    "codeDescriptionTitle": "Notes",
+    "propsEmpty": "This component has no public props.",
+    "propsHeaderName": "Name",
+    "propsHeaderType": "Type",
+    "propsHeaderRequired": "Required",
+    "propsHeaderDescription": "Description",
+    "propsRequired": "required",
+    "propsOptional": "optional",
+    "propsNoDescription": "—",
+    "anatomyTitle": "Anatomy",
+    "anatomySingleDescription": "Single component — no sub-parts to compose.",
+    "anatomyCompoundDescription": "This component file exports additional pieces you can render or extend.",
+    "anatomyExportsHeading": "Sub-exports",
+    "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Show internal components",
+    "adminToggleAriaLabel": "Toggle internal components visibility",
+    "adminToggleAdminView": "ADMIN VIEW",
+    "adminToggleInternalBadge": "internal",
+    "adminToggleInternalTooltip": "Internal component — hidden from the public docs surface.",
+    "domain": {
+      "authForms": {
+        "title": "Auth Forms",
+        "description": "Sign in, sign up, password reset, and email verification — every flow ships as Form, Card, or Modal so you can drop the right primitive in any layout."
+      },
+      "authButtons": {
+        "title": "Auth Buttons",
+        "description": "Drop-in CTAs that route to the hosted auth flow — login, register, OAuth, magic link."
+      },
+      "userProfile": {
+        "title": "User Profile",
+        "description": "User menu, avatar, account modal, settings, sessions, and OAuth-providers management — everything that lives behind the user dropdown."
+      },
+      "dashboards": {
+        "title": "Dashboards",
+        "description": "Pre-composed dashboards: end-user, admin, and the federated EZAuth shell that powers the @ezstart hub."
+      },
+      "applicationsKeys": {
+        "title": "Applications & Keys",
+        "description": "Application CRUD, the Developer Portal, API key tables, usage badges, and the create / created modals."
+      },
+      "guardsBanners": {
+        "title": "Guards & Banners",
+        "description": "Auth guards, loaders, and the system-wide banners (maintenance, dev mode, scope context, error)."
+      },
+      "security": {
+        "title": "Security",
+        "description": "Password strength meter, Turnstile widget, and the two-factor settings + prompt."
+      },
+      "audit": {
+        "title": "Audit",
+        "description": "Audit log section — drop-in surface for security-relevant events on a user account."
+      }
+    }
+  }
+}

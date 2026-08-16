@@ -18,7 +18,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { consumeHandoffCode } from '../../services/sso.service.js'
 import { issueSession } from '../../services/auth.service.js'
@@ -37,16 +37,29 @@ export const ssoExchangeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(ssoExchangeRegistry, router)
 
-// Rate limit to mitigate code-guessing (even though codes are 256-bit random)
-const ssoExchangeRateLimiter = createStrictRateLimiter()
+// Rate limit to mitigate code-guessing (even though codes are 256-bit random).
+// 10 req/min/IP — slightly more permissive than login because legitimate cross-app
+// SSO bursts (user lands on /auth/callback for several apps in quick succession)
+// are normal, while brute-forcing 256-bit handoff codes is computationally absurd.
+const ssoExchangeRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 10,
+})
 
 const ssoExchangeRequestSchema = z.object({
-  code: z.string().min(32, 'code is required'),
-  app: z.string().min(1, 'app is required'),
+  code: z
+    .string()
+    .min(32, 'code is required')
+    .describe('Single-use SSO handoff code from /sso-authorize'),
+  app: z
+    .string()
+    .min(1, 'app is required')
+    .describe('Target app identifier (ezauth, ezbill, etc.)'),
 })
 
 const ssoExchangeResponseSchema = z.object({
   user: z.object({}).passthrough().describe('Authenticated user'),
+  accessToken: z.string().describe('JWT access token (used in localStorage mode, e.g. localhost)'),
   refreshToken: z.string().describe('Refresh token to persist client-side (localStorage)'),
   redirect: z.string().describe('Relative path on the target app to redirect to'),
 })
@@ -108,13 +121,14 @@ const ssoExchangeController = async (req: Request, res: Response) => {
     })
 
     // Cookie options mirror login-cookie.ts EXACTLY — centralized in config/cookie.ts.
-    res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions())
-    res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions())
+    res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions(req))
+    res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions(req))
 
-    // Refresh token returned in body (matches login-cookie.ts pattern) for
-    // localStorage-mode consumers; httpOnly consumers ignore it.
+    // Tokens returned in body for localStorage-mode consumers (e.g. localhost
+    // where httpOnly cookies can't cross ports); httpOnly consumers ignore them.
     return sendSuccess(res, {
       user: user.toAuthUser(),
+      accessToken: session.access_token,
       refreshToken: session.refreshToken,
       redirect: toRelativeRedirect(consumed.redirectUri),
     })

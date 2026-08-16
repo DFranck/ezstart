@@ -3,21 +3,13 @@
  * Create User
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-} from '@ezstart/express-core';
-import { createUserSchema, userSchema } from '@ezbill/types';
-import { createUser } from '../../controllers/user/index.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/api-core'
+import { createUserSchema, userSchema } from '@ezbill/types'
+import { createUser } from '../../controllers/user/index.js'
 
-export const createUserRegistry = new OpenAPIRegistry();
-const router = Router();
-export const createUserRouter = createRouterWithDoc(
-  createUserRegistry,
-  router,
-  '/users'
-);
+export const createUserRegistry = new OpenAPIRegistry()
+const router = Router()
+export const createUserRouter = createRouterWithDoc(createUserRegistry, router, '/users')
 
 createUserRouter.post('/', createUser, {
   summary: 'Create User',
@@ -25,6 +17,6 @@ createUserRouter.post('/', createUser, {
   bodySchema: createUserSchema,
   responseSchema: userSchema,
   status: 201,
-});
+})
 
-export default router;
+export default router

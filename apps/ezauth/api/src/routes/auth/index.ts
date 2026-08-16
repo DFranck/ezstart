@@ -17,9 +17,13 @@ import { twoFactorRegistries, twoFactorRouters } from './two-factor/index.js'
 import deleteAccountRouter, { deleteAccountRegistry } from './delete-account.js'
 import updateProfileRouter, { updateProfileRegistry } from './update-profile.js'
 import changePasswordRouter, { changePasswordRegistry } from './change-password.js'
+import changeEmailRouter, { changeEmailRegistry } from './change-email.js'
+import magicLinkRouter, { magicLinkRegistry } from './magic-link.js'
 import quickSignupRouter, { quickSignupRegistry } from './quick-signup.js'
 import ssoAuthorizeRouter, { ssoAuthorizeRegistry } from './sso-authorize.js'
 import ssoExchangeRouter, { ssoExchangeRegistry } from './sso-exchange.js'
+import meOAuthProvidersRouter, { meOAuthProvidersRegistry } from './me-oauth-providers.js'
+import auditLogRouter, { auditLogRegistry } from './audit-log.js'
 
 export const authRegistries = [
   registerRegistry,
@@ -41,9 +45,13 @@ export const authRegistries = [
   deleteAccountRegistry,
   updateProfileRegistry,
   changePasswordRegistry,
+  changeEmailRegistry,
+  magicLinkRegistry,
   quickSignupRegistry,
   ssoAuthorizeRegistry,
   ssoExchangeRegistry,
+  meOAuthProvidersRegistry,
+  auditLogRegistry,
 ]
 
 export const authRouters = [
@@ -66,7 +74,11 @@ export const authRouters = [
   deleteAccountRouter,
   updateProfileRouter,
   changePasswordRouter,
+  changeEmailRouter,
+  magicLinkRouter,
   quickSignupRouter,
   ssoAuthorizeRouter,
   ssoExchangeRouter,
+  meOAuthProvidersRouter,
+  auditLogRouter,
 ]

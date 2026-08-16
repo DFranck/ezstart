@@ -1,18 +1,16 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
-  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
-
-const { authMiddleware } = createAuthMiddleware()
+import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 
 export const meRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -25,8 +23,10 @@ const meController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { user })
   } catch (error) {
+    // MED-1 — never echo a raw `error.message` (Mongoose/DB internals leak).
+    // Any error reaching here is unexpected; return a stable generic message.
     logger.error('Get user error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to fetch user', 500)
+    sendError(res, 'Failed to fetch user', 500)
   }
 }
 

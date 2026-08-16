@@ -73,14 +73,13 @@ const packageJson = {
     dev: 'node src/scripts/dev-with-port.js',
     'dev:port': 'next dev -p $PORT',
     build:
-      'pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build',
+      'pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk build && next build',
     start: 'next start',
     lint: 'eslint .',
     typecheck: 'tsc --noEmit',
   },
   dependencies: {
     '@ezstart/auth-sdk': 'workspace:*',
-    '@ezstart/next-theme': 'workspace:*',
     '@ezstart/ui': 'workspace:*',
     deepmerge: '^4.3.1',
     next: '^15.1.6',
@@ -171,7 +170,7 @@ import withPWA from 'next-pwa'
 
 /** @type {import('next').NextConfig} */
 const baseConfig = {
-  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk', '@ezstart/next-theme'],
+  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk'],
 }
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
@@ -400,7 +399,7 @@ fs.mkdirSync(path.join(projectPath, 'src/providers'), { recursive: true })
 const providersContent = `'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { NextIntlClientProvider } from 'next-intl'
 import { ReactNode } from 'react'
 
@@ -495,7 +494,7 @@ export default function HomePage() {
             <li>Internationalization (i18n) with next-intl</li>
             <li>Progressive Web App (PWA) support</li>
             <li>@ezstart/ui components library</li>
-            <li>@ezstart/next-theme & auth-sdk providers</li>
+            <li>@ezstart/ui/theme & auth-sdk providers</li>
             <li>Centralized TypeScript, ESLint, and Tailwind configs</li>
           </ul>
           <div className="pt-4">

@@ -3,7 +3,7 @@
  * Webhook endpoint health check
  */
 
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/api-core'
 
 export const healthCheckRegistry = new OpenAPIRegistry()
 const router: import('express').Router = Router()

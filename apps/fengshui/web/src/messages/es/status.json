@@ -1,0 +1,37 @@
+{
+  "status": {
+    "title": "Estado",
+    "intro": "Estado en tiempo real de los servicios upstream utilizados por FengShui. Actualizado automáticamente cada 30 s.",
+    "componentsHeading": "Componentes del servicio",
+    "incidentsHeading": "Incidentes",
+    "incidentsBody": "Sin incidentes activos.",
+    "lastCheckedLabel": "Última verificación",
+    "responseTimeLabel": "Tiempo de respuesta",
+    "refreshHint": "Actualización automática cada {seconds} s",
+    "refreshButton": "Actualizar",
+    "dependenciesLabel": "Dependencias",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Lento",
+      "down": "Caído"
+    },
+    "summary": {
+      "operational": "Todos los sistemas operativos",
+      "degraded": "Interrupción parcial",
+      "down": "Interrupción mayor",
+      "checking": "Verificando servicios"
+    },
+    "state": {
+      "operational": "Operativo",
+      "degraded": "Degradado",
+      "down": "Caído",
+      "checking": "Verificando"
+    },
+    "services": {
+      "ezauthApi": "API EZAuth",
+      "ezauthApiDescription": "Autenticación, sesiones, OAuth, claves API",
+      "ezpayApi": "API EZPay",
+      "ezpayApiDescription": "Planes, suscripciones, pagos"
+    }
+  }
+}

@@ -11,25 +11,42 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { QRCode } from '../../models/QRCode.js'
 
 const CreateQRCodeSchema = z.object({
   url: z.string().url().max(2048).describe('Target URL'),
   title: z.string().max(200).optional().describe('Optional label'),
-  redirectType: z.enum(['permanent', 'temporary']).default('permanent'),
-  size: z.number().int().min(128).max(512).default(256),
+  redirectType: z
+    .enum(['permanent', 'temporary'])
+    .default('permanent')
+    .describe('Whether the target URL can change later (permanent = locked)'),
+  size: z
+    .number()
+    .int()
+    .min(128)
+    .max(512)
+    .default(256)
+    .describe('QR code size in pixels (128-512)'),
   foreground: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
-    .default('#000000'),
+    .default('#000000')
+    .describe('Foreground color as a 6-digit hex code (e.g. #000000)'),
   background: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
-    .default('#ffffff'),
-  errorCorrection: z.enum(['L', 'M', 'Q', 'H']).default('M'),
-  includeMargin: z.boolean().default(true),
+    .default('#ffffff')
+    .describe('Background color as a 6-digit hex code (e.g. #ffffff)'),
+  errorCorrection: z
+    .enum(['L', 'M', 'Q', 'H'])
+    .default('M')
+    .describe('Error correction level (L=7%, M=15%, Q=25%, H=30%)'),
+  includeMargin: z
+    .boolean()
+    .default(true)
+    .describe('Whether to include a quiet-zone margin around the code'),
   userEmail: z.string().email().optional().describe('User email for admin display'),
 })
 

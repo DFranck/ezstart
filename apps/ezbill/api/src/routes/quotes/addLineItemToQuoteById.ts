@@ -3,23 +3,18 @@
  * Add line Item to Quote
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { addLineItemSchema, paramsMongoIdSchema, quoteSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/quote/quote.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { addLineItemSchema, paramsMongoIdSchema, quoteSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/quote/quote.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const addLineItemToQuoteByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const addLineItemToQuoteByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const addLineItemToQuoteByIdRouter = createRouterWithDoc(
   addLineItemToQuoteByIdRegistry,
   router,
   '/quotes'
-);
+)
 
 addLineItemToQuoteByIdRouter.post(
   '/:id/add-line-item',
@@ -33,6 +28,6 @@ addLineItemToQuoteByIdRouter.post(
     paramsSchema: paramsMongoIdSchema,
     responseSchema: quoteSchema,
   }
-);
+)
 
-export default router;
+export default router

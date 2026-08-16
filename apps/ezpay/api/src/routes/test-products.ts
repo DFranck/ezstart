@@ -1,5 +1,5 @@
-import { Router } from '@ezstart/express-core'
-import { sendSuccess } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
+import { sendSuccess } from '@ezstart/api-core'
 import { TEST_PRODUCTS } from '../config/test-products.js'
 import { Router as ExpressRouter } from 'express'
 

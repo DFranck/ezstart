@@ -24,15 +24,9 @@ export interface AuditsData {
 }
 
 async function fetchAudits(): Promise<AuditsData> {
-  const response = await callApi<AuditsData>('/audits', {
-    query: { _t: String(Date.now()) },
+  return callApi<AuditsData>('/audits', {
+    query: { _t: Date.now() },
   })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch audits data')
-  }
-
-  return response.data
 }
 
 export function useMonitoringAudits() {

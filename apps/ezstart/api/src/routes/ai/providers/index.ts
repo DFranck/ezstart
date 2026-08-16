@@ -1,6 +1,11 @@
 /**
  * GET /api/ai/providers
  * List enabled AI providers (public, no auth required)
+ *
+ * GET /api/ai/providers/status
+ * Return current health/status of every registered provider (public). Used by
+ * the admin dashboard + public status page to surface degraded / auto-disabled
+ * providers.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -10,8 +15,8 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
-import { providerRegistry } from '@ezstart/ai-sdk'
+} from '@ezstart/api-core'
+import { providerRegistry } from '@ezstart/ai-sdk/server'
 
 export const providersRegistry = new OpenAPIRegistry()
 const router: import('express').Router = Router()
@@ -30,6 +35,23 @@ docRouter.get(
   },
   {
     summary: 'List enabled AI providers',
+    tags: ['AI Providers'],
+  }
+)
+
+docRouter.get(
+  '/status',
+  async (_req, res) => {
+    try {
+      const providers = providerRegistry.getStatus()
+      sendSuccess(res, { providers })
+    } catch (error) {
+      logger.error('[AI Providers] Status error:', error)
+      sendError(res, 'Failed to fetch provider status')
+    }
+  },
+  {
+    summary: 'Health status of all AI providers',
     tags: ['AI Providers'],
   }
 )

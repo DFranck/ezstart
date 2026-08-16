@@ -4,7 +4,7 @@ import { CompanyModel } from '../../models/company.js'
 import { toApiObject } from '../../utils/mongoose/to-api-object.js'
 import { AuthRequest } from '../../types/auth.js'
 import { logger } from '@ezstart/logger/server'
-import { sendSuccess, sendError } from '@ezstart/express-core'
+import { sendSuccess, sendError } from '@ezstart/api-core'
 
 export const getCompanies = async (req: AuthRequest, res: Response) => {
   try {

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { sendError } from '@ezstart/express-core'
+import { sendError } from '@ezstart/api-core'
 import { isAppAuthorizedForProvider } from '../services/provider-access.service.js'
 
 /**

@@ -11,7 +11,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { extractEsgPayload, validateEsgData } from '../../services/gemini.service.js'
 import {
   TextExtractionRequestSchema,

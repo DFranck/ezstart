@@ -6,9 +6,11 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -25,11 +27,13 @@ const deletePromoParamsSchema = z.object({
 })
 
 const deletePromoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    message: z.string(),
-  }),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z
+    .object({
+      message: z.string().describe('Success message'),
+    })
+    .describe('Response payload'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================
@@ -63,6 +67,16 @@ const deletePromoHandler = async (req: Request, res: Response) => {
 
     logger.info(`Promo soft-deleted: ${promo.code} for ${promo.appName}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'promo.deleted',
+      userId: req.userId,
+      metadata: {
+        promoId: String(promo._id),
+        code: promo.code,
+        appName: promo.appName,
+      },
+    })
+
     sendSuccess(res, promo)
   } catch (error) {
     logger.error('Delete promo error:', error instanceof Error ? error : String(error))
@@ -74,7 +88,7 @@ const deletePromoHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.delete('/promos/:id', authMiddleware, populateUserFromToken, deletePromoHandler, {
+docRouter.delete('/promos/:id', authJwtOrKey({ requireKeyScope: 'admin' }), deletePromoHandler, {
   summary: 'Delete a promo code (admin only)',
   tags: ['Promos'],
   responseSchema: deletePromoResponseSchema,

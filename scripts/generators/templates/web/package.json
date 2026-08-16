@@ -6,14 +6,13 @@
   "scripts": {
     "dev": "node src/scripts/dev-with-port.js",
     "dev:port": "next dev -p $PORT",
-    "build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
+    "build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk build && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
-    "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "deepmerge": "^4.3.1",
     "next": "^15.1.6",

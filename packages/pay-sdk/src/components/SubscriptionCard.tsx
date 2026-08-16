@@ -1,12 +1,18 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Icon, P } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  ConfirmActionDialog,
+  Icon,
+  P,
+} from '@ezstart/ui/components'
 import { useCallback, useState } from 'react'
-import { usePayContext } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
-import { ConfirmActionDialog } from './ConfirmActionDialog.js'
-import type { PaymentStatus } from '../types.js'
+import { useCancelSubscription } from '../react/hooks/useCancelSubscription.js'
+import { formatCurrency } from '../core/format-currency.js'
+import type { PaymentStatus } from '../core/types.js'
 
 export interface SubscriptionCardTexts {
   cancel?: string
@@ -56,7 +62,7 @@ export function SubscriptionCard({
   className,
   texts,
 }: SubscriptionCardProps) {
-  const { client } = usePayContext()
+  const cancelMutation = useCancelSubscription()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const t = {
@@ -98,16 +104,18 @@ export function SubscriptionCard({
       if (onCancel) {
         await onCancel(subscriptionId)
       } else {
-        await client.cancelSubscription(subscriptionId)
+        // Uses `useCancelSubscription` — on success the mutation invalidates
+        // the shared `SUBSCRIPTIONS_QUERY_KEY` cache, so `useSubscriptions`
+        // + `useSubscriptionStatus` re-fetch and the parent dashboard
+        // reflects the "canceling at period end" state automatically.
+        await cancelMutation.mutateAsync(subscriptionId)
       }
     } catch (err) {
-      logger.error(
-        'Failed to cancel subscription:',
-        err instanceof Error ? err.message : String(err)
-      )
+      // Re-throw so the surrounding ConfirmActionDialog can surface the
+      // error in its own UI (state='error' + toast). No need to log here.
       throw err
     }
-  }, [subscriptionId, onCancel, client])
+  }, [subscriptionId, onCancel, cancelMutation])
 
   return (
     <>

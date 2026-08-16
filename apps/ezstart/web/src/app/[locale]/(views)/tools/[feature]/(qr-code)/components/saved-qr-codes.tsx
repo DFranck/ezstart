@@ -16,7 +16,7 @@ import {
 } from '@ezstart/ui/components'
 import type { ColumnDef } from '@ezstart/ui/components'
 import { useAuthStore } from '@ezstart/auth-sdk'
-import { useRBAC } from '@ezstart/rbac'
+import { useRBAC } from '@ezstart/auth-sdk'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { useState, useMemo } from 'react'
 import { useQRCodes, useDeleteQRCode } from '../hooks/useQRCodes'

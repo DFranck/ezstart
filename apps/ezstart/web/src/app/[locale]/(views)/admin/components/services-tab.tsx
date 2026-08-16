@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import {
   Badge,
   Button,
@@ -66,17 +66,9 @@ const STATUS_TO_VARIANT: Record<ProviderHealth, BadgeProps['variant']> = {
 }
 
 async function fetchServices(refresh: boolean): Promise<ProviderStatusListResponse> {
-  const response = await callApi<ProviderStatusListResponse>(
-    `/admin/services${refresh ? '?refresh=true' : ''}`,
-    { appName: 'ezstart' }
-  )
-  if (!response.ok) {
-    throw new Error(response.error || parseApiError(response.data) || 'Failed to load services')
-  }
-  if (!response.data) {
-    throw new Error('Failed to load services: empty response')
-  }
-  return response.data
+  return apiCall<ProviderStatusListResponse>(`/admin/services${refresh ? '?refresh=true' : ''}`, {
+    appName: 'ezstart',
+  })
 }
 
 function formatNumber(n: number, unit: string): string {

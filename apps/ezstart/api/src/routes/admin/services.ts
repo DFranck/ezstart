@@ -14,7 +14,7 @@ import {
   sendSuccess,
   sendError,
   createRoleMiddleware,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 import { authMiddleware } from '../../middleware/auth.js'
@@ -31,30 +31,34 @@ const { requireAdmin } = createRoleMiddleware()
 // ========================================
 
 const usageMetricSchema = z.object({
-  label: z.string(),
-  current: z.number(),
-  limit: z.number().nullable(),
-  unit: z.string(),
-  percentage: z.number().optional(),
+  label: z.string().describe('Human-readable metric label (e.g. "Bandwidth", "Invocations")'),
+  current: z.number().describe('Current usage value'),
+  limit: z.number().nullable().describe('Plan limit (null when unlimited)'),
+  unit: z.string().describe('Unit of measurement (e.g. "GB", "req")'),
+  percentage: z.number().optional().describe('Usage as a percentage of the limit'),
 })
 
 const providerStatusSchema = z.object({
-  provider: z.enum(['vercel', 'railway', 'mongodb', 'stripe', 'resend', 'github']),
-  displayName: z.string(),
-  plan: z.string(),
-  monthlyCostEstimate: z.number(),
-  usage: z.array(usageMetricSchema),
-  status: z.enum(['healthy', 'warning', 'critical', 'unknown']),
-  statusMessage: z.string().optional(),
-  lastSync: z.string(),
-  dashboardUrl: z.string(),
-  error: z.string().optional(),
+  provider: z
+    .enum(['vercel', 'railway', 'mongodb', 'stripe', 'resend', 'github'])
+    .describe('Provider identifier'),
+  displayName: z.string().describe('Human-readable provider name'),
+  plan: z.string().describe('Current billing plan name'),
+  monthlyCostEstimate: z.number().describe('Estimated monthly cost in USD'),
+  usage: z.array(usageMetricSchema).describe('List of usage metrics for this provider'),
+  status: z
+    .enum(['healthy', 'warning', 'critical', 'unknown'])
+    .describe('Aggregated health status'),
+  statusMessage: z.string().optional().describe('Optional detail explaining the status'),
+  lastSync: z.string().describe('ISO timestamp of the last successful sync'),
+  dashboardUrl: z.string().describe('URL to the provider dashboard'),
+  error: z.string().optional().describe('Error message when the status is "unknown"'),
 })
 
 const providerStatusListSchema = z.object({
-  providers: z.array(providerStatusSchema),
-  cacheTtlSeconds: z.number(),
-  generatedAt: z.string(),
+  providers: z.array(providerStatusSchema).describe('List of provider statuses'),
+  cacheTtlSeconds: z.number().describe('Remaining cache TTL in seconds'),
+  generatedAt: z.string().describe('ISO timestamp when this response was generated'),
 })
 
 // ========================================

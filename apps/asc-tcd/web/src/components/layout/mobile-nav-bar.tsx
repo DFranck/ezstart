@@ -5,7 +5,7 @@ import { useClickOutside, useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { MobileNavMenu } from './mobile-nav-menu'
 export default function MobileNavbar() {

@@ -6,6 +6,55 @@ API centralisée pour la gestion des paiements, donations, abonnements et factur
 
 EZPay API est le service backend qui gère tous les types de paiements pour l'écosystème @ezstart. Il s'interface avec Stripe/PayPal et fournit une API REST standardisée.
 
+## 🔑 Bootstrap — API keys (dev / staging / prod)
+
+Chaque environnement (dev local, staging, production) doit être amorcé **une seule fois** pour obtenir les deux clés dont EZPay a besoin : sa propre publishable key côté web + une secret key S2S côté API pour parler à ezauth.
+
+Ordre obligatoire (ezauth d'abord, ezpay ensuite) :
+
+### 1. Seed ezauth (crée les Applications `ezauth` + `ezpay` + la self-key ezauth)
+
+```bash
+pnpm --filter api-ezauth seed:self-key
+```
+
+→ Copie la clé affichée dans `apps/ezauth/web/.env.local` :
+
+```env
+NEXT_PUBLIC_EZAUTH_KEY=ez_pk_live_...
+```
+
+Cette étape crée aussi l'entité `Application(slug="ezpay")` dans la DB ezauth — c'est cette Application qui sert de tenant source-of-truth pour toutes les clés ezpay.
+
+### 2. Génère `EZPAY_SERVER_EZAUTH_KEY` (S2S)
+
+Cette secret key permet à l'API ezpay de valider les `applicationId` auprès d'ezauth lors du `POST /api/keys`. Elle est créée une seule fois par un superadmin via le dashboard ezauth :
+
+1. Login superadmin sur `http://localhost:6111/en/developer`
+2. Sélectionner l'Application `ezpay`
+3. Create key : `type=secret`, `env=live`, `scope=admin`
+4. Copier la valeur (`ez_sk_live_...`) dans `apps/ezpay/api/.env.local` :
+
+```env
+EZPAY_SERVER_EZAUTH_KEY=ez_sk_live_...
+```
+
+### 3. Seed ezpay (crée la self-key ezpay pour son propre /api/keys)
+
+```bash
+pnpm --filter api-ezpay seed:self-key
+```
+
+→ Copie la clé affichée dans `apps/ezpay/web/.env.local` :
+
+```env
+NEXT_PUBLIC_EZPAY_KEY=ez_pk_live_...
+```
+
+Le script est **idempotent** : si une clé `createdBy='system-seed'` existe déjà pour `Application(slug="ezpay")` (active ou révoquée), le script est un no-op et affiche le prefix existant. Pour rotater, supprimer manuellement la row en DB puis rerun.
+
+Redémarrer les dev servers (`pnpm dev ez` ou `pnpm dev pay`) pour que les nouvelles env vars soient prises en compte.
+
 ## 🚀 Quick Start
 
 ### Development
@@ -208,7 +257,7 @@ apps/ezpay/api/
 
 ## 🛠️ Technologies
 
-- **Express.js** via `@ezstart/express-core`
+- **Express.js** via `@ezstart/api-core`
 - **MongoDB** via Mongoose
 - **Stripe** SDK v14
 - **TypeScript** with strict mode

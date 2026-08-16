@@ -4,7 +4,7 @@
  * Routes for adaptive health check scheduler status
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import statusRouter, { setScheduler as setSchedulerStatus } from './status.js'
 import serviceStateRouter, { setScheduler as setSchedulerServiceState } from './service-state.js'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'

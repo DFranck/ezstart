@@ -13,20 +13,16 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getHealthCheckModel } from '../../models/HealthCheck.js'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 
-const projectHistoryQuerySchema = z.object({
+// Note: limit max lowered from 1000 → 100 (canonical standard). For deeper
+// per-service history, paginate with multiple requests.
+const projectHistoryQuerySchema = PaginationQuerySchema.extend({
   hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
-  limit: z.coerce
-    .number()
-    .min(1)
-    .max(1000)
-    .default(50)
-    .describe('Max number of records per service'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip per service'),
 })
 
 export const router: ReturnType<typeof Router> = Router()
@@ -39,7 +35,7 @@ const getByProjectHandler = async (req: Request, res: Response) => {
       ? parsed.data
       : {
           hours: Math.min(Number(req.query.hours) || 24, 168),
-          limit: Math.min(Number(req.query.limit) || 50, 1000),
+          limit: Math.min(Number(req.query.limit) || 50, 100),
           offset: Math.max(Number(req.query.offset) || 0, 0),
         }
 

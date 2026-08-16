@@ -4,7 +4,7 @@
  * Routes for deployment configurations and status
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import listRouter, { registry as listRegistry } from './list.js'
 import getByIdRouter, { registry as getByIdRegistry } from './get-by-id.js'
 

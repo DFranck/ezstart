@@ -1,0 +1,31 @@
+{
+  "security": {
+    "title": "Security",
+    "lead": "We take the security of EZPay and the payment data we touch very seriously. This page describes how to report a vulnerability, what is in scope, and how we coordinate disclosure.",
+    "contactHeading": "Reporting a vulnerability",
+    "contactBody": "Please email security@ezstart.xyz with a clear description of the issue, the steps required to reproduce it, and any proof-of-concept material. We acknowledge new reports within two business days. A PGP key for encrypted reports will be published here once finalized.",
+    "scopeHeading": "Scope",
+    "scopeBody": "All production EZPay domains are in scope, including ezpay.ezstart.xyz and the api.ezpay.ezstart.xyz API. Out of scope: denial-of-service, social engineering, physical attacks, findings that require already-compromised credentials, and Stripe infrastructure (please report those directly to Stripe).",
+    "disclosureHeading": "Coordinated disclosure",
+    "disclosureBody": "We follow a coordinated disclosure model: please give us a reasonable window to investigate and ship a fix before going public. We are happy to credit researchers in our changelog when a fix ships, unless you prefer to remain anonymous.",
+    "txtLinkLabel": "View security.txt (RFC 9116)"
+  },
+  "refundPolicy": {
+    "title": "Refund Policy",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "lead": "We want you to be confident when paying through EZPay. This page summarizes how refunds work for both donations and subscriptions processed by our platform.",
+    "euRightHeading": "EU 14-day right of withdrawal",
+    "euRightBody": "Customers in the European Union benefit from a 14-day right of withdrawal under Directive 2011/83/EU on subscription services. You can request a full refund within 14 days of your initial paid subscription, no questions asked, unless you have explicitly waived this right by starting to consume the service.",
+    "eligibilityHeading": "Eligibility",
+    "eligibilityBody": "Subscription refunds are issued for unused time on a pro-rata basis after the 14-day window. One-time purchases delivering digital content are non-refundable once the content has been delivered. Donations are non-refundable by nature; if a donation was made in error, contact us within 7 days and we will review the request.",
+    "processHeading": "How refunds are processed",
+    "processBody": "Approved refunds are issued back to the original payment method through Stripe within 5 to 10 business days, depending on your card issuer. You will receive an email confirmation once the refund is initiated. Currency conversion fees applied by your bank are not reimbursed.",
+    "disputesHeading": "Disputes and chargebacks",
+    "disputesBody": "Before disputing a charge with your bank, please contact us so we can resolve the issue directly. Chargebacks incur additional fees from Stripe and may result in your account being suspended pending investigation."
+  },
+  "login": {
+    "title": "Sign in to EZPay",
+    "redirecting": "Redirecting you to the EZAuth single sign-on page…"
+  }
+}

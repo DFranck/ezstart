@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import healthRouter, { healthRegistries } from './health/index.js'
 import auditRouter, { auditRegistries } from './audit/index.js'
 import deploymentRouter, { deploymentRegistries } from './deployment/index.js'
@@ -18,6 +18,7 @@ import { appProvidersRegistries } from './ai/app-providers/index.js'
 import { globalProvidersRegistries } from './ai/global-providers/index.js'
 import qrCodesRouter, { qrCodeRegistries } from './qr-codes/index.js'
 import adminRouter, { adminRegistries } from './admin/index.js'
+import e2eTestsRouter, { e2eTestsRegistries } from './e2e-tests/index.js'
 
 const router = Router()
 
@@ -33,8 +34,11 @@ router.use('/activity', activityRouter)
 router.use('/performance', performanceRouter)
 router.use('/scheduler', schedulerRouter)
 router.use('/ai', aiRouter)
-router.use('/qr-codes', qrCodesRouter)
+// qr-codes child routers own their basePath via createRouterWithDoc(..., '/qr-codes')
+router.use(qrCodesRouter)
 router.use('/admin', adminRouter)
+// e2eTestsRouter children own '/e2e-tests' basePath via createRouterWithDoc
+router.use(e2eTestsRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -50,6 +54,7 @@ router.get('/', (_, res) => {
       metrics: '/api/metrics',
       history: '/api/history/:serviceId',
       projectHistory: '/api/history/project/:projectId',
+      historyAggregate: '/api/history/aggregate',
       activity: '/api/activity',
       activityErrors: '/api/activity/errors',
       activityStats: '/api/activity/stats',
@@ -66,6 +71,9 @@ router.get('/', (_, res) => {
       aiGlobalProviders: '/api/ai/global-providers',
       qrCodes: '/api/qr-codes',
       adminServices: '/api/admin/services',
+      e2eTests: '/api/e2e-tests',
+      e2eTestsStats: '/api/e2e-tests/stats/summary',
+      e2eTestsNeedsRerun: '/api/e2e-tests/needs-rerun',
       docs: '/api/docs',
     },
   })
@@ -85,6 +93,7 @@ export const registries = [
   ...globalProvidersRegistries,
   ...qrCodeRegistries,
   ...adminRegistries,
+  ...e2eTestsRegistries,
 ]
 
 // Re-export setScheduler for backward compatibility

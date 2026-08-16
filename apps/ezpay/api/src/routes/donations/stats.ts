@@ -7,7 +7,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -21,7 +21,7 @@ const docRouter = createRouterWithDoc(donationStatsRegistry, router)
 // ========================================
 
 const donationStatsQuerySchema = z.object({
-  projectId: z.string().optional().describe('Filter stats by project ID'),
+  projectId: z.string().optional().openapi({ description: 'Filter stats by project ID' }),
 })
 
 const donationStatsResponseSchema = z.object({
@@ -40,7 +40,7 @@ const donationStatsResponseSchema = z.object({
             .describe('Donation type breakdown'),
         })
         .describe('Breakdown by payment type'),
-      recent: z.array(z.any()).describe('Recent donations (last 5)'),
+      recent: z.array(z.record(z.unknown())).describe('Recent donations (last 5)'),
     })
     .describe('Donation statistics'),
 })

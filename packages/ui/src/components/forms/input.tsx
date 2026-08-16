@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils'
 import { radius as radiusTokens, paddingY } from '../../lib/design-system/tokens'
 import { formInputVariantConfig } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 
 /**
  * Input Component - Enhanced with Icon Support & Design Tokens
@@ -141,4 +142,11 @@ export { Input }
  * Legacy export for backward compatibility
  * @deprecated Use named export Input instead
  */
-export default Input
+const DeprecatedDefaultInput = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  useDeprecationWarning('Input default export', 'named export `Input` from @ezstart/ui/components')
+  return <Input ref={ref} {...props} />
+})
+
+DeprecatedDefaultInput.displayName = 'DeprecatedDefaultInput'
+
+export default DeprecatedDefaultInput

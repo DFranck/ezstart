@@ -21,25 +21,58 @@ function findMonorepoRoot(startDir = process.cwd()) {
   }
 }
 
+function pickEnvFileBasename() {
+  const deploy = process.env.DEPLOY_ENV
+  if (deploy === 'production') return '.env.production'
+  if (deploy === 'staging') return '.env.staging'
+  if (deploy === 'local') return '.env.local'
+  if (process.env.NODE_ENV === 'production') return '.env.production'
+  return '.env.local'
+}
+
 /**
- * Load root-level shared env BEFORE Next.js boots.
- * Must be called inside next.config.js (top-level, sync).
+ * Load a single dotenv file. When `override=true`, file values replace any
+ * existing process.env value; when `override=false`, existing wins (shell
+ * vars beat file vars).
+ */
+function loadFile(absPath, override) {
+  if (!existsSync(absPath)) return 0
+  // dotenv.config respects existing process.env by default; passing override
+  // emulates the same behaviour we want for per-app files.
+  const result = dotenv.config({ path: absPath, override: override === true })
+  return result.parsed ? Object.keys(result.parsed).length : 0
+}
+
+/**
+ * Load root-level shared env BEFORE Next.js boots, then load the app's
+ * own `apps/<app>/web/.env.{env}` to override per-app values.
  *
- * Next.js loads `apps/{app}/web/.env.local` automatically, so app-specific
- * overrides keep working natively. This wrapper only adds the root layer.
+ * Note: Next.js will ALSO auto-load `apps/<app>/web/.env.local` on its own,
+ * but doing it here too ensures the values are present in process.env before
+ * `next.config.js` runs — important for code that reads env in the config
+ * factory itself (e.g. PWA, withBundleAnalyzer).
  *
- * @param {string} [app] - optional app name (for logging)
+ * @param {string} [app] - app name for locating per-app file
  */
 export function loadSharedEnv(app) {
-  const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local'
+  const envFile = pickEnvFileBasename()
   const root = findMonorepoRoot()
-  const rootEnv = path.join(root, envFile)
 
-  if (existsSync(rootEnv)) {
-    dotenv.config({ path: rootEnv })
-    // eslint-disable-next-line no-console
-    console.log(`🔐 [next] Loaded shared env from ${rootEnv}${app ? ` (app: ${app})` : ''}`)
+  // 1. Root shared vars (no override — shell wins)
+  const rootEnv = path.join(root, envFile)
+  const rootCount = loadFile(rootEnv, false)
+
+  // 2. Per-app overrides
+  let appCount = 0
+  if (app) {
+    const appEnv = path.join(root, 'apps', app, 'web', envFile)
+    appCount = loadFile(appEnv, true)
   }
+
+  // eslint-disable-next-line no-console
+  console.log(
+    `🔐 [next] Loaded ${envFile}${app ? ` for ${app}/web` : ''}: root ${rootCount} vars, per-app ${appCount} vars`
+  )
 }
 
 /**

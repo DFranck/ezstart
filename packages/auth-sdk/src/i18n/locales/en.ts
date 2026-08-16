@@ -4,6 +4,11 @@
 
 export const en = {
   signUp: {
+    cardTitle: 'Create your account',
+    cardSubtitleWithApp: 'Create an account to access {app}',
+    cardSubtitle: 'Sign up to get started',
+    haveAccount: 'Already have an account?',
+    loginLink: 'Sign in',
     email: 'Email',
     emailPlaceholder: 'Enter your email',
     emailTaken: 'This email is already taken',
@@ -16,13 +21,14 @@ export const en = {
     lastNamePlaceholder: 'Last name',
     password: 'Password',
     passwordPlaceholder: 'Choose a password',
-    passwordHint: 'At least 8 characters with a mix of letters, numbers, and symbols.',
+    passwordHint: 'At least 12 characters with a mix of letters, numbers, and symbols.',
     confirmPassword: 'Confirm Password',
     confirmPasswordPlaceholder: 'Confirm your password',
     passwordMismatch: 'Passwords do not match',
     submit: 'Sign Up',
     submitting: 'Creating account...',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
     checkEmail: 'Check your email',
     checkEmailDescription:
       'We sent you a verification email. Please click the link in the email to verify your account.',
@@ -40,8 +46,20 @@ export const en = {
     promoCodeChecking: 'Checking...',
     continueWithGoogle: 'Continue with Google',
     orContinueWith: 'Or continue with',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   signIn: {
+    cardTitle: 'Sign in to your account',
+    cardSubtitleWithApp: 'Sign in to access {app}',
+    cardSubtitle: 'Welcome back',
+    noAccount: "Don't have an account?",
+    registerLink: 'Sign up',
+    keyInvalid:
+      'The publishable key in this URL is invalid. Please check the link or contact support.',
+    keyRateLimited: 'Too many attempts. Retrying in {seconds} seconds...',
+    keyUnavailable: 'Authentication service is temporarily unavailable. Please try again shortly.',
+    loading: 'Loading...',
     emailOrUsername: 'Email or Username',
     emailOrUsernamePlaceholder: 'Enter your email or username',
     password: 'Password',
@@ -53,6 +71,7 @@ export const en = {
     minLength: 'Minimum {min} characters',
     noRedirectUri: 'No redirect URI configured',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
     twoFactorPrompt: 'Enter the 6-digit code from your authenticator app',
     twoFactorCodePlaceholder: '000000',
     twoFactorVerify: 'Verify',
@@ -60,8 +79,13 @@ export const en = {
     twoFactorBack: 'Back',
     continueWithGoogle: 'Continue with Google',
     orContinueWith: 'Or continue with',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   forgotPassword: {
+    cardTitle: 'Forgot your password?',
+    cardSubtitle: 'Enter your email and we will send you a reset link.',
+    link: 'Forgot password?',
     email: 'Email',
     emailPlaceholder: 'Enter your email address',
     submit: 'Send Reset Link',
@@ -71,8 +95,12 @@ export const en = {
     success: 'If an account with that email exists, we sent a password reset link.',
     backToLogin: 'Back to login',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
   },
   resetPassword: {
+    cardTitle: 'Reset your password',
+    cardSubtitle: 'Choose a new password for your account.',
+    loading: 'Loading...',
     newPassword: 'New password',
     newPasswordPlaceholder: 'Enter your new password',
     confirmPassword: 'Confirm password',
@@ -87,6 +115,7 @@ export const en = {
     tryAgain: 'Try again',
     backToLogin: 'Back to login',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
     passwordWeak: 'Weak',
     passwordFair: 'Fair',
     passwordGood: 'Good',
@@ -95,6 +124,25 @@ export const en = {
     tokenExpired: 'This reset link has expired or is invalid.',
     requestNewLink: 'Request a new link',
     errorInvalidToken: 'This reset link is invalid or expired.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+  },
+  verifyEmail: {
+    cardTitle: 'Verify your email',
+    cardSubtitle: 'Confirming your email address...',
+    verifying: 'Verifying your email...',
+    verifyingDescription: 'Please wait while we verify your email address.',
+    success: 'Email verified successfully!',
+    successDescription: 'You can now sign in to your account.',
+    alreadyVerified: 'Email already verified',
+    alreadyVerifiedDescription: 'Your email is already verified. You can sign in.',
+    invalid: 'Invalid or expired link',
+    invalidDescription:
+      'This verification link is invalid or has expired. Please request a new one.',
+    error: 'Verification failed',
+    errorDescription: 'An error occurred while verifying your email. Please try again.',
+    backToLogin: 'Back to login',
+    tryAgain: 'Request a new link',
   },
   quickSignup: {
     username: 'Username',
@@ -114,5 +162,93 @@ export const en = {
     promoCodeInvalid: 'Invalid promo code',
     promoCodeRateLimited: 'Please wait a moment and try again',
     promoCodeChecking: 'Checking...',
+  },
+  // ─── Two-factor authentication ────────────────────────────────────────
+  // Combines the keys consumed by `<TwoFactorPrompt>` (login challenge step)
+  // and `<TwoFactorSettings>` (setup / disable flow). Both components fall
+  // back to `getAuthTexts(locale, 'twoFactor')` and merge a partial
+  // `texts` prop on top, so partial overrides keep working unchanged.
+  twoFactor: {
+    // Prompt (login challenge)
+    prompt: 'Enter the code from your authenticator app',
+    codePlaceholder: '000000',
+    backupCodeHint: 'Or enter an 8-character backup code',
+    verify: 'Verify',
+    verifying: 'Verifying...',
+    back: 'Back to login',
+    // Settings — status
+    enabled: 'Enabled',
+    disabled: 'Disabled',
+    enableDescription: 'Protect your account with two-factor authentication.',
+    disableDescription: 'Two-factor authentication is currently active.',
+    enableButton: 'Enable 2FA',
+    disableButton: 'Disable 2FA',
+    // Settings — setup flow
+    setupTitle: 'Set up two-factor authentication',
+    setupDescription: 'Scan the QR code with your authenticator app.',
+    scanQR: 'Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)',
+    manualEntry: 'Or enter this code manually:',
+    enterCode: 'Enter the 6-digit code from your authenticator app',
+    settingsVerify: 'Verify & Enable',
+    cancel: 'Cancel',
+    // Settings — backup codes
+    backupTitle: 'Backup Codes',
+    backupDescription: 'Save these backup codes in a safe place. Each code can only be used once.',
+    copyBackup: 'Copy codes',
+    downloadBackup: 'Download codes',
+    confirmBackup: "I've saved my backup codes",
+    done: 'Done',
+    // Settings — disable flow
+    disableTitle: 'Disable two-factor authentication',
+    disableConfirm: 'Enter your current 2FA code to disable two-factor authentication',
+    disablePasswordLabel: 'Password',
+    disablePasswordPlaceholder: 'Enter your password',
+    disablePasswordHint: 'Confirm with your account password (defense in depth)',
+    // Errors
+    fallbackError: 'An error occurred. Please try again.',
+    invalidCode: 'Invalid code. Please try again.',
+    /**
+     * Shown when the API returns HTTP 423 with `code: 'TWO_FACTOR_LOCKED'`
+     * after too many wrong code attempts. `{minutes}` is interpolated client-
+     * side from the `retryAfterSeconds` field of the structured response.
+     */
+    lockedError: 'Too many failed verification attempts. Try again in {minutes} minute(s).',
+  },
+  userMenu: {
+    // Sign-in / sign-out
+    signIn: 'Sign in',
+    signOut: 'Sign out',
+    signingOut: 'Signing out…',
+    signOutSuccess: 'You have been signed out',
+    signOutError: 'Failed to sign out — please try again',
+    signOutAllDevices: 'Sign out from all devices',
+    signOutAllSuccess: 'Signed out from all devices',
+    signOutAllError: 'Failed to sign out from all devices',
+    // Account / management
+    manageAccount: 'Manage account',
+    managePlan: 'Manage plan',
+    // Identity card badges (V2)
+    platformBadge: 'Platform',
+    adminBadge: 'Admin',
+    emailVerified: 'Verified',
+    emailUnverified: 'Unverified',
+    resendVerification: 'Resend verification email',
+    verificationSent: 'Verification email sent. Check your inbox.',
+    verifyError: 'Failed to send verification email',
+    // Theme switcher
+    themeLabel: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'System',
+    // Notifications (V2)
+    notifications: 'Notifications',
+    notificationsBadgeLabel: 'unread notifications',
+    // Help & resources (V2)
+    helpAndResources: 'Help & resources',
+    helpCenter: 'Help center',
+    keyboardShortcuts: 'Keyboard shortcuts',
+    keyboardShortcutsHint: '⌘K',
+    status: 'Status',
+    changelog: "What's new",
   },
 } as const

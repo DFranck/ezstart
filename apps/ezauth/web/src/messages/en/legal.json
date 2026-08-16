@@ -1,0 +1,96 @@
+{
+  "about": {
+    "title": "About EZAuth",
+    "leadHeading": "Centralized authentication for modern applications",
+    "leadBody": "EZAuth is the identity service powering EZStart applications. We provide secure single sign-on, API key management, OAuth2, multi-factor authentication, and role-based access control through one developer-friendly platform.",
+    "missionHeading": "Our mission",
+    "missionBody": "We believe that authentication should be effortless to integrate, transparent for end users, and never an afterthought for security. EZAuth lets product teams focus on their domain logic while we handle the identity layer.",
+    "techHeading": "Technology",
+    "techBody": "EZAuth is built on TypeScript, Next.js, Express, and MongoDB. The full stack is open-source and developed in the @ezstart monorepo on GitHub. SDKs are published to npm so any project can adopt EZAuth in minutes.",
+    "ctaHeading": "Get started",
+    "ctaBody": "Read the documentation or create an account to start integrating EZAuth today.",
+    "ctaDocs": "Read the docs",
+    "ctaContact": "Contact us"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "April 25, 2026",
+    "summaryHeading": "Summary",
+    "summaryBody": "EZAuth respects your privacy. Our full privacy policy is being finalized with our legal team and will be published before the public launch.",
+    "scopeHeading": "What we collect",
+    "scopeBody": "We collect only the data required to authenticate you and operate the service: email address, hashed password, OAuth provider identifiers, session metadata, and minimal audit logs. We never sell personal data.",
+    "contactHeading": "Questions?",
+    "contactBody": "Reach out to us if you need details about how your data is processed.",
+    "contactCta": "Contact us"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "April 25, 2026",
+    "summaryHeading": "Summary",
+    "summaryBody": "EZAuth is provided on an as-is basis while we finalize our terms with our legal team. The full terms of service will be published before the public launch.",
+    "useHeading": "Acceptable use",
+    "useBody": "By using EZAuth you agree to follow applicable laws, to not abuse the service, and to keep your credentials secure. We reserve the right to suspend accounts that violate these principles.",
+    "contactHeading": "Questions?",
+    "contactBody": "Reach out to us with any question about these terms.",
+    "contactCta": "Contact us"
+  },
+  "blog": {
+    "title": "Blog",
+    "leadHeading": "Insights, releases, and engineering notes",
+    "leadBody": "Our blog is launching soon. We will share product updates, technical deep-dives, and security best practices around authentication and developer experience.",
+    "subscribeHeading": "Stay in the loop",
+    "subscribeBody": "Follow the project on GitHub or contact us to be notified when the blog goes live.",
+    "subscribeCta": "View on GitHub"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "subtitle": "Notable changes to EZAuth, in reverse chronological order.",
+    "githubLabel": "Full release history",
+    "githubCta": "View releases on GitHub",
+    "entries": {
+      "v01Title": "v0.1.0 — Initial public preview",
+      "v01Date": "April 25, 2026",
+      "v01Body": "First public preview of EZAuth. Includes email and OAuth sign-in, API key management, role-based access control, multi-tenant Applications, and white-label theming."
+    }
+  },
+  "contact": {
+    "title": "Contact us",
+    "leadBody": "Need help integrating EZAuth, reporting an issue, or discussing your use case? We typically reply within one business day.",
+    "emailLabel": "Email",
+    "emailCta": "Send us an email",
+    "githubLabel": "GitHub",
+    "githubCta": "Open an issue"
+  },
+  "refundPolicy": {
+    "title": "Refund Policy",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "lead": "We want you to be happy with EZAuth. This page summarizes how refunds work and what to expect when you request one.",
+    "euRightHeading": "EU 14-day right of withdrawal",
+    "euRightBody": "Customers in the European Union benefit from a 14-day right of withdrawal under Directive 2011/83/EU. You can request a full refund within 14 days of your initial paid subscription, no questions asked, unless you have explicitly waived this right by starting to consume the service.",
+    "eligibilityHeading": "Eligibility",
+    "eligibilityBody": "Refunds are issued for unused subscription time on a pro-rata basis after the 14-day window. Usage-based charges (API calls, additional seats) are non-refundable once consumed. Free trials never produce a charge and therefore do not require a refund.",
+    "processHeading": "How refunds are processed",
+    "processBody": "Approved refunds are issued back to the original payment method through Stripe within 5 to 10 business days, depending on your card issuer. You will receive an email confirmation once the refund is initiated. Currency conversion fees applied by your bank are not reimbursed.",
+    "contactHeading": "Request a refund",
+    "contactBody": "Contact us with your account email and the invoice number you would like refunded. We aim to reply within one business day.",
+    "contactCta": "Contact us"
+  },
+  "legalNotices": {
+    "title": "Legal Notices",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "lead": "Information required by French and European Union law for any operator of an online service (loi pour la confiance dans l'économie numérique, Directive 2000/31/EC).",
+    "publisherHeading": "Publisher",
+    "publisherBody": "EZStart LLC, a limited liability company registered in Wyoming (United States). Director of publication: Franck Dufournet. Contact: support@ezstart.xyz.",
+    "hostingHeading": "Hosting",
+    "hostingBody": "The EZAuth web application is hosted by Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, United States. The EZAuth API is hosted by Railway Corp., 2261 Market Street #4382, San Francisco, CA 94114, United States.",
+    "ipHeading": "Intellectual property",
+    "ipBody": "The EZAuth source code is published under the MIT license in the @ezstart monorepo on GitHub. Trademarks, logos, and brand assets remain the property of EZStart LLC. Any reproduction without prior written authorization is forbidden.",
+    "contactHeading": "Contact",
+    "contactBody": "For any question regarding these legal notices, our terms of service, or your personal data, reach out via the contact form below.",
+    "contactCta": "Contact us"
+  }
+}

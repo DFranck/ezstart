@@ -3,12 +3,25 @@
  *
  * Usage:
  *   node scripts/generators/extract-app.js --name gacha-analyzer --output ../extracted/gacha-analyzer
+ *   node scripts/generators/extract-app.js green-pulse /tmp/green-pulse-standalone   # positional shorthand
+ *   node scripts/generators/extract-app.js --help
+ *
+ * The standalone project is self-contained: env vars referenced via
+ * `process.env.<NAME>` in the app + transitive packages are extracted from
+ * the monorepo's root `.env.local` + per-app `.env.local` files into a fresh
+ * `.env.local` (with values) and `.env.example` (with empty placeholders).
  */
 
 const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 const { ROOT_DIR, APPS_DIR, appExists } = require('./lib/utils')
+const {
+  collectEnvVarNames,
+  parseEnvFile,
+  mergeEnvSources,
+  generateEnvFiles,
+} = require('./lib/env-handler')
 
 const PACKAGES_DIR = path.join(ROOT_DIR, 'packages')
 
@@ -16,22 +29,68 @@ const PACKAGES_DIR = path.join(ROOT_DIR, 'packages')
 // CLI args
 // ---------------------------------------------------------------------------
 
+function printHelp() {
+  console.info(`
+extract-app — extract a monorepo app into a self-contained standalone project
+
+Usage:
+  node scripts/generators/extract-app.js --name <app> --output <dir> [flags]
+  node scripts/generators/extract-app.js <app> <dir> [flags]
+
+Flags:
+  --name <app>      App name under apps/ (e.g. green-pulse)
+  --output <dir>    Output directory (must NOT exist)
+  --dry-run         Print plan without writing files
+  --test            After extraction, run pnpm install + pnpm build
+  --help, -h        Show this help
+
+Behavior:
+  - Copies app sub-projects (web, api, types) to the output root
+  - Copies all transitive @ezstart/* package dependencies into packages/
+  - Generates root package.json, tsconfig.json, pnpm-workspace.yaml, README.md
+  - Generates self-contained .env.local + .env.example by grepping
+    process.env.<NAME> usages and resolving against root + per-app .env.local
+`)
+}
+
 function parseArgs() {
   const args = process.argv.slice(2)
+
+  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+    printHelp()
+    process.exit(0)
+  }
+
   let name = null
   let output = null
+  let dryRun = false
 
+  // Flag pairs
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--name' && args[i + 1]) name = args[i + 1]
-    if (args[i] === '--output' && args[i + 1]) output = args[i + 1]
+    if (args[i] === '--name' && args[i + 1]) {
+      name = args[i + 1]
+      i++
+    } else if (args[i] === '--output' && args[i + 1]) {
+      output = args[i + 1]
+      i++
+    } else if (args[i] === '--dry-run') {
+      dryRun = true
+    } else if (args[i] === '--test') {
+      // handled in main()
+    } else if (!args[i].startsWith('--')) {
+      // Positional: first = name, second = output
+      if (!name) name = args[i]
+      else if (!output) output = args[i]
+    }
   }
 
   if (!name || !output) {
-    console.error('Usage: node extract-app.js --name <app-name> --output <dir>')
+    console.error('Error: missing required args')
+    printHelp()
     process.exit(1)
   }
 
-  return { name, output: path.resolve(output) }
+  return { name, output: path.resolve(output), dryRun }
 }
 
 // ---------------------------------------------------------------------------
@@ -99,6 +158,19 @@ function collectPackageDeps(appName) {
 // Copy helpers
 // ---------------------------------------------------------------------------
 
+const COPY_SKIP = new Set([
+  'node_modules',
+  '.next',
+  'dist',
+  '.turbo',
+  '.env',
+  '.env.local',
+  '.env.staging',
+  '.env.production',
+  '.env.test',
+  'tsconfig.tsbuildinfo',
+])
+
 function copyDirSync(src, dest) {
   fs.mkdirSync(dest, { recursive: true })
   const entries = fs.readdirSync(src, { withFileTypes: true })
@@ -106,10 +178,7 @@ function copyDirSync(src, dest) {
     const srcPath = path.join(src, entry.name)
     const destPath = path.join(dest, entry.name)
 
-    // Skip node_modules, .next, dist, .turbo, .env.local
-    if (['node_modules', '.next', 'dist', '.turbo', '.env.local', '.env'].includes(entry.name)) {
-      continue
-    }
+    if (COPY_SKIP.has(entry.name)) continue
 
     if (entry.isDirectory()) {
       copyDirSync(srcPath, destPath)
@@ -262,7 +331,7 @@ function generateReadme(appName, subProjects, packageFolders) {
 // ---------------------------------------------------------------------------
 
 function main() {
-  const { name, output } = parseArgs()
+  const { name, output, dryRun } = parseArgs()
 
   // Validate app exists
   if (!appExists(name)) {
@@ -272,7 +341,7 @@ function main() {
   }
 
   // Validate output does not exist
-  if (fs.existsSync(output)) {
+  if (!dryRun && fs.existsSync(output)) {
     console.error(`Error: Output directory already exists: ${output}`)
     console.error('Remove it first or choose a different path.')
     process.exit(1)
@@ -281,8 +350,8 @@ function main() {
   const appDir = path.join(APPS_DIR, name)
   const subProjects = detectSubProjects(appDir)
 
-  console.log(`\nExtracting app "${name}" to ${output}\n`)
-  console.log(`Sub-projects: ${subProjects.join(', ')}`)
+  console.info(`\nExtracting app "${name}" to ${output}${dryRun ? ' (DRY RUN)' : ''}\n`)
+  console.info(`Sub-projects: ${subProjects.join(', ')}`)
 
   // 1. Resolve dependency tree
   const packageDeps = collectPackageDeps(name)
@@ -290,7 +359,12 @@ function main() {
   packageDeps.add('typescript-config')
   packageDeps.add('eslint-config')
 
-  console.log(`Required packages (${packageDeps.size}): ${[...packageDeps].sort().join(', ')}\n`)
+  console.info(`Required packages (${packageDeps.size}): ${[...packageDeps].sort().join(', ')}\n`)
+
+  if (dryRun) {
+    console.info('Dry run complete — no files written.')
+    return
+  }
 
   // 2. Create output directory
   fs.mkdirSync(output, { recursive: true })
@@ -313,7 +387,7 @@ function main() {
   for (const sub of subProjects) {
     const src = path.join(appDir, sub)
     const dest = path.join(output, sub)
-    console.log(`  Copying apps/${name}/${sub}/ -> ${sub}/`)
+    console.info(`  Copying apps/${name}/${sub}/ -> ${sub}/`)
     copyDirSync(src, dest)
   }
 
@@ -324,7 +398,7 @@ function main() {
     const src = path.join(PACKAGES_DIR, folder)
     const dest = path.join(pkgOutDir, folder)
     if (fs.existsSync(src)) {
-      console.log(`  Copying packages/${folder}/`)
+      console.info(`  Copying packages/${folder}/`)
       copyDirSync(src, dest)
     } else {
       console.warn(`  Warning: packages/${folder} not found, skipping`)
@@ -335,59 +409,118 @@ function main() {
   const rootConfigs = ['prettier.config.js', 'turbo.json', '.gitignore']
   for (const file of rootConfigs) {
     if (copyFileIfExists(path.join(ROOT_DIR, file), path.join(output, file))) {
-      console.log(`  Copying ${file}`)
+      console.info(`  Copying ${file}`)
     }
   }
 
   // 6. Generate pnpm-workspace.yaml
   const wsYaml = generateWorkspaceYaml(subProjects)
   fs.writeFileSync(path.join(output, 'pnpm-workspace.yaml'), wsYaml)
-  console.log('  Generated pnpm-workspace.yaml')
+  console.info('  Generated pnpm-workspace.yaml')
 
   // 7. Generate root package.json
   const rootPkg = generateRootPackageJson(name, subProjects)
   fs.writeFileSync(path.join(output, 'package.json'), rootPkg)
-  console.log('  Generated package.json')
+  console.info('  Generated package.json')
 
   // 8. Generate root tsconfig.json
   const rootTsconfig = generateRootTsconfig(name, subProjects, packageDeps)
   fs.writeFileSync(path.join(output, 'tsconfig.json'), rootTsconfig)
-  console.log('  Generated tsconfig.json')
+  console.info('  Generated tsconfig.json')
 
   // 9. Generate README.md
   const readme = generateReadme(name, subProjects, packageDeps)
   fs.writeFileSync(path.join(output, 'README.md'), readme)
-  console.log('  Generated README.md')
+  console.info('  Generated README.md')
+
+  // 10. Generate self-contained env files (.env.local + .env.example)
+  const envResult = extractEnvFiles({ name, output, appDir, packageDeps })
+  console.info(
+    `  Generated .env.local + .env.example (${envResult.resolved.length} resolved, ${envResult.missing.length} missing)`
+  )
+  if (envResult.missing.length > 0) {
+    console.warn(`    Missing vars (set manually in .env.local): ${envResult.missing.join(', ')}`)
+  }
 
   // Summary
   countCopied(output)
-  console.log('\n========================================')
-  console.log('  Extraction complete!')
-  console.log(`  Output: ${output}`)
-  console.log(`  Dirs:  ${summary.dirs}`)
-  console.log(`  Files: ${summary.files}`)
-  console.log(`  Packages: ${[...packageDeps].sort().join(', ')}`)
-  console.log('========================================\n')
-  console.log('Next steps:')
-  console.log('  cd ' + output)
-  console.log('  pnpm install')
-  console.log('  pnpm dev')
-  console.log('')
+  console.info('\n========================================')
+  console.info('  Extraction complete!')
+  console.info(`  Output: ${output}`)
+  console.info(`  Dirs:  ${summary.dirs}`)
+  console.info(`  Files: ${summary.files}`)
+  console.info(`  Packages: ${[...packageDeps].sort().join(', ')}`)
+  console.info(
+    `  Env vars: ${envResult.resolved.length} resolved, ${envResult.missing.length} missing`
+  )
+  console.info('========================================\n')
+  console.info('Next steps:')
+  console.info('  cd ' + output)
+  console.info('  pnpm install')
+  console.info('  pnpm dev')
+  console.info('')
 
   // Optional --test flag: verify extraction by running install + build
   if (process.argv.includes('--test')) {
-    console.log('Running post-extraction test...\n')
+    console.info('Running post-extraction test...\n')
     try {
-      console.log('  pnpm install...')
+      console.info('  pnpm install...')
       execSync('pnpm install', { cwd: output, stdio: 'inherit' })
-      console.log('\n  pnpm build...')
+      console.info('\n  pnpm build...')
       execSync('pnpm build', { cwd: output, stdio: 'inherit' })
-      console.log('\n✅ Extraction test passed!')
+      console.info('\n[OK] Extraction test passed!')
     } catch {
-      console.error('\n❌ Extraction test failed!')
+      console.error('\n[FAIL] Extraction test failed!')
       process.exit(1)
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Env extraction
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a self-contained `.env.local` + `.env.example` for the standalone repo.
+ *
+ * Strategy:
+ *   1. Grep `process.env.<NAME>` across:
+ *      - apps/<name>/{web,api,types}/src
+ *      - every transitive package's src/ (so we catch vars consumed indirectly,
+ *        e.g. JWT_SECRET via @ezstart/api-core)
+ *   2. Read root .env.local + per-app .env.local (api + web layers)
+ *   3. Merge with per-app override > root, write .env.local with values
+ *   4. Write .env.example with empty values for the same key set
+ *
+ * @param {{ name: string, output: string, appDir: string, packageDeps: Set<string> }} args
+ * @returns {{ resolved: string[], missing: string[] }}
+ */
+function extractEnvFiles({ name, output, appDir, packageDeps }) {
+  // 1. Build the set of source roots to scan
+  const sourceRoots = []
+  for (const sub of ['web', 'api', 'types']) {
+    const sub_src = path.join(appDir, sub, 'src')
+    if (fs.existsSync(sub_src)) sourceRoots.push(sub_src)
+    // Also include config files at app sub root (next.config.js etc.)
+    if (fs.existsSync(path.join(appDir, sub))) sourceRoots.push(path.join(appDir, sub))
+  }
+  for (const folder of packageDeps) {
+    const pkgSrc = path.join(PACKAGES_DIR, folder, 'src')
+    if (fs.existsSync(pkgSrc)) sourceRoots.push(pkgSrc)
+  }
+
+  const usedNames = collectEnvVarNames(sourceRoots)
+
+  // 2. Load env sources (root + per-app)
+  const rootEnv = parseEnvFile(path.join(ROOT_DIR, '.env.local'))
+  const apiEnv = parseEnvFile(path.join(appDir, 'api', '.env.local'))
+  const webEnv = parseEnvFile(path.join(appDir, 'web', '.env.local'))
+  const typesEnv = parseEnvFile(path.join(appDir, 'types', '.env.local'))
+  const merged = mergeEnvSources(rootEnv, [apiEnv, webEnv, typesEnv])
+
+  // 3. Generate files
+  const header = `# ${name}-standalone — environment configuration\n# This standalone repo has NO root .env fallback. All vars must live here.`
+  return generateEnvFiles(output, usedNames, merged, { header })
 }
 
 main()

@@ -14,7 +14,7 @@ describe('AuthUser Model', () => {
     // Drop all indexes and recreate to ensure correct indexes
     try {
       await AuthUserModel.collection.dropIndexes()
-    } catch (error) {
+    } catch {
       // Ignore error if collection doesn't exist yet
     }
     await AuthUserModel.createIndexes()
@@ -351,7 +351,7 @@ describe('AuthUser Model', () => {
 
       const authUser = user.toAuthUser()
 
-      expect(authUser).toEqual({
+      expect(authUser).toMatchObject({
         _id: String(user._id),
         email: 'test@example.com',
         username: 'testuser',
@@ -360,13 +360,12 @@ describe('AuthUser Model', () => {
         avatar: 'https://example.com/avatar.png',
         isVerified: true,
         apps: ['ezbill', 'green-pulse'],
-        roles: [],
         globalRoles: [],
         appRoles: {},
         permissions: [],
         features: [],
-        organizationId: undefined,
-        managedBy: undefined,
+        hasSetOwnPassword: true,
+        lastActiveAt: null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       })

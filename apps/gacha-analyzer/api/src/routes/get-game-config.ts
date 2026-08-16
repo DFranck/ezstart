@@ -4,7 +4,8 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, findOne, findMany } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
+import { findOne, findMany } from '../utils/mongoose-query.js'
 import type { Router as ExpressRouter } from 'express'
 import { getGameConfigModel } from '../models/game-config.js'
 

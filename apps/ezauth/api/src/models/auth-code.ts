@@ -1,17 +1,32 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
-interface AuthCodeDocument extends Document {
+export interface AuthCodeDocument extends Document {
   code: string
   userId: string
   app: string
   type: 'auth' | 'password-reset' | 'email-verification' | 'sso-handoff'
   redirectUri?: string
+  /**
+   * PKCE (RFC 7636 / OAuth 2.1) — when the client committed to a PKCE flow,
+   * this stores `BASE64URL(SHA256(code_verifier))`. The /token exchange then
+   * REQUIRES a matching `code_verifier`. Absent ⇒ legacy (no-PKCE) code that
+   * exchanges without a verifier (magic-link, sso-handoff, 2FA, legacy login).
+   */
+  codeChallenge?: string
+  /** PKCE method — only `'S256'` is ever stored (plain is rejected upstream). */
+  codeChallengeMethod?: 'S256'
   expiresAt: Date
   isUsed: boolean
   consumedAt?: Date
   issuedFromIp?: string
   issuedUa?: string
+  /**
+   * Stripe-pattern test/live partition. SSO handoff codes issued via a test
+   * key cannot be redeemed for a live session and vice-versa.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -50,6 +65,16 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     redirectUri: {
       type: String,
     },
+    // PKCE (RFC 7636) — stored only when the client opted into PKCE. The
+    // exchange binds `BASE64URL(SHA256(code_verifier))` against this value
+    // with a timing-safe compare. See `auth.service.ts` exchangeCodeForToken.
+    codeChallenge: {
+      type: String,
+    },
+    codeChallengeMethod: {
+      type: String,
+      enum: ['S256'],
+    },
     expiresAt: {
       type: Date,
       required: true,
@@ -68,6 +93,12 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     issuedUa: {
       type: String,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -78,6 +109,9 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
 
 // Auto-expire codes
 authCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+authCodeSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get AuthCode model attached to shared connection

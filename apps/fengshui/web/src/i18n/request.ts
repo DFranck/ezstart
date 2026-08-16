@@ -11,12 +11,13 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [common, baguaBase, baguaStars] = await Promise.all([
+  const [common, baguaBase, baguaStars, status] = await Promise.all([
     // Main UI translations
     import(`../messages/${locale}/index.json`),
     // Bagua configuration
     import(`../messages/${locale}/base.json`),
     import(`../messages/${locale}/stars.json`),
+    import(`../messages/${locale}/status.json`),
   ])
 
   return {
@@ -26,6 +27,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       {
         bagua: merge(baguaBase.default, { stars: baguaStars.default }),
       },
+      status.default,
     ]),
   }
 })

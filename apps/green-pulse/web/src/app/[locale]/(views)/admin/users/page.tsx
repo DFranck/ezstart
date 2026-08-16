@@ -11,7 +11,13 @@ export default function AdminUsersPage() {
     <>
       <H1 className="mb-2">{t('users.title')}</H1>
       <P className="text-muted-foreground mb-6">{t('users.description')}</P>
-      <AuthAdminDashboard appName="green-pulse" />
+      {/*
+        AuthAdminDashboard is auto-scoped server-side via the JWT (superadmin
+        sees all tenants, app-admin sees owned apps, user sees their account).
+        The `appName` prop has been dropped — the API derives scope from the
+        bearer token instead of accepting a client-provided value.
+      */}
+      <AuthAdminDashboard />
     </>
   )
 }

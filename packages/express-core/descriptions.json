@@ -1,7 +1,0 @@
-{
-  "controller-factory": "Factory helpers to generate standard CRUD controllers",
-  "infra": "Infrastructure utilities (MongoDB connection, app bootstrap, server start)",
-  "middlewares": "Express middlewares for request validation (params, query, body)",
-  "openapi": "Helpers for integrating Zod schemas with Swagger/OpenAPI",
-  "types": "Augmented Express types and shared TypeScript definitions"
-}

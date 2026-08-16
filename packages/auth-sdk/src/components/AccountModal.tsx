@@ -1,74 +1,30 @@
 'use client'
 
 import {
-  Badge,
   Button,
   Div,
   H3,
   Icon,
-  Input,
-  Label,
   Modal,
-  P,
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  Span,
 } from '@ezstart/ui/components'
+import { useDeprecationWarning } from '@ezstart/ui/hooks'
 import { ImageCropper } from '@ezstart/capture-sdk'
-import { getWebUrl } from '@ezstart/config'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useAuth, useAuthContext } from '../provider.js'
-import { useAuthStore } from '../store.js'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
-import { UserAvatar } from './UserAvatar.js'
+import { useAuth } from '../react/hooks.js'
+import { useAuthContext, useAuthStoreApi } from '../react/auth-provider.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
+import { AccountProfileSection } from './account/AccountProfileSection.js'
+import { AccountSettingsSection } from './account/AccountSettingsSection.js'
+import { type AccountModalTexts, type AccountTab, DEFAULT_ACCOUNT_TEXTS } from './account/types.js'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-export interface AccountModalTexts {
-  title: string
-  profileTab: string
-  settingsTab: string
-  updateProfile: string
-  emailSection: string
-  primary: string
-  connectedAccounts: string
-  connectAccount: string
-  themeSection: string
-  themeLight: string
-  themeDark: string
-  themeSystem: string
-  languageSection: string
-  memberSince: string
-  // Edit profile
-  firstName: string
-  lastName: string
-  save: string
-  cancel: string
-  profileUpdated: string
-  // Avatar
-  changeAvatar: string
-  cropAvatar: string
-  // Password
-  passwordSection: string
-  currentPassword: string
-  newPassword: string
-  changePassword: string
-  createPassword: string
-  passwordChanged: string
-  // Advanced security (link to ezauth settings)
-  securitySection: string
-  manageSecurity: string
-  // Email verification
-  emailVerified: string
-  emailUnverified: string
-  resendVerification: string
-  verificationSent: string
-  verifyError: string
-}
+// Re-export the texts type so consumers continue to import it from the
+// AccountModal module (keeps the public API stable across the split).
+export type { AccountModalTexts } from './account/types.js'
 
 export interface AccountModalProps {
   open: boolean
@@ -81,70 +37,49 @@ export interface AccountModalProps {
   onLocaleChange?: (locale: string) => void
   /** Google OAuth URL for "Connect account" button. If not provided, button stays disabled. */
   googleOAuthUrl?: string
+  /**
+   * Base URL of the EZAuth web app. Used to deep-link the user to the
+   * advanced security settings (2FA, sessions, account deletion).
+   * REQUIRED to render the "Manage 2FA & sessions" CTA — when omitted,
+   * the section is hidden. Pass the same URL the consumer already uses
+   * in its `<AuthProvider webUrl=...>` config.
+   *
+   * @example 'https://auth.example.com'
+   */
+  ezauthWebUrl?: string
 }
 
-// ─── Defaults ────────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: AccountModalTexts = {
-  title: 'Account',
-  profileTab: 'Profile',
-  settingsTab: 'Settings',
-  updateProfile: 'Update profile',
-  emailSection: 'Email addresses',
-  primary: 'Primary',
-  connectedAccounts: 'Connected accounts',
-  connectAccount: 'Connect account',
-  themeSection: 'Theme',
-  themeLight: 'Light',
-  themeDark: 'Dark',
-  themeSystem: 'System',
-  languageSection: 'Language',
-  memberSince: 'Member since',
-  // Edit profile
-  firstName: 'First name',
-  lastName: 'Last name',
-  save: 'Save',
-  cancel: 'Cancel',
-  profileUpdated: 'Profile updated successfully',
-  // Avatar
-  changeAvatar: 'Change avatar',
-  cropAvatar: 'Crop avatar',
-  // Password
-  passwordSection: 'Password',
-  currentPassword: 'Current password',
-  newPassword: 'New password',
-  changePassword: 'Change password',
-  createPassword: 'Create password',
-  passwordChanged: 'Password changed successfully',
-  // Advanced security (link to ezauth settings)
-  securitySection: 'Advanced security',
-  manageSecurity: 'Manage 2FA & sessions',
-  // Email verification
-  emailVerified: 'Verified',
-  emailUnverified: 'Unverified',
-  resendVerification: 'Resend verification email',
-  verificationSent: 'Verification email sent. Check your inbox.',
-  verifyError: 'Failed to send verification email',
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(dateStr: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  } catch {
-    return dateStr
-  }
-}
-
-type Tab = 'profile' | 'settings'
-
-// ─── Component ───────────────────────────────────────────────────────────────
-
+/**
+ * V1 account management modal (simple tab modal pattern) split into two tabs:
+ * - **Profile** — avatar, name, email + verification, connected accounts
+ * - **Settings** — password, advanced security (SSO handoff to EZAuth web),
+ *   theme switcher, language switcher
+ *
+ * The component is a pure abstraction over `<Modal>` from `@ezstart/ui` —
+ * the consumer controls open/close state and provides the optional theme
+ * and locale handlers. Internal sections live in
+ * `./account/AccountProfileSection.tsx` and
+ * `./account/AccountSettingsSection.tsx` to keep each file under the
+ * 400-line policy ceiling.
+ *
+ * @deprecated Use `AccountModalV2` for the modern modal with sidebar nav
+ * (collapses to Sheet on mobile, sidebar on tablet/desktop). Matches modern
+ * account management UX. `AccountModal` will be removed 2026-08-01.
+ *
+ * @example
+ * ```tsx
+ * <AccountModal
+ *   open={isOpen}
+ *   onClose={() => setIsOpen(false)}
+ *   ezauthWebUrl="https://auth.example.com"
+ *   googleOAuthUrl="https://auth.example.com/api/auth/google?app=myapp"
+ *   theme={{ theme, setTheme }}
+ *   languages={[{ code: 'en', label: 'EN' }, { code: 'fr', label: 'FR' }]}
+ *   currentLocale="en"
+ *   onLocaleChange={code => router.push(`/${code}`)}
+ * />
+ * ```
+ */
 export function AccountModal({
   open,
   onClose,
@@ -155,100 +90,45 @@ export function AccountModal({
   currentLocale,
   onLocaleChange,
   googleOAuthUrl,
+  ezauthWebUrl,
 }: AccountModalProps) {
+  useDeprecationWarning(
+    'AccountModal (V1) from @ezstart/auth-sdk',
+    'AccountModalV2 from @ezstart/auth-sdk/components'
+  )
   const { user, accessToken } = useAuth()
-  const { client, appName } = useAuthContext()
-  const store = useAuthStore()
-  const texts = { ...DEFAULT_TEXTS, ...textOverrides }
-  const [activeTab, setActiveTab] = useState<Tab>('profile')
+  const { client, appName, webUrl: contextWebUrl } = useAuthContext()
+  const storeApi = useAuthStoreApi()
+  // Resolve the EZAuth web URL: explicit prop > AuthProvider context value.
+  // The component never imports `@ezstart/config` so it stays agnostic.
+  const resolvedEzauthWebUrl = ezauthWebUrl ?? contextWebUrl
+  const texts: AccountModalTexts = { ...DEFAULT_ACCOUNT_TEXTS, ...textOverrides }
+  const [activeTab, setActiveTab] = useState<AccountTab>('profile')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
-  // Profile editing state
-  const [editing, setEditing] = useState(false)
-  const [editFirstName, setEditFirstName] = useState('')
-  const [editLastName, setEditLastName] = useState('')
-  const [savingProfile, setSavingProfile] = useState(false)
-
-  // Avatar upload state
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  // Avatar cropping state lives at the parent so the cropper modal can sit
+  // alongside the main modal without duplicating state in both sections.
   const [avatarFile, setAvatarFile] = useState<string | null>(null)
   const [showCropper, setShowCropper] = useState(false)
   const [savingAvatar, setSavingAvatar] = useState(false)
-
-  // Password state
-  const [editingPassword, setEditingPassword] = useState(false)
-  const [currentPasswordValue, setCurrentPasswordValue] = useState('')
-  const [newPasswordValue, setNewPasswordValue] = useState('')
-  const [savingPassword, setSavingPassword] = useState(false)
-
-  // Email verification state
-  const [sendingVerification, setSendingVerification] = useState(false)
   const navigation = useAuthNavigation()
-
-  // Advanced security (SSO handoff) state
-  const [redirecting, setRedirecting] = useState(false)
-
-  const handleResendVerification = async () => {
-    if (!user?.email || sendingVerification) return
-    setSendingVerification(true)
-    try {
-      const effectiveApp = navigation.app || appName
-      const response = await callApi('/auth/send-verification', {
-        appName: 'ezauth',
-        method: 'POST',
-        body: {
-          email: user.email,
-          ...(effectiveApp && { app: effectiveApp }),
-          ...(navigation.redirectUri && { redirect_uri: navigation.redirectUri }),
-        },
-      })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || texts.verifyError)
-      }
-      toast.success(texts.verificationSent)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : texts.verifyError)
-    } finally {
-      setSendingVerification(false)
-    }
-  }
+  const modalContainerRef = useRef<HTMLDivElement>(null)
 
   if (!user) return null
 
-  const isVerified = Boolean((user as { isVerified?: boolean }).isVerified)
-
-  // Build deep link to ezauth settings (2FA, sessions, delete account)
+  // Build deep link to ezauth settings (2FA, sessions, delete account).
+  // Returns null when no `ezauthWebUrl` is configured so the section can
+  // be hidden gracefully.
   const ezauthSettingsLocale = currentLocale || 'en'
   const ezauthSettingsUrl = (() => {
-    const base = `${getWebUrl('ezauth')}/${ezauthSettingsLocale}/settings`
+    if (!resolvedEzauthWebUrl) return null
+    const base = `${resolvedEzauthWebUrl.replace(/\/+$/, '')}/${ezauthSettingsLocale}/settings`
     return appName ? `${base}?app=${encodeURIComponent(appName)}` : base
   })()
 
-  const fullName = user.firstName
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
-    : user.username
-
-  const startEditing = () => {
-    setEditFirstName(user.firstName || '')
-    setEditLastName(user.lastName || '')
-    setEditing(true)
-  }
-
-  const cancelEditing = () => {
-    setEditing(false)
-  }
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      setAvatarFile(reader.result as string)
-      setShowCropper(true)
-    }
-    reader.readAsDataURL(file)
-    // Reset input so the same file can be re-selected
-    e.target.value = ''
+  const handleAvatarFilePicked = (dataUrl: string) => {
+    setAvatarFile(dataUrl)
+    setShowCropper(true)
   }
 
   const handleCropComplete = async (croppedDataUrl: string) => {
@@ -260,7 +140,7 @@ export function AccountModal({
         { avatar: croppedDataUrl },
         accessToken || undefined
       )
-      store.updateUser(updatedUser)
+      storeApi.getState().updateUser(updatedUser)
       toast.success(texts.profileUpdated)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update avatar')
@@ -274,60 +154,10 @@ export function AccountModal({
     setAvatarFile(null)
   }
 
-  const saveProfile = async () => {
-    setSavingProfile(true)
-    try {
-      const updatedUser = await client.updateProfile(
-        { firstName: editFirstName, lastName: editLastName },
-        accessToken || undefined
-      )
-      store.updateUser(updatedUser)
-      toast.success(texts.profileUpdated)
-      setEditing(false)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to update profile')
-    } finally {
-      setSavingProfile(false)
-    }
-  }
-
-  const handleChangePassword = async () => {
-    if (!newPasswordValue || newPasswordValue.length < 8) {
-      toast.error('Password must be at least 8 characters')
-      return
-    }
-    setSavingPassword(true)
-    try {
-      await client.changePassword(
-        {
-          currentPassword: currentPasswordValue || undefined,
-          newPassword: newPasswordValue,
-        },
-        accessToken || undefined
-      )
-      toast.success(texts.passwordChanged)
-      setCurrentPasswordValue('')
-      setNewPasswordValue('')
-      setEditingPassword(false)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to change password')
-    } finally {
-      setSavingPassword(false)
-    }
-  }
-
-  const handleConnectGoogle = () => {
-    if (googleOAuthUrl) {
-      window.location.href = googleOAuthUrl
-    }
-  }
-
-  const tabs: { id: Tab; label: string; icon: string }[] = [
+  const tabs: { id: AccountTab; label: string; icon: string }[] = [
     { id: 'profile', label: texts.profileTab, icon: 'lucide:User' },
     { id: 'settings', label: texts.settingsTab, icon: 'lucide:Settings' },
   ]
-
-  const modalContainerRef = useRef<HTMLDivElement>(null)
 
   return (
     <Modal isOpen={open} onClose={onClose} size="xl" scrollBehavior="inside" className={className}>
@@ -400,358 +230,32 @@ export function AccountModal({
 
           {/* ── Content ── */}
           <Div className="flex-1 space-y-6">
-            {/* ── Profile ── */}
             {activeTab === 'profile' && (
-              <>
-                {/* Hidden file input for avatar upload */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-
-                {/* Avatar + name */}
-                <Div className="flex items-center gap-4">
-                  <Div
-                    className="relative cursor-pointer group shrink-0"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <UserAvatar size="lg" user={user} />
-                    <Div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      {savingAvatar ? (
-                        <Icon name="lucide:Loader2" className="w-5 h-5 text-white animate-spin" />
-                      ) : (
-                        <Icon name="lucide:Camera" className="w-5 h-5 text-white" />
-                      )}
-                    </Div>
-                  </Div>
-                  <Div className="flex flex-col gap-1 flex-1">
-                    {editing ? (
-                      <>
-                        <Div className="space-y-2">
-                          <Div>
-                            <Label className="text-xs text-muted-foreground">
-                              {texts.firstName}
-                            </Label>
-                            <Input
-                              value={editFirstName}
-                              onChange={e => setEditFirstName(e.target.value)}
-                              placeholder={texts.firstName}
-                              className="mt-1"
-                            />
-                          </Div>
-                          <Div>
-                            <Label className="text-xs text-muted-foreground">
-                              {texts.lastName}
-                            </Label>
-                            <Input
-                              value={editLastName}
-                              onChange={e => setEditLastName(e.target.value)}
-                              placeholder={texts.lastName}
-                              className="mt-1"
-                            />
-                          </Div>
-                        </Div>
-                        <Div className="flex gap-2 mt-2">
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="cursor-pointer"
-                            onClick={saveProfile}
-                            disabled={savingProfile}
-                          >
-                            {texts.save}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="cursor-pointer"
-                            onClick={cancelEditing}
-                            disabled={savingProfile}
-                          >
-                            {texts.cancel}
-                          </Button>
-                        </Div>
-                      </>
-                    ) : (
-                      <>
-                        <H3 className="text-lg font-semibold text-foreground">{fullName}</H3>
-                        <P className="text-sm text-muted-foreground">{user.username}</P>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-1 w-fit cursor-pointer"
-                          onClick={startEditing}
-                        >
-                          {texts.updateProfile}
-                        </Button>
-                      </>
-                    )}
-                  </Div>
-                </Div>
-
-                <Div className="h-px bg-border" />
-
-                {/* Email */}
-                <Div className="space-y-3">
-                  <H3 className="text-sm font-semibold text-foreground">{texts.emailSection}</H3>
-                  <Div className="rounded-md border bg-card p-3 space-y-2">
-                    <Div className="flex items-center gap-3">
-                      <Icon name="lucide:Mail" className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <Span className="text-sm text-foreground flex-1 truncate">{user.email}</Span>
-                      <Badge variant="secondary" className="text-xs shrink-0">
-                        {texts.primary}
-                      </Badge>
-                      {isVerified ? (
-                        <Badge
-                          variant="outline"
-                          className="text-xs shrink-0 bg-success/15 text-success border-success/30"
-                        >
-                          <Icon name="lucide:CheckCircle2" size={12} className="mr-1" />
-                          {texts.emailVerified}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="text-xs shrink-0 bg-warning/15 text-warning border-warning/30"
-                        >
-                          <Icon name="lucide:AlertTriangle" size={12} className="mr-1" />
-                          {texts.emailUnverified}
-                        </Badge>
-                      )}
-                    </Div>
-                    {!isVerified && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full cursor-pointer"
-                        onClick={handleResendVerification}
-                        disabled={sendingVerification}
-                      >
-                        {sendingVerification ? '...' : texts.resendVerification}
-                      </Button>
-                    )}
-                  </Div>
-                </Div>
-
-                <Div className="h-px bg-border" />
-
-                {/* Connected accounts */}
-                <Div className="space-y-3">
-                  <H3 className="text-sm font-semibold text-foreground">
-                    {texts.connectedAccounts}
-                  </H3>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-3 p-3 h-auto cursor-pointer"
-                    onClick={handleConnectGoogle}
-                    disabled={!googleOAuthUrl}
-                  >
-                    {googleOAuthUrl ? (
-                      <Icon name="fa:FaGoogle" className="w-4 h-4 text-muted-foreground shrink-0" />
-                    ) : (
-                      <Icon name="lucide:Link" className="w-4 h-4 text-muted-foreground shrink-0" />
-                    )}
-                    <Span className="text-sm text-muted-foreground">{texts.connectAccount}</Span>
-                  </Button>
-                </Div>
-
-                <Div className="h-px bg-border" />
-
-                {/* Member since */}
-                <Div className="space-y-1">
-                  <H3 className="text-sm font-semibold text-foreground">{texts.memberSince}</H3>
-                  <P className="text-sm text-muted-foreground">{formatDate(user.createdAt)}</P>
-                </Div>
-              </>
+              <AccountProfileSection
+                user={user}
+                client={client}
+                accessToken={accessToken}
+                appName={appName}
+                navigation={{ app: navigation.app, redirectUri: navigation.redirectUri }}
+                texts={texts}
+                googleOAuthUrl={googleOAuthUrl}
+                onUserUpdated={updated => storeApi.getState().updateUser(updated)}
+                onAvatarFilePicked={handleAvatarFilePicked}
+                savingAvatar={savingAvatar}
+              />
             )}
-
-            {/* ── Settings ── */}
             {activeTab === 'settings' && (
-              <>
-                {/* Password */}
-                <Div className="space-y-3">
-                  <H3 className="text-sm font-semibold text-foreground">{texts.passwordSection}</H3>
-                  {!editingPassword ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer"
-                      onClick={() => setEditingPassword(true)}
-                    >
-                      <Icon name="lucide:Lock" className="w-4 h-4 mr-1.5" />
-                      {texts.changePassword}
-                    </Button>
-                  ) : (
-                    <Div className="space-y-2">
-                      <Div>
-                        <Label className="text-xs text-muted-foreground">
-                          {texts.currentPassword}
-                        </Label>
-                        <Input
-                          type="password"
-                          value={currentPasswordValue}
-                          onChange={e => setCurrentPasswordValue(e.target.value)}
-                          placeholder={texts.currentPassword}
-                          className="mt-1"
-                        />
-                      </Div>
-                      <Div>
-                        <Label className="text-xs text-muted-foreground">{texts.newPassword}</Label>
-                        <Input
-                          type="password"
-                          value={newPasswordValue}
-                          onChange={e => setNewPasswordValue(e.target.value)}
-                          placeholder={texts.newPassword}
-                          className="mt-1"
-                        />
-                      </Div>
-                      <Div className="flex gap-2">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="cursor-pointer"
-                          onClick={handleChangePassword}
-                          disabled={savingPassword || !newPasswordValue}
-                        >
-                          {texts.changePassword}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="cursor-pointer"
-                          onClick={() => {
-                            setEditingPassword(false)
-                            setCurrentPasswordValue('')
-                            setNewPasswordValue('')
-                          }}
-                        >
-                          {texts.cancel}
-                        </Button>
-                      </Div>
-                    </Div>
-                  )}
-                </Div>
-
-                <Div className="h-px bg-border" />
-
-                {/* Advanced security — link to ezauth settings (2FA, sessions, delete) */}
-                <Div className="space-y-2">
-                  <H3 className="text-sm font-semibold text-foreground">{texts.securitySection}</H3>
-                  {appName ? (
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between cursor-pointer"
-                      onClick={async () => {
-                        if (redirecting) return
-                        setRedirecting(true)
-                        try {
-                          const url = await client.createSsoHandoff({
-                            targetUrl: ezauthSettingsUrl,
-                            app: appName,
-                          })
-                          window.location.href = url
-                        } catch (err) {
-                          toast.error(
-                            err instanceof Error ? err.message : 'Failed to open security settings'
-                          )
-                          setRedirecting(false)
-                        }
-                      }}
-                      disabled={redirecting}
-                    >
-                      <Span>{texts.manageSecurity}</Span>
-                      {redirecting ? (
-                        <Icon name="lucide:Loader2" size={14} className="animate-spin" />
-                      ) : (
-                        <Icon name="lucide:ExternalLink" size={14} />
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="w-full justify-between cursor-pointer"
-                    >
-                      <a href={ezauthSettingsUrl} target="_blank" rel="noopener noreferrer">
-                        <Span>{texts.manageSecurity}</Span>
-                        <Icon name="lucide:ExternalLink" size={14} />
-                      </a>
-                    </Button>
-                  )}
-                </Div>
-
-                <Div className="h-px bg-border" />
-
-                {/* Theme */}
-                {theme && (
-                  <Div className="space-y-3">
-                    <H3 className="text-sm font-semibold text-foreground">{texts.themeSection}</H3>
-                    <Div className="flex gap-2">
-                      <Button
-                        variant={theme.theme === 'light' ? 'default' : 'outline'}
-                        size="sm"
-                        className="cursor-pointer"
-                        onClick={() => theme.setTheme('light')}
-                      >
-                        <Icon name="lucide:Sun" className="w-4 h-4 mr-1.5" />
-                        {texts.themeLight}
-                      </Button>
-                      <Button
-                        variant={theme.theme === 'dark' ? 'default' : 'outline'}
-                        size="sm"
-                        className="cursor-pointer"
-                        onClick={() => theme.setTheme('dark')}
-                      >
-                        <Icon name="lucide:Moon" className="w-4 h-4 mr-1.5" />
-                        {texts.themeDark}
-                      </Button>
-                      <Button
-                        variant={theme.theme === 'system' || !theme.theme ? 'default' : 'outline'}
-                        size="sm"
-                        className="cursor-pointer"
-                        onClick={() => theme.setTheme('system')}
-                      >
-                        <Icon name="lucide:Monitor" className="w-4 h-4 mr-1.5" />
-                        {texts.themeSystem}
-                      </Button>
-                    </Div>
-                  </Div>
-                )}
-
-                {/* Language */}
-                {languages && languages.length > 0 && onLocaleChange && (
-                  <>
-                    {theme && <Div className="h-px bg-border" />}
-                    <Div className="space-y-3">
-                      <H3 className="text-sm font-semibold text-foreground">
-                        {texts.languageSection}
-                      </H3>
-                      <Div className="flex gap-2 flex-wrap">
-                        {languages.map(lang => (
-                          <Button
-                            key={lang.code}
-                            variant={currentLocale === lang.code ? 'default' : 'outline'}
-                            size="sm"
-                            className="cursor-pointer"
-                            onClick={() => onLocaleChange(lang.code)}
-                          >
-                            {lang.label}
-                          </Button>
-                        ))}
-                      </Div>
-                    </Div>
-                  </>
-                )}
-
-                {!theme && (!languages || languages.length === 0) && (
-                  <Div className="flex items-center justify-center h-32">
-                    <P className="text-muted-foreground text-sm">No settings available</P>
-                  </Div>
-                )}
-              </>
+              <AccountSettingsSection
+                client={client}
+                accessToken={accessToken}
+                appName={appName}
+                ezauthSettingsUrl={ezauthSettingsUrl}
+                texts={texts}
+                theme={theme}
+                languages={languages}
+                currentLocale={currentLocale}
+                onLocaleChange={onLocaleChange}
+              />
             )}
           </Div>
         </Div>

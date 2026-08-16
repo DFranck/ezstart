@@ -1,5 +1,6 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import { QueryProvider } from '@/providers/query-provider'
@@ -10,6 +11,7 @@ import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Inter } from 'next/font/google'
+import { headers } from 'next/headers'
 import Script from 'next/script'
 import ClientLayout from './client-layout'
 
@@ -68,6 +70,18 @@ export default async function RootLayout({
   const { locale } = await params
   const messages = await getMessages()
 
+  // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
+  // httpOnly mode. Reads the session cookie from the inbound request,
+  // resolves the user via `/api/auth/me` server-side, and seeds the
+  // Zustand store synchronously when `<AuthProvider>` mounts (via
+  // `initialUser`). Anonymous requests still work: returns `null`.
+  const headersList = await headers()
+  const cookieHeader = headersList.get('cookie')
+  // Phase A1 ENV-DIET (2026-05-05) — `apiUrl` is OPTIONAL: when omitted, the
+  // SDK helper falls back to `process.env.NEXT_PUBLIC_EZAUTH_API_URL`, then
+  // to the shipped production default (`https://ezauth-api.ezstart.xyz`).
+  const initialUser = await getServerAuth({ cookieHeader })
+
   return (
     <html lang={locale} suppressHydrationWarning data-app="fengshui">
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
@@ -80,8 +94,27 @@ export default async function RootLayout({
           <ErrorBoundary title="Something went wrong in FengShui">
             <QueryProvider>
               <ThemeProvider>
-                <AuthProvider appName="fengshui" authMode="httpOnly">
-                  <PayProvider appName="fengshui">
+                <AuthProvider
+                  appName="fengshui"
+                  authMode="httpOnly"
+                  // Phase A1 ENV-DIET (2026-05-05) — `apiUrl` is OPTIONAL in
+                  // production (SDK ships `https://ezauth-api.ezstart.xyz` as
+                  // a hardcoded default). The prop is still threaded so dev /
+                  // staging consumers can override via
+                  // `NEXT_PUBLIC_EZAUTH_API_URL` in their `.env.local`.
+                  // `webUrl` is auto-resolved from `/keys/config.webUrl`.
+                  apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL}
+                  publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+                  initialUser={initialUser}
+                >
+                  <PayProvider
+                    appName="fengshui"
+                    // Same precedence for pay-sdk: SDK ships
+                    // `https://ezpay-api.ezstart.xyz` default.
+                    config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL }}
+                    publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
+                    locale={locale}
+                  >
                     <ClientLayout>{children}</ClientLayout>
                   </PayProvider>
                 </AuthProvider>

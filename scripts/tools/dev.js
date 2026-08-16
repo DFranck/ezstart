@@ -33,6 +33,7 @@ const SHORTCUTS = {
 const SDK_TO_APP = {
   '@ezstart/auth-sdk': 'ezauth',
   '@ezstart/pay-sdk': 'ezpay',
+  '@ezstart/ai-sdk': 'ezstart', // AI endpoints centralized on ezstart-api
 }
 
 // Extra dependencies not detected via SDK (e.g. CRM needs payment API)
@@ -213,6 +214,14 @@ function main() {
   if (filters.length === 0) {
     console.error('No turbo filters generated. Check app structure.')
     process.exit(1)
+  }
+
+  // Kill dev ports before starting servers (avoids EADDRINUSE)
+  console.log('\nKilling dev ports...')
+  try {
+    execSync('pnpm kill:ports', { cwd: ROOT, stdio: 'inherit' })
+  } catch (err) {
+    console.warn(`kill:ports failed but continuing: ${err.message}`)
   }
 
   // Clean .next directories

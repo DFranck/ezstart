@@ -1,9 +1,35 @@
 {
   "name": "@ezstart/email-service",
   "version": "0.1.0",
+  "description": "Email service with multi-provider support for @ezstart monorepo",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/email-service"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/email-service",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "email",
+    "resend",
+    "service",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

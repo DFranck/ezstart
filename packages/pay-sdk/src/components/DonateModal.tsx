@@ -4,7 +4,6 @@ import {
   Button,
   Checkbox,
   Div,
-  H2,
   Icon,
   Input,
   Label,
@@ -13,11 +12,11 @@ import {
   Span,
   Textarea,
 } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
+import { toast } from '@ezstart/ui/utils'
 import { useState } from 'react'
-import { usePay } from '../provider.js'
+import { usePay } from '../react/pay-provider.js'
 import { DonateButton } from './DonateButton.js'
-import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
+import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
 
 export interface DonateModalTexts {
   title?: string
@@ -68,6 +67,8 @@ export function DonateModal({
 
   const t = {
     title: texts?.title || `Support ${projectName || projectId}`,
+    // Provided to Modal as the accessible description (DialogDescription) —
+    // satisfies the modal's `aria-describedby` accessibility requirement.
     description:
       texts?.description || 'Your support helps us keep this project running and improving.',
     amountLabel: texts?.amountLabel || 'Amount',
@@ -108,7 +109,7 @@ export function DonateModal({
         window.location.href = result.checkoutUrl
       }
     } catch (error) {
-      logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -116,19 +117,18 @@ export function DonateModal({
     <>
       <Div onClick={() => setOpen(true)}>{trigger || <DonateButton>❤️ Donate</DonateButton>}</Div>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)}>
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title={
+          <span className="flex items-center gap-2">
+            <Icon name="lucide:Heart" className="w-5 h-5" />
+            {t.title}
+          </span>
+        }
+        description={t.description}
+      >
         <form onSubmit={handleDonate} className="px-2 flex flex-col gap-4">
-          {/* Header with gradient */}
-          <Div layout={'center'}>
-            <H2 size={'h4'} className="flex items-center justify-center gap-2">
-              <Icon name="lucide:Heart" className="w-8 h-8 text-white" />
-              {t.title}
-            </H2>
-            <P size={'sm'} variant={'description'}>
-              {t.description}
-            </P>
-          </Div>
-
           {/* Preset amounts - Large buttons */}
           <Div>
             <Label className="text-base font-semibold">{t.amountLabel}</Label>

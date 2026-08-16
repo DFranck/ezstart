@@ -29,7 +29,27 @@
     "client": "Client"
   },
   "receipt": {
-    "download": "Download"
+    "download": "Download",
+    "downloadTitle": "Download receipt"
+  },
+  "documentCard": {
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "dueSoon": "Due soon",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "expired": "Expired",
+    "expiresSoon": "Expires soon",
+    "validUntil": "Valid until: {date}",
+    "validUntilNone": "Valid until: -",
+    "send": "Send",
+    "download": "Download",
+    "receipt": "Receipt",
+    "markPaid": "Mark Paid",
+    "markPaidShort": "Paid",
+    "accept": "Accept",
+    "decline": "Decline",
+    "invoice": "Invoice"
   },
   "client": {
     "create": "Create Client",

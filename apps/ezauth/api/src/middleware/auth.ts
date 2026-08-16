@@ -6,13 +6,14 @@
 import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
-import { sendError } from '@ezstart/express-core'
+import { sendError } from '@ezstart/api-core'
 import { getAuthUserModel } from '../models/auth-user.js'
 import { updatePresenceByUserId } from '../services/presence.service.js'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 import { JWT_SECRET } from '../config/env.js'
 import { ACCESS_COOKIE_NAME } from '../config/cookie.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../config/jwt.js'
 
 /** Extract a Bearer/cookie token from the request, or return undefined. */
 function extractToken(req: Request): string | undefined {
@@ -33,7 +34,14 @@ async function attachUserToRequest(req: Request, userId: string): Promise<boolea
   const user = await AuthUser.findById(userId).select('-passwordHash').lean()
   if (!user) return false
 
+  // Soft-delete gate — a still-unexpired access token (15 min TTL) MUST
+  // not authenticate an account that was scheduled for deletion. Without
+  // this check the JWT signature alone keeps every protected route usable
+  // until natural expiry. (P0 — see standard-saas-security.md §3.)
+  if (user.deletedAt) return false
+
   const resolvedUserId = user._id.toString()
+  req.userId = resolvedUserId
   req.user = {
     _id: resolvedUserId,
     userId: resolvedUserId,
@@ -70,8 +78,12 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       return sendError(res, 'Authentication required', 401)
     }
 
+    // HAC-CRIT-2 — enforce iss/aud so a token minted for another app (or
+    // by an attacker bypassing the sign path) is rejected with 401 here.
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
 
     const attached = await attachUserToRequest(req, payload.userId)
@@ -103,8 +115,13 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
       return next()
     }
 
+    // HAC-CRIT-2 — same iss/aud enforcement as the required path; an
+    // invalid/cross-API token degrades to anonymous (no rejection here
+    // because this middleware is opt-in).
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
     await attachUserToRequest(req, payload.userId)
     next()

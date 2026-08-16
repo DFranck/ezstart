@@ -24,9 +24,8 @@
     }
   },
   "plans": {
-    "free": "Self-Awareness (Free plan)",
-    "premium": "Premium Package",
-    "golden": "Golden Package"
+    "loading": "Loading plan…",
+    "noPlan": "No active plan"
   },
   "errors": {
     "sendFailed": "Failed to send message. Please try again.",

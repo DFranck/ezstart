@@ -6,7 +6,7 @@ import {
   createVeryStrictRateLimiter,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'
@@ -20,6 +20,7 @@ import { sendVerificationRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 
 export const sendVerificationRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -62,8 +63,10 @@ const sendVerificationController = async (req: Request, res: Response) => {
     const parsedBody = sendVerificationRequestSchema.safeParse(req.body ?? {})
     const app = parsedBody.success ? parsedBody.data.app : undefined
     const redirect_uri = parsedBody.success ? parsedBody.data.redirect_uri : undefined
-    const locale = parsedBody.success ? parsedBody.data.locale : 'en'
+    const bodyLocale = parsedBody.success ? parsedBody.data.locale : undefined
     const emailOverride = parsedBody.success ? parsedBody.data.emailOverride : undefined
+    // Body-locale wins; otherwise fall back to the request's Accept-Language.
+    const locale = resolveUserLocale(req, bodyLocale)
 
     const appKey = app || 'ezstart'
 

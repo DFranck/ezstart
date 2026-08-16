@@ -1,10 +1,10 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
-import { Aside, Button, Card, Div, Icon, Nav, Section, Spinner } from '@ezstart/ui/components'
+import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
+import { Aside, Button, Card, Div, Icon, Nav, Section } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { usePathname } from 'next/navigation'
 
 function useAdminNavItems() {
@@ -121,11 +121,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant="ghost">

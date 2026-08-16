@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import aiRoutes from './ai/index.js'
 import clientRoutes, { clientsRegistries } from './clients/index.js'
 import companiesRoutes, { companiesRegistries } from './companies/index.js'
@@ -27,6 +27,7 @@ router
   .use('/payment-methods', paymentMethodRoutes)
   .use('/quotes', quoteRoutes)
   .use('/receipts', receiptRoutes)
-  .use('/users', usersRoutes)
+  // users children own '/users' basePath via createRouterWithDoc
+  .use(usersRoutes)
 
 export default router

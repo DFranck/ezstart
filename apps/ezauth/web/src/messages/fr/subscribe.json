@@ -1,0 +1,24 @@
+{
+  "subscribe": {
+    "success": {
+      "title": "Abonnement confirmé !",
+      "description": "Votre abonnement est actif et votre compte a été mis à jour.",
+      "redirecting": "Redirection vers votre tableau de bord dans {seconds}s…",
+      "goToDashboard": "Aller au tableau de bord",
+      "whatNext": "Et maintenant ?",
+      "emailConfirmation": "Un reçu vous a été envoyé par email via Stripe.",
+      "accessGranted": "Vos nouveaux rôles et fonctionnalités sont désormais actifs.",
+      "receiptAvailable": "Gérez votre abonnement à tout moment depuis votre compte.",
+      "reference": "Référence : {id}"
+    },
+    "cancel": {
+      "title": "Paiement annulé",
+      "description": "Votre abonnement n'a pas été lancé. Aucun montant n'a été débité.",
+      "backToPricing": "Retour aux offres",
+      "backHome": "Retour à l'accueil",
+      "needHelp": "Besoin d'aide ?",
+      "noCharge": "Rassurez-vous, aucune somme n'a été prélevée sur votre compte.",
+      "contactSupport": "En cas de problème, contactez notre support."
+    }
+  }
+}

@@ -3,23 +3,18 @@
  * Assign Client to Quote
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { assignClientSchema, paramsMongoIdSchema, quoteSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/quote/quote.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { assignClientSchema, paramsMongoIdSchema, quoteSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/quote/quote.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const assignClientToQuoteByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const assignClientToQuoteByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const assignClientToQuoteByIdRouter = createRouterWithDoc(
   assignClientToQuoteByIdRegistry,
   router,
   '/quotes'
-);
+)
 
 assignClientToQuoteByIdRouter.post(
   '/:id/assign-client',
@@ -33,6 +28,6 @@ assignClientToQuoteByIdRouter.post(
     paramsSchema: paramsMongoIdSchema,
     responseSchema: quoteSchema,
   }
-);
+)
 
-export default router;
+export default router

@@ -1,0 +1,39 @@
+{
+  "status": {
+    "title": "Trạng thái",
+    "intro": "Tình trạng hoạt động thời gian thực của tất cả dịch vụ nền tảng EZStart. Tự động làm mới mỗi 30 giây.",
+    "componentsHeading": "Thành phần dịch vụ",
+    "incidentsHeading": "Sự cố",
+    "incidentsBody": "Không có sự cố nào đang hoạt động.",
+    "lastCheckedLabel": "Lần kiểm tra cuối",
+    "responseTimeLabel": "Thời gian phản hồi",
+    "refreshHint": "Tự động làm mới mỗi {seconds} giây",
+    "refreshButton": "Làm mới ngay",
+    "dependenciesLabel": "Phụ thuộc",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Chậm",
+      "down": "Ngừng"
+    },
+    "summary": {
+      "operational": "Tất cả hệ thống hoạt động bình thường",
+      "degraded": "Gián đoạn dịch vụ một phần",
+      "down": "Sự cố lớn",
+      "checking": "Đang kiểm tra dịch vụ"
+    },
+    "state": {
+      "operational": "Hoạt động",
+      "degraded": "Suy giảm",
+      "down": "Ngừng hoạt động",
+      "checking": "Đang kiểm tra"
+    },
+    "services": {
+      "ezauthApi": "EZAuth API",
+      "ezauthApiDescription": "Xác thực, phiên, OAuth, khóa API",
+      "ezpayApi": "EZPay API",
+      "ezpayApiDescription": "Gói, đăng ký, thanh toán, Stripe Connect",
+      "ezstartApi": "EZStart API",
+      "ezstartApiDescription": "Trung tâm nền tảng, giám sát, tổng hợp trạng thái"
+    }
+  }
+}

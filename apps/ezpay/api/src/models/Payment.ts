@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo, testModeScopePlugin, ttlPlugin } from '@ezstart/api-core'
 import { Schema, Model, Document } from 'mongoose'
 
 export interface DonationMetadata {
@@ -19,6 +19,19 @@ export interface SubscriptionMetadata {
   interval?: 'month'
   intervalCount?: number
   features?: string[]
+  /**
+   * Raw Stripe subscription status snapshot (e.g. `'active'`, `'past_due'`,
+   * `'trialing'`, `'unpaid'`). Persisted on every `customer.subscription.*`
+   * webhook so consumers (and the dunning service) can detect transitions
+   * without re-querying Stripe.
+   */
+  subscriptionStatus?: string
+  /** Stripe billing reason snapshot (`'subscription_create'`, `'subscription_cycle'`, …). */
+  billingReason?: string
+  /** Period end snapshot (ISO string from the latest invoice). */
+  periodEnd?: string
+  /** Renewal lineage — id of the original subscription Payment row. */
+  renewalOf?: string
 }
 
 export interface InvoiceMetadata {
@@ -26,11 +39,18 @@ export interface InvoiceMetadata {
   invoiceNumber?: string
 }
 
+export interface PromoMetadata {
+  promoCode?: string
+  originalAmount?: number
+  discountApplied?: number
+}
+
 /** Combined metadata type — all fields optional, used fields depend on payment type */
 export type PaymentMetadata = DonationMetadata &
   PurchaseMetadata &
   SubscriptionMetadata &
-  InvoiceMetadata
+  InvoiceMetadata &
+  PromoMetadata
 
 export interface PaymentDocument extends Document {
   // Project Info
@@ -54,6 +74,15 @@ export interface PaymentDocument extends Document {
   provider: 'stripe' | 'paypal'
   paymentId: string
   stripePaymentIntentId?: string
+  /**
+   * Stripe customer id (`cus_…`) captured on the first
+   * `checkout.session.completed` event for this Payment (or later, via the
+   * webhook resilience path). Used as a fallback join key to link
+   * `customer.subscription.updated` events back to the originating checkout
+   * Payment when `metadata.subscriptionId` hasn't been stamped yet (i.e.
+   * the subscription webhook arrived before `checkout.completed`).
+   */
+  stripeCustomerId?: string
   paymentMethod?: string
   status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
 
@@ -66,6 +95,17 @@ export interface PaymentDocument extends Document {
 
   // Environment
   liveMode: boolean
+
+  /**
+   * Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+   * Mirror of `!liveMode` for the cross-app `testModeScopePlugin` —
+   * `liveMode: true` ↔ `isTestMode: false`, `liveMode: false` ↔
+   * `isTestMode: true`. Both are kept in sync at write time
+   * (see routes/donations/create.ts, purchases/create.ts, ...).
+   *
+   * Migration `migrate-add-is-test-mode.ts` backfills existing docs.
+   */
+  isTestMode: boolean
 
   // Dates
   createdAt: Date
@@ -88,7 +128,7 @@ const paymentSchema = new Schema<PaymentDocument>(
     },
 
     // Amount
-    amount: { type: Number, required: true },
+    amount: { type: Number, required: true, min: 0 },
     currency: { type: String, default: 'EUR' },
 
     // Customer Info (link avec EZAuth si connecté)
@@ -102,6 +142,12 @@ const paymentSchema = new Schema<PaymentDocument>(
     provider: { type: String, enum: ['stripe', 'paypal'], default: 'stripe' },
     paymentId: { type: String, unique: true },
     stripePaymentIntentId: { type: String, index: true },
+    /**
+     * Fallback join key — indexed so the `subscription.updated` resilience
+     * lookup (`stripeCustomerId + status: 'pending' + type: 'subscription'`)
+     * doesn't fall back to a collscan.
+     */
+    stripeCustomerId: { type: String, index: true },
     paymentMethod: { type: String },
     status: {
       type: String,
@@ -148,6 +194,10 @@ const paymentSchema = new Schema<PaymentDocument>(
     // Environment — separates test data from production data
     liveMode: { type: Boolean, default: false, index: true },
 
+    // Stripe-pattern test/live partition mirror of `!liveMode`.
+    // Default true to match `liveMode: false` default (un-set → test mode).
+    isTestMode: { type: Boolean, default: true, index: true },
+
     // Dates
     completedAt: { type: Date },
   },
@@ -161,6 +211,12 @@ const paymentSchema = new Schema<PaymentDocument>(
 paymentSchema.index({ projectId: 1, createdAt: -1 })
 paymentSchema.index({ userId: 1, createdAt: -1 })
 paymentSchema.index({ type: 1, status: 1 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4):
+// - auto-scope every read by `req.derivedMode` via AsyncLocalStorage
+// - auto-purge test documents after 24h (partial TTL index on isTestMode:true)
+paymentSchema.plugin(testModeScopePlugin)
+paymentSchema.plugin(ttlPlugin, { ttlSeconds: 86400, partialFilter: { isTestMode: true } })
 
 /**
  * Factory function to get Payment model attached to shared connection

@@ -1,3 +1,56 @@
 /* EZPay Theme Variables */
 
-/* Theme colors to be defined */
+:root[data-app='ezpay'] {
+  /* Override shadcn primary/secondary/accent tokens */
+  /* Brand color: pink/rose (#E91E63 / rose-500) */
+  --primary: oklch(0.6 0.22 350);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.95 0.03 350);
+  --secondary-foreground: oklch(0.2 0.05 350);
+  --accent: oklch(0.93 0.04 340);
+  --accent-foreground: oklch(0.2 0.05 340);
+
+  /* EZPay-specific brand variables */
+  --ezpay: oklch(0.6 0.22 350);
+  --ezpay-foreground: oklch(0.98 0 0);
+
+  /* Gradient (pink to magenta) */
+  --ezpay-gradient-from: oklch(0.6 0.22 350);
+  --ezpay-gradient-to: oklch(0.55 0.2 320);
+}
+
+:root[data-app='ezpay'].dark {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.65 0.22 350);
+  --primary-foreground: oklch(0.15 0.05 350);
+  --secondary: oklch(0.25 0.04 350);
+  --secondary-foreground: oklch(0.95 0.02 350);
+  --accent: oklch(0.28 0.05 340);
+  --accent-foreground: oklch(0.95 0.02 340);
+
+  /* EZPay-specific brand variables (dark mode) */
+  --ezpay: oklch(0.65 0.22 350);
+  --ezpay-foreground: oklch(0.15 0.05 350);
+
+  /* Gradient (dark mode) */
+  --ezpay-gradient-from: oklch(0.35 0.12 350);
+  --ezpay-gradient-to: oklch(0.35 0.12 320);
+}
+
+@theme inline {
+  --color-ezpay: var(--ezpay);
+  --color-ezpay-foreground: var(--ezpay-foreground);
+  --color-ezpay-gradient-from: var(--ezpay-gradient-from);
+  --color-ezpay-gradient-to: var(--ezpay-gradient-to);
+}
+
+@layer utilities {
+  /* EZPay Generic Gradient */
+  .bg-ezpay-gradient {
+    background: linear-gradient(
+      to right,
+      var(--ezpay-gradient-from),
+      var(--ezpay-gradient-to)
+    );
+  }
+}

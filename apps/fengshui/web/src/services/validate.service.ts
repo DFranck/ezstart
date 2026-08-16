@@ -1,9 +1,4 @@
-// TODO: Migrate to @ezstart/ai-sdk vision support once FengShui has a backend API.
-// Currently this runs client-side with GEMINI_API_KEY exposed via NEXT_PUBLIC_.
-// The ai-sdk vision support (ProviderSendOptions.images) is server-only.
-// Migration path: create a FengShui API endpoint that calls UnifiedChat.send()
-// with { images, extractJson: true } and the VALIDATION_PROMPT as message.
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GeminiProvider } from '@ezstart/ai-sdk/server'
 import { logger } from '@ezstart/logger'
 
 export interface BoundingBox {
@@ -59,22 +54,31 @@ Respond ONLY in JSON format:
 }`
 
 /**
- * Validate a floor plan image using Google Gemini Vision.
+ * Shape returned by the Gemini vision JSON extraction.
+ * The API is prompted to return these fields — validation happens below.
+ */
+interface RawValidationJson {
+  isValid?: unknown
+  score?: unknown
+  roomsDetected?: unknown
+  feedback?: unknown
+  boundingBox?: {
+    top?: unknown
+    left?: unknown
+    bottom?: unknown
+    right?: unknown
+  }
+}
+
+/**
+ * Validate a floor plan image using the ai-sdk GeminiProvider (vision).
+ * Runs server-side (Next.js API route — see `/api/validate/route.ts`).
  */
 export async function validatePlanImage(imageData: string): Promise<ValidationResult> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured')
   }
-
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    generationConfig: {
-      temperature: 0.3,
-      responseMimeType: 'application/json',
-    },
-  })
 
   // Extract base64 data and mime type from data URL
   const match = imageData.match(/^data:([^;]+);base64,(.+)$/)
@@ -85,22 +89,22 @@ export async function validatePlanImage(imageData: string): Promise<ValidationRe
   const mimeType = match[1] as string
   const base64Data = match[2] as string
 
-  try {
-    const result = await model.generateContent([
-      VALIDATION_PROMPT,
-      {
-        inlineData: {
-          mimeType,
-          data: base64Data,
-        },
-      },
-    ])
+  const provider = new GeminiProvider({
+    apiKey,
+    model: 'gemini-2.5-flash',
+  })
 
-    const text = result.response.text()
-    const parsed = JSON.parse(text) as ValidationResult
+  try {
+    const result = await provider.sendMessage(VALIDATION_PROMPT, {
+      images: [{ data: base64Data, mimeType }],
+      temperature: 0.3,
+      extractJson: true,
+    })
+
+    const parsed = (result.extractedData ?? {}) as RawValidationJson
 
     logger.info(
-      `[validate.service] Plan validated: score=${parsed.score}, rooms=${parsed.roomsDetected}`
+      `[validate.service] Plan validated: score=${String(parsed.score)}, rooms=${String(parsed.roomsDetected)}`
     )
 
     // Parse bounding box if present and valid

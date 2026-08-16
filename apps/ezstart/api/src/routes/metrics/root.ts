@@ -10,7 +10,7 @@ import {
   Router,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import type { Request, Response } from 'express'
 import type { PipelineStage } from 'mongoose'
 import { getHealthCheckModel } from '../../models/HealthCheck.js'

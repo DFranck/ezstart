@@ -119,17 +119,17 @@ export function UptimeGraph({
     uptimePercentage ??
     (data.length > 0 ? (data.filter(d => d.status === 'healthy').length / data.length) * 100 : 0)
 
-  // Determine color based on uptime percentage
+  // Determine color based on uptime percentage (semantic status tokens)
   const getUptimeColor = (uptime: number) => {
-    if (uptime >= 99) return 'text-green-600 dark:text-green-400'
-    if (uptime >= 95) return 'text-yellow-600 dark:text-yellow-400'
-    return 'text-red-600 dark:text-red-400'
+    if (uptime >= 99) return 'text-success'
+    if (uptime >= 95) return 'text-warning'
+    return 'text-destructive'
   }
 
   const getUptimeBgColor = (uptime: number) => {
-    if (uptime >= 99) return 'bg-green-100 dark:bg-green-950'
-    if (uptime >= 95) return 'bg-yellow-100 dark:bg-yellow-950'
-    return 'bg-red-100 dark:bg-red-950'
+    if (uptime >= 99) return 'bg-success/15'
+    if (uptime >= 95) return 'bg-warning/15'
+    return 'bg-destructive/15'
   }
 
   // Custom tooltip

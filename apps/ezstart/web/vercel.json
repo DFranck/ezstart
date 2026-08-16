@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"master\" ]; then exit 0; else npx turbo-ignore web-ezstart; fi",
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"master\" ] && [ \"$VERCEL_GIT_COMMIT_REF\" != \"staging\" ]; then exit 0; else npx turbo-ignore web-ezstart; fi",
   "buildCommand": "pnpm turbo build --filter=web-ezstart...",
   "outputDirectory": ".next",
   "installCommand": "pnpm install --frozen-lockfile",
@@ -19,9 +19,37 @@
       "statusCode": 302
     }
   ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://js.stripe.com\")"
+        }
+      ]
+    }
+  ],
   "git": {
     "deploymentEnabled": {
-      "master": true
+      "master": true,
+      "staging": true
     }
   }
 }

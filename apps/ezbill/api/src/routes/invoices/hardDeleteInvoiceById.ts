@@ -3,23 +3,18 @@
  * Hard delete Invoice
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { paramsMongoIdSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/invoice/invoice.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { paramsMongoIdSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/invoice/invoice.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const hardDeleteInvoiceByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const hardDeleteInvoiceByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const hardDeleteInvoiceByIdRouter = createRouterWithDoc(
   hardDeleteInvoiceByIdRegistry,
   router,
   '/invoices'
-);
+)
 
 hardDeleteInvoiceByIdRouter.delete(
   '/:id/hard-delete',
@@ -31,6 +26,6 @@ hardDeleteInvoiceByIdRouter.delete(
     tags: ['Invoices'],
     paramsSchema: paramsMongoIdSchema,
   }
-);
+)
 
-export default router;
+export default router

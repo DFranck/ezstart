@@ -1,95 +1,42 @@
 'use client'
 
-import { Div, P } from '@ezstart/ui/components'
-import { useMemo } from 'react'
+import { PasswordStrength as _PasswordStrength } from '@ezstart/ui/components'
+import { useDeprecationWarning } from '@ezstart/ui/hooks'
+import type {
+  PasswordStrengthProps as _PasswordStrengthProps,
+  PasswordStrengthTexts as _PasswordStrengthTexts,
+} from '@ezstart/ui/components'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+/**
+ * @deprecated Moved to `@ezstart/ui` as `PasswordStrengthProps`. Will be removed in 2026-08-01.
+ */
+export type PasswordStrengthProps = _PasswordStrengthProps
+/**
+ * @deprecated Moved to `@ezstart/ui` as `PasswordStrengthTexts`. Will be removed in 2026-08-01.
+ */
+export type PasswordStrengthTexts = _PasswordStrengthTexts
 
-export interface PasswordStrengthTexts {
-  weak: string
-  fair: string
-  good: string
-  strong: string
-}
-
-export interface PasswordStrengthProps {
-  password: string
-  /** Override texts */
-  texts?: Partial<PasswordStrengthTexts>
-}
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: PasswordStrengthTexts = {
-  weak: 'Weak',
-  fair: 'Fair',
-  good: 'Good',
-  strong: 'Strong',
-}
-
-// ─── Logic ──────────────────────────────────────────────────────────────────
-
-type Strength = 'weak' | 'fair' | 'good' | 'strong'
-
-function calculateStrength(password: string): { level: number; label: Strength } {
-  if (!password) return { level: 0, label: 'weak' }
-
-  let score = 0
-
-  // Length checks
-  if (password.length >= 6) score++
-  if (password.length >= 10) score++
-  if (password.length >= 14) score++
-
-  // Character variety checks
-  if (/[a-z]/.test(password)) score++
-  if (/[A-Z]/.test(password)) score++
-  if (/[0-9]/.test(password)) score++
-  if (/[^a-zA-Z0-9]/.test(password)) score++
-
-  if (score <= 2) return { level: 1, label: 'weak' }
-  if (score <= 4) return { level: 2, label: 'fair' }
-  if (score <= 5) return { level: 3, label: 'good' }
-  return { level: 4, label: 'strong' }
-}
-
-const strengthColors: Record<Strength, string> = {
-  weak: 'bg-destructive',
-  fair: 'bg-warning',
-  good: 'bg-warning/70',
-  strong: 'bg-success',
-}
-
-const strengthTextColors: Record<Strength, string> = {
-  weak: 'text-destructive',
-  fair: 'text-warning',
-  good: 'text-warning/70',
-  strong: 'text-success',
-}
-
-// ─── Component ──────────────────────────────────────────────────────────────
-
-export function PasswordStrength({ password, texts }: PasswordStrengthProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
-  const { level, label } = useMemo(() => calculateStrength(password), [password])
-
-  if (!password) return null
-
-  return (
-    <Div className="space-y-1">
-      <Div className="flex gap-1">
-        {[1, 2, 3, 4].map(i => (
-          <Div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i <= level ? strengthColors[label] : 'bg-muted'
-            }`}
-          />
-        ))}
-      </Div>
-      <P size="xs" className={strengthTextColors[label]}>
-        {t[label]}
-      </P>
-    </Div>
+/**
+ * Visual strength indicator (color-graded bar + label) for a password input.
+ *
+ * @deprecated Moved to `@ezstart/ui`. Will be removed in 2026-08-01.
+ * Import `PasswordStrength` from `@ezstart/ui/components` instead.
+ *
+ * @example migration
+ * ```tsx
+ * // before
+ * import { PasswordStrength } from '@ezstart/auth-sdk/components'
+ *
+ * // after
+ * import { PasswordStrength } from '@ezstart/ui/components'
+ * ```
+ */
+export function PasswordStrength(props: PasswordStrengthProps) {
+  useDeprecationWarning(
+    'PasswordStrength from @ezstart/auth-sdk',
+    'PasswordStrength from @ezstart/ui/components'
   )
+  return <_PasswordStrength {...props} />
 }
+
+PasswordStrength.displayName = 'PasswordStrength'

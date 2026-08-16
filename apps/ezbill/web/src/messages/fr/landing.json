@@ -1,4 +1,14 @@
 {
+  "home": {
+    "description": "Facturation et gestion de factures professionnelle simplifiée. Créez de belles factures, gérez vos clients et suivez les paiements facilement.",
+    "smartInvoicing": "Facturation Intelligente",
+    "smartInvoicingDesc": "Créez des factures et devis professionnels en quelques secondes avec notre interface intuitive",
+    "clientManagement": "Gestion Clients",
+    "clientManagementDesc": "Organisez vos clients et entreprises avec des informations de contact détaillées",
+    "paymentTracking": "Suivi des Paiements",
+    "paymentTrackingDesc": "Suivez les paiements et gérez les reçus pour rester au top de vos finances",
+    "getStarted": "Commencer"
+  },
   "landing": {
     "hero": {
       "badge": "Sans Frais Mensuels • Propriété À Vie",
@@ -30,6 +40,8 @@
     "solution": {
       "title": "Possédez Votre Système de Facturation À Vie",
       "description": "EZBill est un achat unique. Pas d'abonnement, pas de limites, pas de surprises.",
+      "dashboardScreenshotLabel": "Capture du tableau de bord",
+      "dashboardScreenshotHint": "Image : ezbill-dashboard.webp (1920x1080)",
       "steps": {
         "step1": {
           "badge": "1",
@@ -120,11 +132,14 @@
         "yearCost": "0$/an après achat",
         "limits": "Tout illimité"
       },
+      "bestValue": "MEILLEUR CHOIX",
       "savings": "Économisez 360-600$ chaque année"
     },
     "useCases": {
       "title": "Conçu Pour de Vraies Entreprises",
       "subtitle": "Des freelances aux agences en croissance",
+      "challengeLabel": "Défi",
+      "solutionLabel": "Solution",
       "cases": [
         {
           "persona": "Designer Freelance",

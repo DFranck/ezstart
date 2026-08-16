@@ -5,9 +5,10 @@ import {
   Router,
   createStrictRateLimiter,
   sendSuccess,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
@@ -15,6 +16,7 @@ import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { hashRefreshToken, getRefreshTokenModel } from '../../models/refresh-token.js'
 import { JWT_SECRET } from '../../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 import {
   ACCESS_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
@@ -59,8 +61,13 @@ function extractUserIdFromRequest(req: Request): string | null {
 
     if (!token) return null
 
+    // HAC-CRIT-2 — enforce iss/aud so a cross-API or forged token cannot
+    // resolve a userId via this best-effort helper. Catch below degrades
+    // to anonymous logout (cookie clear still happens).
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
     return payload.userId ?? null
   } catch {
@@ -72,8 +79,8 @@ function extractUserIdFromRequest(req: Request): string | null {
 // Logout: clear httpOnly cookies + revoke refresh tokens
 const logoutController = async (req: Request, res: Response) => {
   const clearCookies = () => {
-    res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions())
-    res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions())
+    res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions(req))
+    res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions(req))
   }
 
   try {
@@ -84,11 +91,17 @@ const logoutController = async (req: Request, res: Response) => {
     const userId = extractUserIdFromRequest(req)
 
     if (refreshToken) {
-      // Specific refresh token provided — revoke only that one
+      // Specific refresh token provided — revoke only that one (with ownership check)
       try {
         const RefreshTokenModel = await getRefreshTokenModel()
         const tokenHash = hashRefreshToken(refreshToken)
-        await RefreshTokenModel.updateOne({ tokenHash }, { $set: { isRevoked: true } })
+        // Only revoke if the token belongs to the requesting user (prevents
+        // an attacker from revoking another user's token via a guessed value)
+        const filter: Record<string, unknown> = { tokenHash }
+        if (userId) {
+          filter.userId = userId
+        }
+        await RefreshTokenModel.updateOne(filter, { $set: { isRevoked: true } })
         logger.debug('Revoked specific refresh token on logout')
       } catch (err) {
         logger.debug('Failed to revoke refresh token on logout:', err)
@@ -101,6 +114,14 @@ const logoutController = async (req: Request, res: Response) => {
       } catch (err) {
         logger.debug('Failed to revoke all user tokens on logout:', err)
       }
+    }
+
+    if (userId) {
+      // Fire-and-forget audit log entry — failure must not block logout.
+      void AuditLogService.createFromRequest(req, {
+        userId,
+        action: 'logout',
+      })
     }
 
     clearCookies()

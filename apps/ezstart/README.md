@@ -9,7 +9,7 @@ Provides a unified dashboard for monitoring all services, managing AI conversati
 ## Tech Stack
 
 - **Web:** Next.js, next-intl, React Query, @ezstart/ui
-- **API:** Express via @ezstart/express-core, MongoDB
+- **API:** Express via @ezstart/api-core, MongoDB
 - **Deploy:** Vercel (web) + Railway (API)
 
 ## Architecture
@@ -42,5 +42,5 @@ pnpm dev ez
 ## Related
 
 - [@ezstart/ai-sdk](../../packages/ai-sdk) — AI provider abstraction
-- [@ezstart/express-core](../../packages/express-core) — API infrastructure
+- [@ezstart/api-core](../../packages/api-core) — API infrastructure
 - [@ezstart/config](../../packages/config) — URLs and ports

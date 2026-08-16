@@ -1,47 +1,116 @@
 {
   "name": "@ezstart/pay-sdk",
   "version": "1.0.0",
-  "description": "EZPay React SDK for payments, donations, and subscriptions",
+  "description": "Payment SDK with 3-layer architecture: agnostic core, React bindings, and pre-built UI components",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/pay-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/pay-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "payments",
+    "stripe",
+    "sdk",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./components/registry": {
+      "types": "./dist/components/pay-sdk-registry.generated.d.ts",
+      "import": "./dist/components/pay-sdk-registry.generated.js"
     },
     "./server": {
-      "import": "./dist/server.js",
-      "types": "./dist/server.d.ts"
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     },
     "./providers": {
-      "import": "./dist/providers/index.js",
-      "types": "./dist/providers/index.d.ts"
+      "types": "./dist/core/providers/index.d.ts",
+      "import": "./dist/core/providers/index.js"
     }
   },
   "type": "module",
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
-    "typecheck": "tsc --noEmit"
+    "generate": "node scripts/generate-registry.cjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@ezstart/config": "workspace:*",
-    "@ezstart/logger": "workspace:*",
+    "@ezstart/api-contracts": "workspace:*",
+    "@ezstart/api-core": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
+    "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",
+    "recharts": "2.15.4",
     "sonner": "^2.0.3",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
+    "@tanstack/react-query": "^5.80.7",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^20",
     "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.0.2",
     "next": "^15.5.9",
     "react": "^19.1.1",
-    "typescript": "^5.7.3"
+    "stripe": "^22.0.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
+    "@ezstart/logger": "workspace:*",
+    "@tanstack/react-query": "^5",
     "next": "^15",
-    "react": "^18"
+    "react": "^18",
+    "stripe": "^22"
+  },
+  "peerDependenciesMeta": {
+    "@ezstart/logger": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "stripe": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

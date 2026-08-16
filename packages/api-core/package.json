@@ -1,0 +1,106 @@
+{
+  "name": "@ezstart/api-core",
+  "version": "0.2.0",
+  "description": "Unified Express-based API server framework (agnostic core + optional @ezstart wrapper)",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/api-core"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/api-core",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "api",
+    "express",
+    "server",
+    "framework",
+    "openapi",
+    "zod",
+    "rate-limit",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./crypto": {
+      "types": "./dist/core/crypto.d.ts",
+      "import": "./dist/core/crypto.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^7.3.4",
+    "@ezstart/api-contracts": "workspace:*",
+    "@sentry/node-core": "^10.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "@ezstart/config": "workspace:*",
+    "@ezstart/logger": "workspace:*",
+    "mongoose": "^8.0.0",
+    "socket.io": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@ezstart/config": {
+      "optional": true
+    },
+    "@ezstart/logger": {
+      "optional": true
+    },
+    "mongoose": {
+      "optional": true
+    },
+    "socket.io": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@ezstart/config": "workspace:*",
+    "@ezstart/logger": "workspace:*",
+    "@ezstart/test-utils": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.23",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.0.0",
+    "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.8",
+    "mongoose": "^8.15.1",
+    "socket.io": "^4.8.1",
+    "supertest": "^7.1.4",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

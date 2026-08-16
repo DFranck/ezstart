@@ -15,6 +15,7 @@ export function getLocaleDict(locale: SupportedLocale = 'en'): LocaleDict {
     passwordReset: { ...en.passwordReset, ...dict.passwordReset },
     emailVerification: { ...en.emailVerification, ...dict.emailVerification },
     welcomeSetPassword: { ...en.welcomeSetPassword, ...dict.welcomeSetPassword },
+    accountDeletion: { ...en.accountDeletion, ...dict.accountDeletion },
     common: { ...en.common, ...dict.common },
   }
 }

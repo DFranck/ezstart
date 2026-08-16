@@ -9,7 +9,7 @@
  * - GET  /api/webhooks/health     -> healthCheck
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import individual action routers
 import handleEsgReportRouter, { handleEsgReportRegistry } from './handleEsgReport.js'
@@ -21,8 +21,9 @@ export const webhookRegistries = [handleEsgReportRegistry, healthCheckRegistry]
 // Consolidate all action routers
 const router: import('express').Router = Router()
 
-router
-  .use('/esg-report', handleEsgReportRouter) // POST /esg-report
-  .use('/health', healthCheckRouter) // GET /health
+// This parent is mounted at /api (no /webhooks prefix) — children own '/esg-report'
+// and '/health' basePaths via createRouterWithDoc. We re-prefix them with
+// '/webhooks' here so the final URL matches /api/webhooks/<resource>.
+router.use('/webhooks', handleEsgReportRouter).use('/webhooks', healthCheckRouter)
 
 export default router

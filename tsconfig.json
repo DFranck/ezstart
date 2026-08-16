@@ -11,17 +11,19 @@
     // Core packages (ordre de dépendance)
     { "path": "./packages/config" },
     { "path": "./packages/logger" },
-    { "path": "./packages/fetch-client" },
+    { "path": "./packages/api-contracts" },
+    { "path": "./packages/api-sdk" },
     { "path": "./packages/ocr-sdk" },
-    { "path": "./packages/rbac" },
 
     // Infrastructure packages
     { "path": "./packages/email-service" },
     { "path": "./packages/express-core" },
+    { "path": "./packages/api-core" },
     { "path": "./packages/ui" },
     { "path": "./packages/auth-sdk" },
     { "path": "./packages/pay-sdk" },
     { "path": "./packages/next-theme" },
+    { "path": "./packages/eslint-plugin-ezstart" },
 
     // App-specific types/utils
     { "path": "./apps/ezbill/types" },

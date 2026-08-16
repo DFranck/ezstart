@@ -10,7 +10,16 @@ export type {
   OcrSource,
   BenchRunResult,
 } from './scan.js'
-export type { RuneSet, RuneSlot, StatType, RuneStat, RuneData, RuneQuality } from './rune.js'
+export type {
+  RuneSet,
+  RuneSlot,
+  StatType,
+  RuneStat,
+  RuneData,
+  RuneQuality,
+  RuneMarker,
+} from './rune.js'
+export { RUNE_MARKER_COLORS } from './rune.js'
 export {
   SUBSTAT_ROLL_RANGES,
   ANCIENT_SUBSTAT_BASE_RANGES,
@@ -38,6 +47,8 @@ export {
   SET_STRENGTH,
   SET_STRENGTH_THRESHOLD_BONUS,
   SET_ARCHETYPE_AFFINITY,
+  MAX_STAT_BY_RARITY,
+  GEM_PRIORITY_BY_SLOT,
 } from './rune-data.js'
 export type {
   GrindRarity,

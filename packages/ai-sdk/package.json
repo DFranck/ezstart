@@ -1,10 +1,37 @@
 {
   "name": "@ezstart/ai-sdk",
   "version": "1.0.0",
-  "type": "module",
   "description": "Unified AI SDK with multi-provider support (OpenAI, Gemini, Claude) for backend and frontend",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/ai-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/ai-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "ai",
+    "openai",
+    "gemini",
+    "claude",
+    "sdk",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,6 +40,10 @@
     "./client": {
       "types": "./dist/client.d.ts",
       "default": "./dist/client.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     },
     "./types": {
       "types": "./dist/types/index.d.ts",
@@ -23,11 +54,13 @@
     "build": "tsc -b",
     "dev": "tsc -b --watch",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",
-    "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@anthropic-ai/sdk": "^0.39.0",
     "@google/generative-ai": "^0.21.0",
@@ -46,6 +79,10 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.12",
     "react": "^19.1.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

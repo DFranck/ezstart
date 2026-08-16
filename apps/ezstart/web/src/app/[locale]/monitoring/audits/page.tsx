@@ -1,7 +1,7 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
@@ -69,7 +69,7 @@ function AuditsMonitoringContent() {
         ? error.message === 'Failed to fetch'
           ? t('apiOffline')
           : error.message
-        : 'Unknown error'
+        : t('unknownError')
 
     return (
       <Section size="full">
@@ -174,11 +174,6 @@ export default function AuditsMonitoringPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

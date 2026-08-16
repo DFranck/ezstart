@@ -11,7 +11,8 @@
     "bench": "Bench",
     "history": "Historique",
     "data": "Données",
-    "sources": "Sources"
+    "sources": "Sources",
+    "calculate": "Calculer"
   },
   "actions": {
     "upload": "Importer",
@@ -334,5 +335,115 @@
     "archetype": "Archetype",
     "description": "Description",
     "statPriority": "Priorite des Stats"
+  },
+  "calculate": {
+    "title": "Calculer",
+    "form": {
+      "title": "Donnees de la Rune",
+      "slot": "Slot",
+      "slotMainHint": "Stats principales possibles : {stats}",
+      "set": "Set",
+      "quality": "Qualite",
+      "quality_normal": "Normal",
+      "quality_magic": "Magique",
+      "quality_rare": "Rare",
+      "quality_hero": "Heroique",
+      "quality_legend": "Legendaire",
+      "level": "Niveau",
+      "ancient": "Rune ancienne",
+      "mainStat": "Stat principale",
+      "substats": "Sous-stats",
+      "substatsHint": "({expected} attendues)",
+      "substatN": "Sub {n}",
+      "innate": "Stat innee",
+      "optional": "Optionnel",
+      "statType": "Type de stat",
+      "none": "Aucune",
+      "profile": "Profil",
+      "profile_early": "Debutant",
+      "profile_mid": "Intermediaire",
+      "profile_late": "Endgame",
+      "analyze": "Analyser",
+      "analyzing": "Analyse en cours...",
+      "reset": "Reinitialiser"
+    },
+    "output": {
+      "placeholder": "Remplissez les donnees de la rune et cliquez sur Analyser.",
+      "success": "Analyse terminee",
+      "marker": "Marqueur",
+      "rarityComparison": "Comparaison par rarete",
+      "stat": "Stat",
+      "value": "Valeur",
+      "heroMax": "Max hero",
+      "legendMax": "Max legende",
+      "status": "Statut",
+      "aboveHero": "Au-dessus hero",
+      "structure": "Structure",
+      "grindable": "Sous-stats grindables",
+      "deadStats": "Stats mortes",
+      "efficiency": "Efficacite (Barion)",
+      "current": "Actuelle",
+      "afterGrind": "Apres grind max",
+      "potential12": "Potentiel a +12",
+      "gemSimulation": "Simulation gemme",
+      "gem": "{from} → {to}",
+      "recommendation": "Recommandation joueur",
+      "error": "Echec de l'analyse"
+    }
+  },
+  "runeMarker": {
+    "TRUE_LEG_MIN": "Vrai Minimum Légende",
+    "TRUE_HERO_MIN": "Vrai Minimum Héros",
+    "TRUE_RARE_MIN": "Vrai Minimum Rare",
+    "REAPP": "Réappraiser",
+    "GEM": "Gem en priorité",
+    "GRIND": "Grind en priorité",
+    "TEST": "À tester",
+    "SELL": "Vendre",
+    "descriptions": {
+      "TRUE_LEG_MIN": "Dépasse le maximum théorique d'un Héros parfait",
+      "TRUE_HERO_MIN": "Dépasse le maximum théorique d'un Rare parfait",
+      "TRUE_RARE_MIN": "Structure valide, garder pour début/milieu de jeu",
+      "REAPP": "Set/slot premium, réappraiser pour de meilleurs rolls",
+      "GEM": "Gemmer la stat morte d'abord, puis réévaluer",
+      "GRIND": "Structure valide, grinder pour finaliser la valeur",
+      "TEST": "Continuer à upgrader pour évaluer",
+      "SELL": "Ne passe aucun seuil minimum de rareté"
+    }
+  },
+  "status": {
+    "title": "Statut",
+    "intro": "État en temps réel des services de la plateforme Gacha Analyzer. Actualisé automatiquement toutes les 30 s.",
+    "componentsHeading": "Composants du service",
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "Aucun incident actif signalé.",
+    "lastCheckedLabel": "Dernière vérification",
+    "responseTimeLabel": "Temps de réponse",
+    "refreshHint": "Actualisation automatique toutes les {seconds} s",
+    "refreshButton": "Actualiser",
+    "dependenciesLabel": "Dépendances",
+    "checkStatus": {
+      "ok": "OK",
+      "degraded": "Lent",
+      "down": "Hors service"
+    },
+    "summary": {
+      "operational": "Tous les systèmes sont opérationnels",
+      "degraded": "Interruption partielle de service",
+      "down": "Panne majeure",
+      "checking": "Vérification en cours"
+    },
+    "state": {
+      "operational": "Opérationnel",
+      "degraded": "Dégradé",
+      "down": "Hors ligne",
+      "checking": "Vérification"
+    },
+    "services": {
+      "gachaApi": "API Gacha Analyzer",
+      "gachaApiDescription": "Scans vision, historique, recommandations",
+      "ezauthApi": "API EZAuth",
+      "ezauthApiDescription": "Authentification, sessions, OAuth, clés API"
+    }
   }
 }

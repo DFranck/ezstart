@@ -31,7 +31,7 @@ import { CheckIcon, XIcon } from 'lucide-react'
  *   showStrength
  *   showRequirements
  *   requirements={[
- *     { test: /.{8,}/, label: 'At least 8 characters' },
+ *     { test: /.{12,}/, label: 'At least 12 characters' },
  *     { test: /[A-Z]/, label: 'One uppercase letter' },
  *     { test: /[0-9]/, label: 'One number' }
  *   ]}
@@ -41,6 +41,21 @@ import { CheckIcon, XIcon } from 'lucide-react'
 export interface PasswordRequirement {
   test: RegExp
   label: string
+}
+
+export interface PasswordInputTexts {
+  /** sr-only text when password is hidden (eye icon shown) */
+  showPassword?: string
+  /** sr-only text when password is visible (eye-off icon shown) */
+  hidePassword?: string
+  /** Label preceding the strength badge */
+  strengthLabel?: string
+  /** Strength badges in increasing order */
+  strengthWeak?: string
+  strengthFair?: string
+  strengthGood?: string
+  strengthStrong?: string
+  strengthEmpty?: string
 }
 
 export interface PasswordInputProps extends Omit<
@@ -57,36 +72,51 @@ export interface PasswordInputProps extends Omit<
   showRequirements?: boolean
   /** Password requirements to check */
   requirements?: PasswordRequirement[]
+  /** Translatable strings — defaults to English. Pass to localize. */
+  texts?: PasswordInputTexts
+}
+
+const DEFAULT_TEXTS: Required<PasswordInputTexts> = {
+  showPassword: 'Show password',
+  hidePassword: 'Hide password',
+  strengthLabel: 'Password strength:',
+  strengthWeak: 'Weak',
+  strengthFair: 'Fair',
+  strengthGood: 'Good',
+  strengthStrong: 'Strong',
+  strengthEmpty: 'No password',
 }
 
 const DEFAULT_REQUIREMENTS: PasswordRequirement[] = [
-  { test: /.{8,}/, label: 'At least 8 characters' },
+  { test: /.{12,}/, label: 'At least 12 characters' },
   { test: /[a-z]/, label: 'One lowercase letter' },
   { test: /[A-Z]/, label: 'One uppercase letter' },
   { test: /[0-9]/, label: 'One number' },
 ]
+
+type StrengthBucket = 'empty' | 'weak' | 'fair' | 'good' | 'strong'
 
 function calculateStrength(
   password: string,
   requirements: PasswordRequirement[]
 ): {
   score: number
-  label: string
+  bucket: StrengthBucket
   color: string
 } {
-  if (!password) return { score: 0, label: 'No password', color: 'bg-gray-300' }
+  if (!password) return { score: 0, bucket: 'empty', color: 'bg-muted' }
 
   const passed = requirements.filter(req => req.test.test(password)).length
   const percentage = (passed / requirements.length) * 100
 
   if (percentage < 50) {
-    return { score: percentage, label: 'Weak', color: 'bg-destructive' }
+    return { score: percentage, bucket: 'weak', color: 'bg-destructive' }
   } else if (percentage < 75) {
-    return { score: percentage, label: 'Fair', color: 'bg-yellow-500' }
+    return { score: percentage, bucket: 'fair', color: 'bg-warning' }
   } else if (percentage < 100) {
-    return { score: percentage, label: 'Good', color: 'bg-blue-500' }
+    return { score: percentage, bucket: 'good', color: 'bg-info' }
   } else {
-    return { score: percentage, label: 'Strong', color: 'bg-green-500' }
+    return { score: percentage, bucket: 'strong', color: 'bg-success' }
   }
 }
 
@@ -99,6 +129,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
       showStrength = false,
       showRequirements = false,
       requirements = DEFAULT_REQUIREMENTS,
+      texts,
       value,
       ...props
     },
@@ -108,6 +139,14 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     const size = (sizeProp ?? inherited.size) as React.ComponentProps<typeof Input>['size']
     const [showPassword, setShowPassword] = useState(false)
     const [strength, setStrength] = useState(calculateStrength('', requirements))
+    const t = { ...DEFAULT_TEXTS, ...texts }
+    const strengthLabels: Record<StrengthBucket, string> = {
+      empty: t.strengthEmpty,
+      weak: t.strengthWeak,
+      fair: t.strengthFair,
+      good: t.strengthGood,
+      strong: t.strengthStrong,
+    }
 
     const passwordValue = (value as string) || ''
 
@@ -147,7 +186,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                 icon2="lucide:EyeOff"
                 isToggled={showPassword}
               />
-              <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+              <span className="sr-only">{showPassword ? t.hidePassword : t.showPassword}</span>
             </Button>
           )}
         </div>
@@ -156,16 +195,16 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         {showStrength && passwordValue && (
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Password strength:</span>
+              <span className="text-muted-foreground">{t.strengthLabel}</span>
               <span
                 className={cn('font-medium', {
-                  'text-destructive': strength.label === 'Weak',
-                  'text-yellow-600 dark:text-yellow-500': strength.label === 'Fair',
-                  'text-blue-600 dark:text-blue-500': strength.label === 'Good',
-                  'text-green-600 dark:text-green-500': strength.label === 'Strong',
+                  'text-destructive': strength.bucket === 'weak',
+                  'text-warning': strength.bucket === 'fair',
+                  'text-info': strength.bucket === 'good',
+                  'text-success': strength.bucket === 'strong',
                 })}
               >
-                {strength.label}
+                {strengthLabels[strength.bucket]}
               </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -186,7 +225,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                 <li
                   key={index}
                   className={cn('flex items-center gap-2', {
-                    'text-green-600 dark:text-green-500': passed,
+                    'text-success': passed,
                     'text-muted-foreground': !passed,
                   })}
                 >

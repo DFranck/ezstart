@@ -1,8 +1,30 @@
 # E2E Tests — EZAuth
 
 **Derniere execution complete :** 2026-04-05
+**Dernier audit smoke (live dev) :** 2026-04-20
 **Environnement :** Dev (localhost)
 **Legende :** ✅ pass | ❌ fail | ⏳ a tester | ⚠️ partiel
+
+---
+
+## Audit smoke 2026-04-20 (live MCP)
+
+Audit rapide pour confirmer l'état réel (après doutes sur staleness).
+
+| Test                                 | Resultat | Comment                                                                                                        |
+| ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `GET /health` api-ezauth (6110)      | ✅       | `{"status":"ok","service":"ezauth"}`                                                                           |
+| `GET /en/login` web-ezauth (6111)    | ✅ rend  | Mais "Sign in to access **EZStart**" (bug fallback 'ezstart' au lieu de 'ezauth')                              |
+| `GET /en/login?key=ez_pk_invalid`    | ✅       | Form disabled + banner rouge "Invalid API Key — ez_pk_invali..."                                               |
+| `GET /en/auth/callback?code=fake`    | ✅       | Erreur propre "Invalid or expired authorization code" (PAS "No authorization code found" comme annoncé à tort) |
+| `GET /api/keys/config?key=xxx`       | ✅       | `{"success":false,"error":{"message":"Invalid API key"}}` bien formé                                           |
+| `GET /en` ezpay (6131)               | ✅       | Landing complète, features, pricing placeholder, footer                                                        |
+| ezpay "Sign In" → redirect ezauth    | ⚠️       | Redirige avec `?app=ezpay` legacy, PAS `?key=ez_pk_...` (integration publishable key manquante)                |
+| DevModeBanner sur ezauth first-party | ❌       | Reste visible ("Dev Mode — No API key configured") alors que scope='first-party'                               |
+
+**Conclusion audit :** callback NON cassé (était une info stale), bugs réels = fallback appName + DevModeBanner first-party + ezpay pas migré vers publishable key.
+
+---
 
 ---
 

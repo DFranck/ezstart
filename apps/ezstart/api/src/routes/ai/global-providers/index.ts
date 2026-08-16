@@ -11,7 +11,7 @@
  * - DELETE /api/ai/global-providers/:id          -> delete global provider config
  */
 
-import { Router, createRoleMiddleware } from '@ezstart/express-core'
+import { Router, createRoleMiddleware } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listGlobalProvidersRouter, { listGlobalProvidersRegistry } from './listGlobalProviders.js'
@@ -31,9 +31,11 @@ export const globalProvidersRegistries = [
 
 const router: import('express').Router = Router()
 
-// All global-provider routes require auth + superadmin
-router.use(authMiddleware)
-router.use(requireSuperAdmin)
+// This parent is mounted at /api/ai (no /global-providers prefix) — children own
+// '/global-providers' basePath via createRouterWithDoc. Scope middlewares so they
+// don't leak to sibling AI features.
+router.use('/global-providers', authMiddleware)
+router.use('/global-providers', requireSuperAdmin)
 
 router.use(listGlobalProvidersRouter)
 router.use(createGlobalProviderRouter)

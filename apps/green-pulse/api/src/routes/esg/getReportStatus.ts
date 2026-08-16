@@ -10,7 +10,7 @@ import {
   createRouterWithDoc,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { esgService } from '../../services/esg.service.js'
 
 export const getReportStatusRegistry = new OpenAPIRegistry()

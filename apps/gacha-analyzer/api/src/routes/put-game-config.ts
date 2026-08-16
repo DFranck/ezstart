@@ -3,13 +3,8 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import {
-  Router,
-  sendSuccess,
-  sendError,
-  sendValidationError,
-  findOneAndUpdate,
-} from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/api-core'
+import { findOneAndUpdate } from '../utils/mongoose-query.js'
 import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'

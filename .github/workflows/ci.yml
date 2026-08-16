@@ -1,12 +1,30 @@
 name: CI
+
 on:
   pull_request:
-    branches: [master]
+    branches: [master, staging]
+    paths-ignore:
+      - '**/*.md'
+      - 'BACKLOG.md'
+      - 'BACKLOG-HISTORY.md'
+      - 'docs/**'
+      - '.claude/**'
   push:
-    branches: [master]
+    branches: [master, staging]
+    paths-ignore:
+      - '**/*.md'
+      - 'BACKLOG.md'
+      - 'BACKLOG-HISTORY.md'
+      - 'docs/**'
+      - '.claude/**'
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  ci:
+  drift:
+    name: Generator drift check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +41,25 @@ jobs:
         run: |
           pnpm run generate
           git diff --exit-code || (echo "::error::Generator outputs drifted — run 'pnpm generate' locally and commit." && exit 1)
+
+  test:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      # Note: root engines.node pins 20.18.x for the dev environment. pnpm
+      # warns but doesn't fail on Node 18/22 unless engine-strict=true (not
+      # set here). The >=18.0.0 signal lives in publishable packages.
+      - run: pnpm install --frozen-lockfile
       # Build packages + APIs only (webs are built by Vercel)
       - run: pnpm turbo build --filter='./packages/*' --filter='api-*' --filter='@ezbill/types' --filter='@ezbill/templates' --filter='@gacha-analyzer/types' --filter='@green-pulse/types'
       # Typecheck everything (fast, no build needed)

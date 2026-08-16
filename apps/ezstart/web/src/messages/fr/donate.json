@@ -1,5 +1,9 @@
 {
   "donate": {
+    "landing": {
+      "title": "Soutenir EZStart",
+      "description": "Si vous appréciez EZStart et souhaitez soutenir son développement, chaque contribution aide à maintenir le projet vivant et en évolution. Merci !"
+    },
     "success": {
       "message": "Merci ! Votre don a bien été reçu.",
       "redirecting": "Redirection vers l'accueil...",

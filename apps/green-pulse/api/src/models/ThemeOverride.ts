@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema } from 'mongoose'
 
 export interface ThemeOverride {
@@ -37,5 +37,8 @@ const themeOverrideSchema = new Schema<ThemeOverride>(
 
 export async function getThemeOverrideModel() {
   const mongoose = await connectToMongo('green-pulse')
-  return mongoose.models.ThemeOverride || mongoose.model<ThemeOverride>('ThemeOverride', themeOverrideSchema)
+  return (
+    mongoose.models.ThemeOverride ||
+    mongoose.model<ThemeOverride>('ThemeOverride', themeOverrideSchema)
+  )
 }

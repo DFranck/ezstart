@@ -2,8 +2,17 @@
  * OpenAI Provider
  */
 
+import '../_internal/server-only.js'
+
 import OpenAI from 'openai'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse } from './base.js'
+import {
+  assertValidModelName,
+  extractErrorMessage,
+  type HealthCheckResult,
+  type IAIProvider,
+  type ProviderSendOptions,
+  type ProviderResponse,
+} from './base.js'
 
 export interface OpenAIProviderConfig {
   apiKey?: string
@@ -42,7 +51,38 @@ export class OpenAIProvider implements IAIProvider {
     }
   }
 
+  getModel(): string {
+    return this.model
+  }
+
+  setModel(newModel: string): void {
+    assertValidModelName(newModel)
+    this.model = newModel
+  }
+
+  /**
+   * Cheap health check via `models.list()` — uses the API key but doesn't
+   * consume any tokens. Aborts with the provided signal.
+   */
+  async healthCheck(signal?: AbortSignal): Promise<HealthCheckResult> {
+    const started = Date.now()
+    try {
+      // `models.list()` accepts an optional RequestOptions with signal
+      await this.client.models.list({ signal })
+      return { ok: true, latencyMs: Date.now() - started }
+    } catch (error) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - started,
+        error: extractErrorMessage(error),
+      }
+    }
+  }
+
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
+    // Per-request model override — does NOT mutate `this.model`.
+    const requestModel = options.model ?? this.model
+    if (options.model !== undefined) assertValidModelName(options.model)
     // Build messages array
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = []
 
@@ -85,12 +125,12 @@ export class OpenAIProvider implements IAIProvider {
 
     // Streaming mode
     if (options.streaming?.enabled) {
-      return this.handleStreaming(messages, options)
+      return this.handleStreaming(messages, options, requestModel)
     }
 
     // Regular mode (non-streaming)
     const response = await this.client.chat.completions.create({
-      model: this.model,
+      model: requestModel,
       messages,
       temperature: options.temperature ?? DEFAULT_TEMPERATURE,
       // Fall back to DEFAULT_MAX_TOKENS so a missing caller value never
@@ -138,10 +178,11 @@ export class OpenAIProvider implements IAIProvider {
 
   private async handleStreaming(
     messages: OpenAI.Chat.ChatCompletionMessageParam[],
-    options: ProviderSendOptions
+    options: ProviderSendOptions,
+    model: string
   ): Promise<ProviderResponse> {
     const stream = await this.client.chat.completions.create({
-      model: this.model,
+      model,
       messages,
       temperature: options.temperature ?? DEFAULT_TEMPERATURE,
       max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,

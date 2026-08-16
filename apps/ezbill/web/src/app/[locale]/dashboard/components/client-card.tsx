@@ -9,7 +9,7 @@ import {
   Div,
   Span,
 } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 type Props = { client: Client }
 const ClientCard = ({ client }: Props): React.JSX.Element => {

@@ -18,7 +18,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
@@ -32,12 +32,22 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(ssoAuthorizeRegistry, router)
 
 // TODO: prefer per-userId rate limiting once express-core exposes a userId keyer.
-// For now, IP-based strict limiter (5 req/min) is sufficient given the 60s TTL.
-const ssoAuthorizeRateLimiter = createStrictRateLimiter()
+// 10 req/min/IP — matches sso-exchange budget so a normal cross-app SSO burst
+// (user navigates to several apps in quick succession) doesn't get throttled.
+const ssoAuthorizeRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 10,
+})
 
 const ssoAuthorizeRequestSchema = z.object({
-  app: z.string().min(1, 'app is required'),
-  redirectUri: z.string().url('redirectUri must be a valid URL'),
+  app: z
+    .string()
+    .min(1, 'app is required')
+    .describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirectUri: z
+    .string()
+    .url('redirectUri must be a valid URL')
+    .describe('URL on the target app to redirect to after SSO exchange'),
 })
 
 const ssoAuthorizeResponseSchema = z.object({
@@ -77,7 +87,7 @@ const ssoAuthorizeController = async (req: Request, res: Response) => {
     const message = error instanceof Error ? error.message : 'SSO authorize failed'
     logger.warn({ err: message }, 'SSO authorize error')
 
-    // Redirect-allowlist / validation errors are 400
+    // Redirect-allowlist / validation errors are intentional, client-safe 400s.
     if (
       message.startsWith('Disallowed redirectUri') ||
       message.startsWith('Invalid redirectUri') ||
@@ -85,7 +95,9 @@ const ssoAuthorizeController = async (req: Request, res: Response) => {
     ) {
       return sendError(res, message, 400)
     }
-    return sendError(res, message, 500)
+    // MED-1 — anything else is an unexpected error; return a stable generic
+    // message so internal detail (DB/Mongoose, etc.) never leaks to the client.
+    return sendError(res, 'SSO authorize failed', 500)
   }
 }
 

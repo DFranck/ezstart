@@ -10,7 +10,8 @@ import {
   Router,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -26,33 +27,42 @@ const healthChecker = new HealthChecker()
 // ========================================
 
 const projectIdParamSchema = z.object({
-  projectId: z.string().describe('Project identifier (e.g. ezauth, ezbill)'),
+  projectId: z.string().openapi({ description: 'Project identifier (e.g. ezauth, ezbill)' }),
 })
 
-const projectHistoryQuerySchema = z.object({
-  hours: z.coerce.number().default(24).describe('Time range in hours'),
-  limit: z.coerce.number().default(100).describe('Number of history entries per service'),
+// Note: previous schema accepted unbounded limit (default 100). Now uses
+// canonical PaginationQuerySchema (limit 1-100, default 50). `offset` is
+// extended in but unused by this handler (in-memory ring buffer).
+const projectHistoryQuerySchema = PaginationQuerySchema.extend({
+  hours: z.coerce.number().default(24).openapi({ description: 'Time range in hours' }),
 })
 
 const projectHistoryResponseSchema = z.object({
-  projectId: z.string(),
-  hours: z.number(),
-  services: z.array(
-    z.object({
-      serviceId: z.string(),
-      totalChecks: z.number(),
-      healthyChecks: z.number(),
-      uptimePercentage: z.number(),
-      avgResponseTime: z.number().nullable(),
-      history: z.array(
-        z.object({
-          status: z.enum(['healthy', 'unhealthy']),
-          responseTime: z.number().nullable(),
-          timestamp: z.string(),
-        })
-      ),
-    })
-  ),
+  projectId: z.string().describe('Project identifier (e.g. ezauth, ezbill)'),
+  hours: z.number().describe('Time window covered by the response in hours'),
+  services: z
+    .array(
+      z.object({
+        serviceId: z.string().describe('Service identifier (e.g. ezauth-api, ezauth-web)'),
+        totalChecks: z.number().describe('Total number of health checks in the window'),
+        healthyChecks: z.number().describe('Number of healthy checks in the window'),
+        uptimePercentage: z.number().describe('Uptime percentage over the window (0-100)'),
+        avgResponseTime: z
+          .number()
+          .nullable()
+          .describe('Average response time in ms (null when no checks)'),
+        history: z
+          .array(
+            z.object({
+              status: z.enum(['healthy', 'unhealthy']).describe('Health status at the checkpoint'),
+              responseTime: z.number().nullable().describe('Response time in ms (null on failure)'),
+              timestamp: z.string().describe('ISO timestamp of the check'),
+            })
+          )
+          .describe('Recent health check data points (newest first)'),
+      })
+    )
+    .describe('Per-service history aggregated for the project'),
 })
 
 // ========================================
@@ -62,8 +72,9 @@ const projectHistoryResponseSchema = z.object({
 const getProjectHistoryHandler = (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const hours = Number(req.query.hours) || 24
-    const limit = Number(req.query.limit) || 100
+    const parsed = projectHistoryQuerySchema.safeParse(req.query)
+    const hours = parsed.success ? parsed.data.hours : 24
+    const limit = parsed.success ? parsed.data.limit : 50
 
     // Find all services for this project (e.g. ezauth-api, ezauth-web)
     const serviceIds = Object.keys(MONITORED_SERVICES).filter(id => id.startsWith(`${projectId}-`))

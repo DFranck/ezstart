@@ -243,11 +243,11 @@ placeholder={t('searchPlaceholder')}
 
 ### Configuration Obligatoire
 
-**TOUJOURS** utiliser `@ezstart/next-theme` pour dark/light mode :
+**TOUJOURS** utiliser `@ezstart/ui/theme` pour dark/light mode :
 
 ```tsx
 // app/layout.tsx
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

@@ -13,7 +13,7 @@
  * - DELETE /api/receipts/:id/hard-delete    -> hardDeleteReceiptById
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import createReceiptRouter, { createReceiptRegistry } from './createReceipt.js'

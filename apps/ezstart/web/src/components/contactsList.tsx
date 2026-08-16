@@ -2,7 +2,7 @@ import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { Button, Icon, isValidIconName, LI, UL } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 type Props = { className?: string }
 

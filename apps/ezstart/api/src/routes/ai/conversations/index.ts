@@ -13,7 +13,7 @@
  * - POST   /api/ai/conversations/:id/restore  -> restoreConversation
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listConversationsRouter, { listConversationsRegistry } from './listConversations.js'
@@ -37,7 +37,10 @@ export const conversationRegistries = [
 ]
 
 const router: import('express').Router = Router()
-router.use(authMiddleware)
+// This parent is mounted at /api/ai (no /conversations prefix) — children own
+// '/conversations' basePath via createRouterWithDoc. Scope middleware to
+// '/conversations' so it doesn't leak to sibling AI features.
+router.use('/conversations', authMiddleware)
 
 router
   .use('/', listConversationsRouter)

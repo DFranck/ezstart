@@ -2,7 +2,7 @@
 
 import { Button, Div, H2, H3, Icon, Main, P, Section, Span } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 type LegalSection = {
   id: string

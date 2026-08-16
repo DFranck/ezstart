@@ -15,23 +15,24 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
-import { providerRegistry, enrichedAppProviderSchema } from '@ezstart/ai-sdk'
-import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk'
+} from '@ezstart/api-core'
+import { enrichedAppProviderSchema } from '@ezstart/ai-sdk'
+import { providerRegistry } from '@ezstart/ai-sdk/server'
+import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk/server'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 import { AppProvider, normalizeLegacyAppProvider } from '../../../models/AppProvider.js'
 
-const listQuerySchema = z.object({
-  app: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Filter by app name — matches providers scoped to this app or "*" (omit for all)'),
+const listQuerySchema = PaginationQuerySchema.extend({
+  app: z.string().min(1).optional().openapi({
+    description: 'Filter by app name — matches providers scoped to this app or "*" (omit for all)',
+  }),
   // Kept for backward-compat with the old `appName` query param.
-  appName: z.string().min(1).optional().describe('[Deprecated] Use `app` instead.'),
-  enabled: z.enum(['true', 'false']).optional().describe('Filter by enabled status'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
+  appName: z.string().min(1).optional().openapi({ description: '[Deprecated] Use `app` instead.' }),
+  enabled: z
+    .enum(['true', 'false'])
+    .optional()
+    .openapi({ description: 'Filter by enabled status' }),
 })
 
 // Response envelope matches the monorepo-wide `{ success, data, meta }` shape.
@@ -39,15 +40,21 @@ const listQuerySchema = z.object({
 // metadata (name, capabilities, model, registered flag) so the chat UI can
 // render selectors without a second round-trip.
 const listAppProvidersResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.object({
-    providers: z.array(enrichedAppProviderSchema),
-  }),
-  meta: z.object({
-    total: z.number(),
-    limit: z.number(),
-    offset: z.number(),
-  }),
+  success: z.literal(true).describe('Always true for success responses'),
+  data: z
+    .object({
+      providers: z
+        .array(enrichedAppProviderSchema)
+        .describe('Enriched app provider records (joined with the global registry)'),
+    })
+    .describe('Response payload'),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of app providers matching the filter'),
+      limit: z.number().describe('Page size'),
+      offset: z.number().describe('Pagination offset'),
+    })
+    .describe('Pagination metadata'),
 })
 
 const EMPTY_CAPABILITIES: ProviderCapabilities = {

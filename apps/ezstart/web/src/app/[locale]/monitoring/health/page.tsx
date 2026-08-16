@@ -1,7 +1,7 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
@@ -15,6 +15,7 @@ import { useMonitoringProjects } from '../hooks/useMonitoringProjects'
 import { useSocket } from '../hooks/useSocket'
 import { calculateOverallHealth, getMetricsData } from '@ezstart/monitoring/client'
 import type { ProjectHealth } from '@ezstart/monitoring'
+import { HealthCharts } from './components/HealthCharts'
 import { ProjectCard } from './components/ProjectCard'
 import { TrendingMetrics } from './components/TrendingMetrics'
 
@@ -109,6 +110,11 @@ function HealthMonitoringContent() {
         </Div>
       </Section>
 
+      {/* Aggregated historical charts (latency p95, uptime %, error rate) */}
+      <Section size="full" className="max-w-7xl">
+        <HealthCharts />
+      </Section>
+
       {/* Projects Grid Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
@@ -156,11 +162,6 @@ export default function HealthMonitoringPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

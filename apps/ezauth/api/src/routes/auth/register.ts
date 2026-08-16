@@ -3,14 +3,16 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
-  createVeryStrictRateLimiter,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import crypto from 'crypto'
 import { AuthService } from '../../services/auth.service.js'
+import { requireTurnstile } from '../../middleware/turnstile-required.js'
+import { checkDemoQuotas } from '../../middleware/check-demo-quotas.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
@@ -19,18 +21,26 @@ import type { EmailContext } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 import {
   registerRequestSchema,
   authCodeResponseSchema,
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
+import { WeakPasswordError, PwnedPasswordError } from '../../services/password-policy.service.js'
 
 export const registerRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(registerRegistry, router)
 
-// ✅ Rate limiting for register endpoint (3 req/hour per IP)
-const registerRateLimiter = createVeryStrictRateLimiter()
+// Rate limiting for register endpoint — 3 req/min per IP (anti-spam account creation).
+// Stricter than login (5/min) because each successful POST triggers an email send +
+// DB insert; abuse vector for both spam and resource exhaustion.
+const registerRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 3,
+  message: 'Too many registration attempts, please try again later.',
+})
 
 // Register new user
 const registerController = async (req: Request, res: Response) => {
@@ -65,10 +75,14 @@ const registerController = async (req: Request, res: Response) => {
         const params = buildAuthEmailParams(token, parsed.data.app, parsed.data.redirect_uri)
         const verifyUrl = `${getWebUrl('ezauth')}/verify-email?${params}`
 
+        // Body-locale wins (form-provided); otherwise infer from
+        // Accept-Language so the verification email matches the browser the
+        // user just registered from.
+        const locale = resolveUserLocale(req, parsed.data.locale)
         const ctx: EmailContext = {
           appName: appDisplayName,
           appKey: parsed.data.app,
-          locale: parsed.data.locale,
+          locale,
           overrides: parsed.data.emailOverride,
         }
         const rendered = emailVerificationTemplate({ verifyUrl }, ctx)
@@ -83,7 +97,7 @@ const registerController = async (req: Request, res: Response) => {
         })
 
         logger.info(
-          { email: user.email, locale: parsed.data.locale, appKey: parsed.data.app },
+          { email: user.email, locale, appKey: parsed.data.app },
           'Verification email sent after registration'
         )
       }
@@ -98,21 +112,47 @@ const registerController = async (req: Request, res: Response) => {
       message: 'User registered successfully. Please check your email to verify your account.',
     })
   } catch (error) {
+    // MED-1 — password-policy rejection → 422 with a stable, non-leaking code.
+    if (error instanceof WeakPasswordError || error instanceof PwnedPasswordError) {
+      return sendError(res, error.message, error.statusCode, { code: error.code })
+    }
+    // MED-3 — only the "user already exists" message is an intentional,
+    // client-safe signal; everything else returns a generic message so
+    // unexpected internal detail never leaks. The thrown error is logged.
     logger.error('Register error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Registration failed', 400)
+    const safeMessage =
+      error instanceof Error && error.message === 'User already exists with this email or username'
+        ? error.message
+        : 'Registration failed'
+    sendError(res, safeMessage, 400)
   }
 }
 
-docRouter.post('/register', registerRateLimiter, registerController, {
-  summary: 'Register new user',
-  tags: ['Authentication'],
-  bodySchema: registerRequestSchema,
-  responseSchema: authCodeResponseSchema,
-  status: 201,
-  extraResponses: {
-    400: { description: 'Registration failed', schema: errorResponseSchema },
-    429: { description: 'Too many registration attempts', schema: errorResponseSchema },
-  },
-})
+// `checkDemoQuotas` is mounted between the rate limiter and the turnstile
+// captcha so demo-targeted requests trip the sandbox quota gate FIRST.
+// Non-demo (`req.body.app !== '_docs-demo'`) traffic short-circuits the
+// middleware (no Mongo lookup) and falls through to the regular flow.
+docRouter.post(
+  '/register',
+  registerRateLimiter,
+  checkDemoQuotas,
+  requireTurnstile(),
+  registerController,
+  {
+    summary: 'Register new user',
+    tags: ['Authentication'],
+    bodySchema: registerRequestSchema,
+    responseSchema: authCodeResponseSchema,
+    status: 201,
+    extraResponses: {
+      400: { description: 'Registration failed', schema: errorResponseSchema },
+      422: {
+        description: 'Password too weak (`WEAK_PASSWORD`) or breached (`PWNED_PASSWORD`)',
+        schema: errorResponseSchema,
+      },
+      429: { description: 'Too many registration attempts', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

@@ -6,9 +6,10 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPaymentModel } from '../../models/Payment.js'
-import { optionalAuthMiddleware } from '../../middleware/auth.js'
+import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -20,15 +21,13 @@ const docRouter = createRouterWithDoc(listDonationsRegistry, router)
 // Zod Schemas
 // ========================================
 
-const donationsQuerySchema = z.object({
-  projectId: z.string().optional().describe('Filter by project ID'),
-  limit: z.coerce.number().default(20).describe('Number of donations to return'),
-  offset: z.coerce.number().default(0).describe('Number of donations to skip'),
+const donationsQuerySchema = PaginationQuerySchema.extend({
+  projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
 })
 
 const donationsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of public donations'),
+  payments: z.array(z.record(z.unknown())).describe('List of public donations'),
   meta: z
     .object({
       total: z.number().describe('Total number of donations matching the query'),
@@ -81,7 +80,7 @@ const getDonationsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/donations', optionalAuthMiddleware, getDonationsHandler, {
+docRouter.get('/donations', authOptionalJwtOrKey(), getDonationsHandler, {
   summary: 'Get public donations (testimonials wall)',
   tags: ['Donations'],
   querySchema: donationsQuerySchema,

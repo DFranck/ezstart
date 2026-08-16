@@ -1,12 +1,3 @@
-// CRITICAL: load root-only prefixed env BEFORE any other import so that
-// process.env.SENTRY_DSN / JWT_SECRET / MONGO_URL are populated before
-// Sentry init and before any module that checks them at import time.
-import { loadSharedEnv } from '@ezstart/config/server'
-loadSharedEnv({ app: 'ezbill', layer: 'api' })
-
-import { initSentry, Sentry } from '@ezstart/logger/server'
-
-// Initialize Sentry for EZBill API
-const sentry = initSentry('EZBill API')
-
-export { Sentry, sentry }
+// CRITICAL: must run BEFORE any import that reads JWT_SECRET / MONGO_URL at module eval time.
+import { instrumentApi } from '@ezstart/config/server'
+instrumentApi('ezbill')

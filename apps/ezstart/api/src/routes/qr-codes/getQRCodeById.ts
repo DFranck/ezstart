@@ -10,7 +10,7 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { QRCode } from '../../models/QRCode.js'
 import { isAdminFromToken } from './utils.js'
 

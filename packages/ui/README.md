@@ -1,166 +1,212 @@
 # @ezstart/ui
 
-Accessible UI component library built on shadcn/Radix for all @ezstart web apps.
+Accessible React UI component library built on shadcn + Radix, with semantic color tokens, dark mode, and 90+ components organized by atomic level.
 
-## Purpose
-
-Single source of truth for all UI components, ensuring consistent design, dark mode support, and accessibility across every web app. All user-facing HTML must use these components instead of native elements.
-
-## Tech Stack
-
-- React, Tailwind CSS (OKLCH semantic colors), Radix UI primitives
-- shadcn/ui base, customized with variants
-
-## Architecture
-
-### Feature Folders (where to find components)
-
-```
-ui/src/components/
-├── layout/        # Card, Main, Header, Footer, Sidebar
-├── forms/         # Input, Select, Checkbox, Switch, DatePicker
-├── navigation/    # Tabs, Breadcrumb, Pagination, Sidebar
-├── data-display/  # DataTable (TanStack), Badge, Avatar
-├── overlay/       # Dialog, Sheet, Popover, Tooltip, Drawer
-├── feedback/      # Alert, Skeleton, Progress, Spinner
-├── tag/           # H1-H6, P, Label, Text (semantic HTML wrappers)
-├── thread/        # Chat thread components
-├── media/         # Image, video components
-├── landing/       # Landing page sections
-└── theme-selector # Theme toggle
-```
-
-### Atomic Levels (how design tokens flow)
-
-Components are classified into 3 levels based on their dependency hierarchy. This determines how design tokens (`density`, `size`, `variant`) propagate:
-
-```
-Complex  →  reçoit le token, orchestre et drill à tous les enfants
-Composed →  reçoit le token, merge et drill aux enfants base
-Base     →  reçoit le token, APPLIQUE l'effet CSS réel
-```
-
-#### Base (46 components) — `@ezstart/ui/components/base`
-
-Primitives with **no UI component dependencies**. These are the components that **apply** design tokens (CSS padding, gap, font-size, etc.).
-
-| Category         | Components                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| **Forms**        | `Input`, `Label`, `Select`, `Switch`, `Textarea`                                                 |
-| **Feedback**     | `Progress`, `Skeleton`, `Spinner`, `Tooltip`, `Sonner`                                           |
-| **Data Display** | `Badge`, `Card`, `Table`, `SimpleBadge`                                                          |
-| **Overlay**      | `Dialog`, `Modal`, `Sheet`                                                                       |
-| **Navigation**   | `Tabs`                                                                                           |
-| **Media**        | `Chart`, `ImageCropper`, `Img`, `UptimeGraph`                                                    |
-| **Effects**      | `AnimatedCounter`, `AuroraBackground`, `InfiniteMovingCards`, `TextGradient`, `TypewriterEffect` |
-| **Tag**          | `Div`, `P`, `H1`-`H6`, `Section`, `Main`, `Span`, `Label` (semantic HTML wrappers)               |
-| **Thread**       | `Thread`, `ThreadHeader`, `ThreadWelcome`                                                        |
-| **Other**        | `Button`, `AnimatedIconToggle`, `Icon`, `SkipLink`                                               |
-
-**When adding a design token:** Add the CSS implementation here. Example: `density="compact"` on `Button` reduces padding from `p-3` to `p-1.5`.
-
-#### Composed (33 components) — `@ezstart/ui/components/composed`
-
-Components using **1-3 other UI components**. These **merge and drill** design tokens to their base children.
-
-| Category         | Components                                                                                                                          |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Forms**        | `Checkbox` (Label+Span), `PasswordInput` (Input+Button), `Form` (Label)                                                             |
-| **Data Display** | `Accordion` (Icon), `DataTable` (Table+Button+Input)                                                                                |
-| **Layout**       | `Footer`, `Header`, `MobileNavbar`, `SplitSection`                                                                                  |
-| **Thread**       | `ThreadComposer` (Button), `ThreadMessage` (Icon), `ThreadMessages`, `ThreadSidebarToggle` (Button+Icon), `ConversationItem` (Icon) |
-| **Navigation**   | `BackButton`, `Command`, `Dropdown`                                                                                                 |
-| **Overlay**      | `FloatingPanel`, `WelcomeModal`, `AlertDialog`                                                                                      |
-| **Utility**      | `LocaleSwitcher`, `PWAInstallPrompt`, `VersionSwitch`                                                                               |
-
-**When adding a design token:** Accept the prop, merge it with local defaults, then pass it down to base children. Example:
-
-```tsx
-// Composed: PasswordInput receives density and drills to Input + Button
-function PasswordInput({ density, ...props }) {
-  return (
-    <>
-      <Input density={density} {...props} />
-      <Button density={density} size="icon" />
-    </>
-  )
-}
-```
-
-#### Complex (10 components) — `@ezstart/ui/components/complex`
-
-Components using **4+ other UI components**. These **orchestrate and drill** design tokens through the entire tree.
-
-| Category       | Components                                        |
-| -------------- | ------------------------------------------------- |
-| **Layout**     | `ClientLayout` (8+ deps), `LayoutWithAside`       |
-| **Thread**     | `ThreadLayout` (4 deps), `ThreadSidebar` (4 deps) |
-| **Landing**    | `FeatureGrid`, `LandingHero`, `UseCases`          |
-| **Navigation** | `Stepper`                                         |
-| **Theme**      | `ThemeEditor` (9+ deps)                           |
-| **Utility**    | `ErrorBoundary`                                   |
-
-**When adding a design token:** Accept the prop at the top level and drill it down through every child layer. Example:
-
-```tsx
-// Complex: ThreadLayout drills density through the entire tree
-function ThreadLayout({ density, children }) {
-  return (
-    <ThreadSidebar density={density}>
-      {' '}
-      {/* → composed → base */}
-      <ThreadComposer density={density}>
-        {' '}
-        {/* → composed → base */}
-        <ThreadMessages density={density}>
-          {' '}
-          {/* → composed → base */}
-          {children}
-        </ThreadMessages>
-      </ThreadComposer>
-    </ThreadSidebar>
-  )
-}
-```
-
-### Token Propagation Flow
-
-```
-<AILayout density="compact">                    ← SDK component
-  └→ <ThreadLayout density="compact">           ← complex: drill
-      ├→ <ThreadSidebar density="compact">       ← complex: drill
-      │   └→ <ConversationItem density="compact"> ← composed: drill
-      │       └→ <Button density="compact">       ← base: APPLY CSS
-      ├→ <ThreadComposer density="compact">      ← composed: drill
-      │   └→ <Input density="compact">            ← base: APPLY CSS
-      │   └→ <Button density="compact">           ← base: APPLY CSS
-      └→ <ThreadMessages density="compact">      ← composed: drill
-          └→ <ThreadMessage density="compact">    ← composed: drill
-              └→ <Button density="compact">       ← base: APPLY CSS
-```
-
-## Usage
-
-```typescript
-// Standard — import everything from one place
-import { Button, Card, Input, DataTable } from '@ezstart/ui/components'
-
-// By level — optional, for clarity
-import { Button, Input } from '@ezstart/ui/components/base'
-import { DataTable } from '@ezstart/ui/components/composed'
-import { ThreadLayout } from '@ezstart/ui/components/complex'
-
-// Hooks & utilities
-import { useMediaQuery } from '@ezstart/ui/hooks'
-import { cn } from '@ezstart/ui/lib'
-```
-
-## Adding Components
+## Install
 
 ```bash
-pnpm --filter @ezstart/ui ui:add [component-name]
+npm install @ezstart/ui
+# Peer deps (auto-resolved in workspaces, install manually for standalone use):
+npm install react react-dom tailwindcss
 ```
 
-## Used By
+Wire the design tokens in your global CSS:
 
-All web apps and packages (auth-sdk, pay-sdk, ai-sdk, rbac, next-theme).
+```css
+/* app/globals.css */
+@import '@ezstart/ui/globals.css';
+```
+
+And the PostCSS config:
+
+```js
+// postcss.config.mjs
+import config from '@ezstart/ui/postcss.config'
+export default config
+```
+
+## Quickstart — Theme + first component
+
+Wrap your app in `<ThemeProvider>` and use semantic components instead of native HTML.
+
+```tsx
+// app/layout.tsx
+import { ThemeProvider } from '@ezstart/ui/theme'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+```tsx
+// app/page.tsx
+import { Card, CardHeader, CardContent, H1, P, Button, Input } from '@ezstart/ui/components'
+
+export default function Page() {
+  return (
+    <Card variant="floating">
+      <CardHeader>
+        <H1 size="h2">Welcome</H1>
+        <P>Sign in to continue.</P>
+      </CardHeader>
+      <CardContent>
+        <Input placeholder="Email" />
+        <Button>Continue</Button>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+### Design tokens
+
+Always use semantic color classes (`bg-primary`, `text-foreground`, `text-destructive`) rather than hardcoded colors (`bg-blue-500`, `text-red-600`). Semantic tokens auto-switch between light and dark mode.
+
+| Context     | Classes                                                            |
+| ----------- | ------------------------------------------------------------------ |
+| Background  | `bg-background`, `bg-card`, `bg-muted`, `bg-popover`, `bg-accent`  |
+| Text        | `text-foreground`, `text-muted-foreground`, `text-card-foreground` |
+| Primary     | `bg-primary`, `text-primary`, `text-primary-foreground`            |
+| Destructive | `bg-destructive`, `text-destructive`                               |
+| Border      | `border` (auto), `border-input`, `border-ring`                     |
+| Status      | `bg-success`, `bg-warning`, `bg-error`, `bg-info`                  |
+
+## Components overview
+
+Components are organized into **3 atomic levels** (base → composed → complex) and **feature folders** (forms, layout, data-display, etc.). All components accept variants via `class-variance-authority`.
+
+### Base (46 components)
+
+Primitives with no UI component dependencies. They **apply** design tokens (CSS padding, gap, font-size).
+
+| Category   | Components                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| Forms      | `Input`, `Label`, `Select`, `Switch`, `Textarea`                                                 |
+| Feedback   | `Progress`, `Skeleton`, `Spinner`, `Tooltip`, `Sonner`                                           |
+| Data       | `Badge`, `Card`, `Table`, `SimpleBadge`                                                          |
+| Overlay    | `Dialog`, `Modal`, `Sheet`                                                                       |
+| Navigation | `Tabs`                                                                                           |
+| Media      | `Chart`, `ImageCropper`, `Img`, `UptimeGraph`                                                    |
+| Effects    | `AnimatedCounter`, `AuroraBackground`, `InfiniteMovingCards`, `TextGradient`, `TypewriterEffect` |
+| Tag        | `Div`, `P`, `H1`-`H6`, `Section`, `Main`, `Span`, `Label`                                        |
+| Other      | `Button`, `AnimatedIconToggle`, `Icon`, `SkipLink`                                               |
+
+### Composed (33 components)
+
+Components using 1-3 other UI components. They **merge and drill** design tokens to base children.
+
+| Category   | Components                                                                    |
+| ---------- | ----------------------------------------------------------------------------- |
+| Forms      | `Checkbox`, `PasswordInput`, `Form`, `PasswordStrength`                       |
+| Data       | `Accordion`, `DataTable`                                                      |
+| Layout     | `Footer`, `Header`, `MobileNavbar`, `SplitSection`                            |
+| Navigation | `BackButton`, `Command`, `Dropdown`                                           |
+| Overlay    | `FloatingPanel`, `WelcomeModal`, `AlertDialog`                                |
+| Feedback   | `ErrorAlert`                                                                  |
+| Utility    | `LocaleSwitcher`, `PWAInstallPrompt`, `VersionSwitch`, `ScopeContextSwitcher` |
+
+### Complex (10 components)
+
+Components using 4+ other UI components. They **orchestrate and drill** design tokens through the entire tree.
+
+| Category   | Components                               |
+| ---------- | ---------------------------------------- |
+| Layout     | `ClientLayout`, `LayoutWithAside`        |
+| Thread     | `ThreadLayout`, `ThreadSidebar`          |
+| Landing    | `FeatureGrid`, `LandingHero`, `UseCases` |
+| Navigation | `Stepper`                                |
+| Theme      | `ThemeEditor`                            |
+| Utility    | `ErrorBoundary`                          |
+
+## API
+
+### Core entry points
+
+```ts
+import { Button, Card, Input } from '@ezstart/ui/components'
+import { useMediaQuery } from '@ezstart/ui/hooks'
+import { cn } from '@ezstart/ui/lib'
+import { ThemeProvider, useTheme } from '@ezstart/ui/theme'
+```
+
+| Entry point                | Content                                           |
+| -------------------------- | ------------------------------------------------- |
+| `@ezstart/ui/components`   | All 90+ components                                |
+| `@ezstart/ui/hooks`        | React hooks (`useMediaQuery`, `useDebounce`, ...) |
+| `@ezstart/ui/lib`          | Utilities (`cn`, color helpers)                   |
+| `@ezstart/ui/theme`        | `<ThemeProvider>`, `useTheme`, `ThemeSwitcher`    |
+| `@ezstart/ui/theme/server` | Server-only theme helpers (`resolveSsrTheme`)     |
+| `@ezstart/ui/templates`    | Page templates                                    |
+| `@ezstart/ui/styles`       | Style tokens                                      |
+| `@ezstart/ui/utils`        | Utilities                                         |
+
+### Token propagation
+
+Pass `density="compact"` (or `size`, `variant`) at the top of a tree and it drills down through composed and complex components to the base layer where the actual CSS effect is applied.
+
+```tsx
+<ClientLayout density="compact">
+  {/* DataTable inside automatically renders compact rows */}
+  <DataTable data={...} columns={...} />
+</ClientLayout>
+```
+
+### Customization
+
+- **Variants** — most components accept `variant`, `size`, `density` props powered by `class-variance-authority`.
+- **Theme tokens** — override CSS variables in your global CSS to change brand colors, radius, spacing.
+- **`className` override** — every component accepts `className` for one-off Tailwind tweaks (merged via `tailwind-merge`).
+
+```tsx
+<Button variant="destructive" size="sm" className="w-full" />
+<Card variant="floating">...</Card>
+<H2 size="h3">...</H2> {/* renders an h2 with h3 styles */}
+```
+
+## Adding new components
+
+```bash
+pnpm --filter @ezstart/ui ui:add <component-name>
+```
+
+Then export from the appropriate level barrel (`src/components/base/index.ts`, `composed/index.ts`, or `complex/index.ts`).
+
+## Landing primitives
+
+Drop-in abstractions for marketing pages: `<LandingHero>`, `<FeatureGrid>`, `<HowItWorksSteps>`, `<CodeBlock>`, `<CTA>`, `<LandingSection>`. Each is data-driven (props in, layout out).
+
+```tsx
+import { LandingHero, FeatureGrid, CTA } from '@ezstart/ui/components'
+
+<LandingHero
+  variant="withGradient"
+  align="center"
+  badge="Authentication as a Service"
+  title="Authentication for every app"
+  description="One SDK. Any framework. Zero config."
+  primaryCTA="Get Started Free"
+  primaryCTAHref="/register"
+/>
+
+<FeatureGrid features={features} columns={3} />
+
+<CTA
+  variant="centered"
+  intent="primary"
+  title="Ready to get started?"
+  primaryText="Start Free"
+  primaryHref="/register"
+/>
+```
+
+## Related
+
+- [`@ezstart/auth-sdk`](../auth-sdk) — Auth components built on top of this UI library.
+- [`@ezstart/pay-sdk`](../pay-sdk) — Payment components built on top of this UI library.
+- [`@ezstart/api-sdk`](../api-sdk) — HTTP client used by SDK components.

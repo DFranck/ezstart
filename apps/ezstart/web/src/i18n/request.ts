@@ -30,6 +30,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
     monitoring,
     admin,
     donate,
+    saasPreview,
+    status,
+    pages,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -57,6 +60,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/admin.json`),
     // donate
     import(`../messages/${locale}/donate.json`),
+    // saas-preview (draft landing)
+    import(`../messages/${locale}/saas-preview.json`),
+    // status (public)
+    import(`../messages/${locale}/status.json`),
+    // statics pages (docs, about, contact, privacy, terms, login, pricing, blog, changelog)
+    import(`../messages/${locale}/pages.json`),
   ])
 
   return {
@@ -80,6 +89,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
       monitoring.default,
       admin.default,
       donate.default,
+      saasPreview.default,
+      status.default,
+      pages.default,
     ]),
   }
 })

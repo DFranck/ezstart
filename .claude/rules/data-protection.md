@@ -1,5 +1,9 @@
 ## 🚨 RÈGLES CRITIQUES - PROTECTION DES DONNÉES (2025-10-26)
 
+**Toutes les règles de ce fichier sont 🔴 P0 (non-négociables) — il n'y a pas de "P1" sur la protection prod.** Voir `standard.md` pour le système de priorisation global.
+
+Pour les aspects étendus (backups testés, restore drill, point-in-time recovery, soft delete, migrations) voir [`standard-saas-data.md`](./standard-saas-data.md).
+
 **⚠️ INCIDENT:** Le 26/10/2025, des tests ont supprimé TOUTES les données de production MongoDB (users, clients, invoices). Ces règles DOIVENT être suivies pour éviter que ça se reproduise.
 
 ### ❌ INTERDICTIONS ABSOLUES
@@ -66,6 +70,17 @@
 4. **TOUJOURS upgrader vers M2+ ($9/mois) si données critiques**
    - M0 = Pas de backups automatiques
    - M2+ = Snapshots automatiques + point-in-time recovery
+
+### 🛟 Stratégie backup obligatoire
+
+Voir [`MONGODB_BACKUP.md`](../../MONGODB_BACKUP.md) pour la stratégie complète. TL;DR :
+
+- Atlas M0 = pas de backup. **INTERDIT en prod.**
+- Choisir UNE option :
+  1. Atlas M2+ ($9/mo) — automatique, recommandé
+  2. Cron weekly via [`scripts/backup-mongodb.sh`](../../scripts/backup-mongodb.sh) (S3-compatible storage)
+  3. GitHub Actions scheduled workflow ([`.github/workflows/mongo-backup.yml`](../../.github/workflows/mongo-backup.yml))
+- **Restore drill obligatoire chaque trimestre** — un backup non testé = pas de backup.
 
 ### 📋 Checklist Avant Chaque Test
 

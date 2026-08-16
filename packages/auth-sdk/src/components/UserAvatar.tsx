@@ -1,7 +1,8 @@
 'use client'
 
+import { Span } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
-import { useAuth } from '../provider.js'
+import { useAuth } from '../react/hooks.js'
 
 export interface UserAvatarProps {
   /** Avatar size */
@@ -36,6 +37,15 @@ function getInitials(user: {
   return user.email.slice(0, 2).toUpperCase()
 }
 
+/**
+ * Renders the authenticated user's avatar — image when available, falls
+ * back to initials derived from the user's name or email.
+ *
+ * @example
+ * ```tsx
+ * <UserAvatar size="md" />
+ * ```
+ */
 export function UserAvatar({ size = 'md', className, user: externalUser }: UserAvatarProps) {
   const auth = useAuth()
   const user = externalUser || auth.user
@@ -57,7 +67,7 @@ export function UserAvatar({ size = 'md', className, user: externalUser }: UserA
   }
 
   return (
-    <span
+    <Span
       className={cn(
         'rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium shrink-0 select-none',
         sizeClass,
@@ -66,6 +76,6 @@ export function UserAvatar({ size = 'md', className, user: externalUser }: UserA
       aria-label={user.username}
     >
       {initials}
-    </span>
+    </Span>
   )
 }

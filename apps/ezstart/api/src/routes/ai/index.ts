@@ -21,8 +21,8 @@
  * - DELETE /api/ai/prompts/:key                     -> delete prompt (auth)
  */
 
-import { Router, createRateLimiter } from '@ezstart/express-core'
-import { authMiddleware, optionalAuthMiddleware } from '../../middleware/auth.js'
+import { Router, createRateLimiter } from '@ezstart/api-core'
+import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import chatRouter from './chat/sendMessage.js'
 import streamRouter from './chat/streamMessage.js'
 import conversationsRouter from './conversations/index.js'
@@ -36,6 +36,7 @@ const router: import('express').Router = Router()
 
 // Chat — optional auth (anonymous users can chat, logged-in users get conversations saved)
 // Stream route BEFORE chat to avoid /chat catching /chat/stream
+// Chat routes keep their explicit prefix because their child routers use basePath '/' (no double-mount).
 //
 // V1 pro-ready: 200 req/min per user covers chat (active typing + SSE streaming +
 // multi-tab + admin panel) without disturbing real users. Bump higher (500+) when
@@ -52,11 +53,14 @@ router.use(
   createRateLimiter({ windowMs: 60 * 1000, max: 200 }),
   chatRouter
 )
-router.use('/conversations', conversationsRouter)
-router.use('/prompts', promptsRouter)
-router.use('/providers', providersRouter)
-router.use('/app-providers', appProvidersRouter)
-router.use('/global-providers', globalProvidersRouter)
-router.use('/usage', usageRouter)
+// Sub-feature routers below own their basePath via createRouterWithDoc(..., '/<feature>'),
+// so they are mounted at '/' here to avoid the historical double-mount that the
+// pre-fix createRouterWithDoc silently swallowed.
+router.use(conversationsRouter)
+router.use(promptsRouter)
+router.use(providersRouter)
+router.use(appProvidersRouter)
+router.use(globalProvidersRouter)
+router.use(usageRouter)
 
 export default router

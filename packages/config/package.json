@@ -1,10 +1,34 @@
 {
   "name": "@ezstart/config",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Centralized configuration for all environments, URLs, and CORS",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/config"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/config",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "config",
+    "configuration",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -30,6 +54,16 @@
       "types": "./dist/env-manifests.d.ts",
       "import": "./dist/env-manifests.js",
       "require": "./dist/env-manifests.js"
+    },
+    "./env-resolvers": {
+      "types": "./dist/env-resolvers.d.ts",
+      "import": "./dist/env-resolvers.js",
+      "require": "./dist/env-resolvers.js"
+    },
+    "./secrets-targets": {
+      "types": "./dist/secrets-targets.d.ts",
+      "import": "./dist/secrets-targets.js",
+      "require": "./dist/secrets-targets.js"
     },
     "./server": {
       "types": "./dist/server.d.ts",
@@ -57,5 +91,8 @@
     "@types/node": "^20",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

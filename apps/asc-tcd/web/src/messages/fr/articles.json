@@ -1,0 +1,15 @@
+{
+  "articles": {
+    "meta": {
+      "title": "Articles",
+      "description": "Conseils, retours d'expérience et actualités de l'ASC TCD sur la transplantation d'arbres et l'aménagement durable."
+    },
+    "title": "Articles",
+    "lead": "Conseils, retours d'expérience et actualités autour de la transplantation d'arbres.",
+    "readMore": "Lire l'article",
+    "backToList": "Tous les articles",
+    "empty": "Aucun article pour le moment. Revenez bientôt !",
+    "readingTime": "{minutes} min de lecture",
+    "publishedOn": "Publié le {date}"
+  }
+}

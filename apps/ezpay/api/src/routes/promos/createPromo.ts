@@ -6,9 +6,11 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -27,21 +29,16 @@ const createPromoSchema = z.object({
   discountValue: z.number().positive().describe('Discount value (20 = 20% or 500 = $5.00)'),
   currency: z.string().optional().describe('Currency code (required for fixed discounts)'),
   duration: z.enum(['once', 'repeating', 'forever']).describe('How long the discount applies'),
-  durationInMonths: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('Months for repeating duration'),
+  durationInMonths: z.number().int().min(1).optional().describe('Months for repeating duration'),
   maxUses: z.number().int().min(1).optional().describe('Max uses (null = unlimited)'),
   active: z.boolean().default(true).describe('Whether the promo is active'),
   expiresAt: z.string().datetime().optional().describe('Expiration date (ISO 8601)'),
 })
 
 const promoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.record(z.unknown()).optional().describe('Response payload (the promo object on success)'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================
@@ -88,6 +85,18 @@ const createPromoHandler = async (req: Request, res: Response) => {
 
     logger.info(`Promo created: ${promo.code} for ${promo.appName}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'promo.created',
+      userId: req.userId,
+      metadata: {
+        promoId: String(promo._id),
+        code: promo.code,
+        appName: promo.appName,
+        discountType: promo.discountType,
+        discountValue: promo.discountValue,
+      },
+    })
+
     res.status(201)
     sendSuccess(res, { promo })
   } catch (error) {
@@ -104,7 +113,7 @@ const createPromoHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/promos', authMiddleware, populateUserFromToken, createPromoHandler, {
+docRouter.post('/promos', authJwtOrKey({ requireKeyScope: 'admin' }), createPromoHandler, {
   summary: 'Create a promo code (admin only)',
   tags: ['Promos'],
   bodySchema: createPromoSchema,

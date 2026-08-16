@@ -2,7 +2,7 @@
 
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { callApi, parseApiError } from '@/config/api'
+import { callApi } from '@/config/api'
 
 // Query keys
 export const billingKeys = {
@@ -15,16 +15,15 @@ export const billingKeys = {
   paymentMethods: () => [...billingKeys.all, 'payment-methods'] as const,
 }
 
+function userHeader(userId?: string): Record<string, string> | undefined {
+  return userId ? { 'X-User-Id': userId } : undefined
+}
+
 // Individual query hooks
 export function useClients(userId?: string) {
   return useQuery({
     queryKey: billingKeys.clients(),
-    queryFn: async () => {
-      const response = await callApi<Client[]>('/clients', { userId: userId! })
-      if (!response.ok) throw new Error(parseApiError(response.data))
-      if (!response.data) throw new Error('No data returned from API')
-      return response.data
-    },
+    queryFn: () => callApi<Client[]>('/clients', { headers: userHeader(userId) }),
     enabled: !!userId, // Only run query when userId is available
   })
 }
@@ -33,11 +32,9 @@ export function useInvoices(userId?: string) {
   return useQuery({
     queryKey: billingKeys.invoices(),
     queryFn: async () => {
-      const response = await callApi<Invoice[]>('/invoices', { userId: userId! })
-      if (!response.ok) throw new Error(parseApiError(response.data))
-      if (!response.data) throw new Error('No data returned from API')
+      const data = await callApi<Invoice[]>('/invoices', { headers: userHeader(userId) })
       // Filter out soft-deleted items
-      return response.data.filter((item) => !item.deletedAt)
+      return data.filter(item => !item.deletedAt)
     },
     enabled: !!userId, // Only run query when userId is available
   })
@@ -47,11 +44,9 @@ export function useQuotes(userId?: string) {
   return useQuery({
     queryKey: billingKeys.quotes(),
     queryFn: async () => {
-      const response = await callApi<Quote[]>('/quotes', { userId: userId! })
-      if (!response.ok) throw new Error(parseApiError(response.data))
-      if (!response.data) throw new Error('No data returned from API')
+      const data = await callApi<Quote[]>('/quotes', { headers: userHeader(userId) })
       // Filter out soft-deleted items
-      return response.data.filter((item) => !item.deletedAt)
+      return data.filter(item => !item.deletedAt)
     },
     enabled: !!userId, // Only run query when userId is available
   })
@@ -61,11 +56,9 @@ export function useReceipts(userId?: string) {
   return useQuery({
     queryKey: billingKeys.receipts(),
     queryFn: async () => {
-      const response = await callApi<Receipt[]>('/receipts', { userId: userId! })
-      if (!response.ok) throw new Error(parseApiError(response.data))
-      if (!response.data) throw new Error('No data returned from API')
+      const data = await callApi<Receipt[]>('/receipts', { headers: userHeader(userId) })
       // Filter out soft-deleted items
-      return response.data.filter((item) => !item.deletedAt)
+      return data.filter(item => !item.deletedAt)
     },
     enabled: !!userId, // Only run query when userId is available
   })
@@ -74,12 +67,7 @@ export function useReceipts(userId?: string) {
 export function useCompanies(userId?: string) {
   return useQuery({
     queryKey: billingKeys.companies(),
-    queryFn: async () => {
-      const response = await callApi<Company[]>('/companies', { userId: userId! })
-      if (!response.ok) throw new Error(parseApiError(response.data))
-      if (!response.data) throw new Error('No data returned from API')
-      return response.data
-    },
+    queryFn: () => callApi<Company[]>('/companies', { headers: userHeader(userId) }),
     enabled: !!userId, // Only run query when userId is available
   })
 }
@@ -87,12 +75,7 @@ export function useCompanies(userId?: string) {
 export function usePaymentMethods(userId?: string) {
   return useQuery({
     queryKey: billingKeys.paymentMethods(),
-    queryFn: async () => {
-      const response = await callApi<PaymentMethod[]>('/payment-methods', { userId: userId! })
-      if (!response.ok) throw new Error(parseApiError(response.data))
-      if (!response.data) throw new Error('No data returned from API')
-      return response.data
-    },
+    queryFn: () => callApi<PaymentMethod[]>('/payment-methods', { headers: userHeader(userId) }),
     enabled: !!userId, // Only run query when userId is available
   })
 }

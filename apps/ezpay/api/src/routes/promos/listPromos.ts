@@ -6,9 +6,11 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -20,21 +22,21 @@ const docRouter = createRouterWithDoc(listPromosRegistry, router)
 // Zod Schemas
 // ========================================
 
-const listPromosQuerySchema = z.object({
-  appName: z.string().optional().describe('Filter by app name'),
-  active: z.enum(['true', 'false']).optional().describe('Filter by active status'),
-  limit: z.coerce.number().int().min(1).max(100).default(20).describe('Max results'),
-  offset: z.coerce.number().int().min(0).default(0).describe('Offset for pagination'),
+const listPromosQuerySchema = PaginationQuerySchema.extend({
+  appName: z.string().optional().openapi({ description: 'Filter by app name' }),
+  active: z.enum(['true', 'false']).optional().openapi({ description: 'Filter by active status' }),
 })
 
 const promosListResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.array(z.any()),
-  meta: z.object({
-    total: z.number(),
-    limit: z.number(),
-    offset: z.number(),
-  }),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.array(z.record(z.unknown())).describe('Array of promo objects'),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of promos matching the filter'),
+      limit: z.number().describe('Page size'),
+      offset: z.number().describe('Pagination offset'),
+    })
+    .describe('Pagination metadata'),
 })
 
 // ========================================
@@ -76,7 +78,7 @@ const listPromosHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/promos', authMiddleware, populateUserFromToken, listPromosHandler, {
+docRouter.get('/promos', authJwtOrKey({ requireKeyScope: 'admin' }), listPromosHandler, {
   summary: 'List promo codes (admin only)',
   tags: ['Promos'],
   querySchema: listPromosQuerySchema,

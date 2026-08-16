@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmActionDialog,
   Div,
   Input,
   P,
@@ -20,8 +21,7 @@ import {
   DataTableColumnHeader,
   type ColumnDef,
 } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
-import { ConfirmActionDialog } from '@ezstart/pay-sdk'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 
 // ========================================
 // Types
@@ -149,42 +149,33 @@ export function EZPayTab() {
   // ---- Fetch stats (from all payments) ----
   useEffect(() => {
     setStatsLoading(true)
-    callApi<{ success: boolean; data: Payment[] }>('/payments', {
+    apiCall<Payment[]>('/payments', {
       appName: 'ezpay',
       method: 'GET',
-      query: { limit: '1000' },
+      query: { limit: 1000 },
     })
-      .then(response => {
-        if (response.ok) {
-          const rawData = response.data as unknown as
-            | { data?: Payment[]; success?: boolean }
-            | Payment[]
-          const allPayments: Payment[] = Array.isArray(rawData)
-            ? rawData
-            : Array.isArray(rawData?.data)
-              ? rawData.data
-              : []
-          const byType: Record<string, { total: number; count: number }> = {}
-          let totalRevenue = 0
-          for (const p of allPayments) {
-            if (p.status === 'completed') {
-              totalRevenue += p.amount
-            }
-            if (!byType[p.type]) {
-              byType[p.type] = { total: 0, count: 0 }
-            }
-            const entry = byType[p.type]!
-            entry.count += 1
-            if (p.status === 'completed') {
-              entry.total += p.amount
-            }
+      .then((allPayments: Payment[]) => {
+        const list: Payment[] = Array.isArray(allPayments) ? allPayments : []
+        const byType: Record<string, { total: number; count: number }> = {}
+        let totalRevenue = 0
+        for (const p of list) {
+          if (p.status === 'completed') {
+            totalRevenue += p.amount
           }
-          setStats({
-            totalRevenue,
-            totalCount: allPayments.length,
-            byType,
-          })
+          if (!byType[p.type]) {
+            byType[p.type] = { total: 0, count: 0 }
+          }
+          const entry = byType[p.type]!
+          entry.count += 1
+          if (p.status === 'completed') {
+            entry.total += p.amount
+          }
         }
+        setStats({
+          totalRevenue,
+          totalCount: list.length,
+          byType,
+        })
       })
       .catch(() => {})
       .finally(() => setStatsLoading(false))
@@ -194,29 +185,17 @@ export function EZPayTab() {
   const fetchPayments = useCallback(() => {
     setPaymentsLoading(true)
 
-    const query: Record<string, string> = { limit: '1000' }
+    const query: Record<string, string | number> = { limit: 1000 }
     if (typeFilter !== 'all') query.type = typeFilter
     if (statusFilter !== 'all') query.status = statusFilter
     if (searchQuery) query.search = searchQuery
 
-    callApi<{ success: boolean; data: Payment[] }>('/payments', {
+    apiCall<Payment[]>('/payments', {
       appName: 'ezpay',
       method: 'GET',
       query,
     })
-      .then(response => {
-        if (response.ok) {
-          const rawData = response.data as unknown as
-            | { data?: Payment[]; success?: boolean }
-            | Payment[]
-          const list: Payment[] = Array.isArray(rawData)
-            ? rawData
-            : Array.isArray(rawData?.data)
-              ? rawData.data
-              : []
-          setPayments(list)
-        }
-      })
+      .then((list: Payment[]) => setPayments(Array.isArray(list) ? list : []))
       .catch(() => {})
       .finally(() => setPaymentsLoading(false))
   }, [typeFilter, statusFilter, searchQuery])
@@ -228,12 +207,15 @@ export function EZPayTab() {
   // ---- Refund handler ----
   const handleRefundConfirm = useCallback(async () => {
     if (!refundDialog.paymentId) return
-    const response = await callApi(`/payments/${refundDialog.paymentId}/refund`, {
-      appName: 'ezpay',
-      method: 'POST',
-    })
-    if (!response.ok) {
-      throw new Error(response.error || t('table.refundError'))
+    try {
+      await apiCall(`/payments/${refundDialog.paymentId}/refund`, {
+        appName: 'ezpay',
+        method: 'POST',
+      })
+    } catch (err: unknown) {
+      const message =
+        ApiError.isApiError(err) || err instanceof Error ? err.message : t('table.refundError')
+      throw new Error(message)
     }
     fetchPayments()
   }, [refundDialog.paymentId, fetchPayments, t])
@@ -245,12 +227,15 @@ export function EZPayTab() {
     if (!subscriptionId) {
       throw new Error(t('table.cancelNoId'))
     }
-    const response = await callApi(`/subscriptions/${subscriptionId}/cancel`, {
-      appName: 'ezpay',
-      method: 'POST',
-    })
-    if (!response.ok) {
-      throw new Error(response.error || t('table.cancelError'))
+    try {
+      await apiCall(`/subscriptions/${subscriptionId}/cancel`, {
+        appName: 'ezpay',
+        method: 'POST',
+      })
+    } catch (err: unknown) {
+      const message =
+        ApiError.isApiError(err) || err instanceof Error ? err.message : t('table.cancelError')
+      throw new Error(message)
     }
     fetchPayments()
   }, [cancelDialog.payment, fetchPayments, t])

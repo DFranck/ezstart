@@ -13,7 +13,6 @@ import {
   Div,
   Icon,
   Section,
-  Spinner,
 } from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -61,7 +60,7 @@ function MonitoringOverviewContent() {
     projectsError || auditsError || errorsError
       ? (projectsError || auditsError || errorsError) instanceof Error
         ? projectsError || auditsError || errorsError
-        : new Error('Unknown error')
+        : new Error(t('unknownError'))
       : null
 
   // Quick Actions (app-specific navigation)
@@ -96,14 +95,6 @@ function MonitoringOverviewContent() {
           >
             <Icon name="lucide:Bug" className="w-4 h-4" />
             {t('overview.quickActions.viewErrorLogs')}
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2"
-            onClick={() => window.open('https://ezstart.sentry.io/insights/projects/', '_blank')}
-          >
-            <Icon name="lucide:ExternalLink" className="w-4 h-4" />
-            {t('overview.quickActions.openSentry')}
           </Button>
           <Button
             variant="outline"
@@ -166,11 +157,6 @@ export default function MonitoringOverviewPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

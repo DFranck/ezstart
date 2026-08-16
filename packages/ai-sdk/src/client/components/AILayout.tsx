@@ -5,7 +5,6 @@
  */
 'use client'
 
-import { useState, useEffect } from 'react'
 import {
   Button,
   Div,
@@ -46,18 +45,9 @@ import type { AILayoutProps } from './ai-layout-types.js'
 export function AILayout({ appName, getToken, ...props }: AILayoutProps) {
   return (
     <AIProvider appName={appName} getToken={getToken}>
-      <AILayoutInner appName={appName} {...props} />
+      <AILayoutContent appName={appName} {...props} />
     </AIProvider>
   )
-}
-
-function AILayoutInner({ getToken: _getToken, ...props }: AILayoutProps) {
-  // Prevent SSR hydration mismatch — hooks read localStorage (auth token, providers)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return null
-
-  return <AILayoutContent {...props} />
 }
 
 function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
@@ -116,6 +106,8 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const noProvidersCTA = texts.noProvidersCTA ?? 'Configure providers'
   const noProvidersComposerPlaceholder =
     texts.noProvidersComposerPlaceholder ?? 'AI providers not configured'
+  const adminHref = props.adminHref ?? '/admin'
+  const onAdminClick = props.onAdminClick
 
   const composerDisabled = showLoginPrompt || noProviders
   const composerPlaceholder = showLoginPrompt
@@ -204,11 +196,22 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
                     <P className="text-sm text-muted-foreground max-w-md">
                       {noProvidersDescription}
                     </P>
-                    {isAdmin && (
-                      <Button asChild variant="default" size="sm" className="mt-2">
-                        <a href="/admin">{noProvidersCTA}</a>
-                      </Button>
-                    )}
+                    {isAdmin &&
+                      (onAdminClick ? (
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          className="mt-2"
+                          onClick={onAdminClick}
+                        >
+                          {noProvidersCTA}
+                        </Button>
+                      ) : (
+                        <Button asChild variant="default" size="sm" className="mt-2">
+                          <a href={adminHref}>{noProvidersCTA}</a>
+                        </Button>
+                      ))}
                   </Div>
                 ) : (
                   <>

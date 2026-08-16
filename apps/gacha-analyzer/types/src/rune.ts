@@ -57,3 +57,24 @@ export interface RuneData {
   /** Last power-up roll values extracted from OCR hints like "(6%)" after substat values */
   rollHints?: Partial<Record<StatType, number>>
 }
+
+export type RuneMarker =
+  | 'TRUE_LEG_MIN'
+  | 'TRUE_HERO_MIN'
+  | 'TRUE_RARE_MIN'
+  | 'REAPP'
+  | 'GEM'
+  | 'GRIND'
+  | 'TEST'
+  | 'SELL'
+
+export const RUNE_MARKER_COLORS: Record<RuneMarker, string> = {
+  TRUE_LEG_MIN: 'text-yellow-400',
+  TRUE_HERO_MIN: 'text-purple-400',
+  TRUE_RARE_MIN: 'text-blue-400',
+  REAPP: 'text-cyan-400',
+  GEM: 'text-orange-400',
+  GRIND: 'text-green-400',
+  TEST: 'text-muted-foreground',
+  SELL: 'text-destructive',
+}

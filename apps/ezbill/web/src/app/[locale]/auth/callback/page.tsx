@@ -7,7 +7,6 @@ export default function CallbackPage() {
       successMessage="Authentication successful!"
       redirectMessage="Redirecting to dashboard..."
       errorButtonText="Back to Home"
-      errorButtonClassName="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
     />
   )
 }

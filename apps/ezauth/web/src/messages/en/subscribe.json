@@ -1,0 +1,24 @@
+{
+  "subscribe": {
+    "success": {
+      "title": "Subscription Successful!",
+      "description": "Your subscription is active and your account has been upgraded.",
+      "redirecting": "Redirecting to your dashboard in {seconds}s…",
+      "goToDashboard": "Go to dashboard",
+      "whatNext": "What happens next?",
+      "emailConfirmation": "A receipt has been emailed to you via Stripe.",
+      "accessGranted": "Your new features and roles have been granted.",
+      "receiptAvailable": "Manage your subscription anytime from your account page.",
+      "reference": "Reference: {id}"
+    },
+    "cancel": {
+      "title": "Checkout Cancelled",
+      "description": "Your subscription was not started. No charges have been made.",
+      "backToPricing": "Back to pricing",
+      "backHome": "Back to home",
+      "needHelp": "Need help?",
+      "noCharge": "Don't worry — no amount has been charged to your account.",
+      "contactSupport": "If you encountered an issue, please reach out to support."
+    }
+  }
+}

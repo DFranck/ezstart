@@ -1,10 +1,42 @@
 {
   "name": "@ezstart/capture-sdk",
   "version": "1.0.0",
-  "private": true,
-  "license": "PROPRIETARY",
+  "description": "Image capture and crop SDK for @ezstart monorepo",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/capture-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/capture-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "capture",
+    "image",
+    "crop",
+    "sdk",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc --noEmit"

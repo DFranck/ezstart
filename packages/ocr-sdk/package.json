@@ -1,10 +1,35 @@
 {
   "name": "@ezstart/ocr-sdk",
   "version": "1.0.0",
-  "type": "module",
   "description": "OCR SDK with Tesseract.js engine and extensible game parsers",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/ocr-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/ocr-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "ocr",
+    "tesseract",
+    "sdk",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

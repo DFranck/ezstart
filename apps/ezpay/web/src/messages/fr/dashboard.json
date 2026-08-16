@@ -1,0 +1,34 @@
+{
+  "dashboard": {
+    "brand": "EZPay",
+    "nav": {
+      "overview": "Vue d'ensemble",
+      "account": "Compte",
+      "applications": "Développeur",
+      "billing": "Facturation",
+      "usage": "Utilisation",
+      "settings": "Paramètres"
+    },
+    "welcomeBack": "Bon retour",
+    "memberSince": "Membre depuis",
+    "plan": "Plan",
+    "planFree": "Gratuit",
+    "platformBadge": "Plateforme",
+    "adminBadge": "Admin",
+    "billing": {
+      "title": "Facturation & Plans",
+      "description": "Gérez votre abonnement et vos limites d'utilisation",
+      "comingSoon": "Tarification bientôt disponible"
+    },
+    "usage": {
+      "title": "Utilisation & Analytiques",
+      "description": "Statistiques d'utilisation personnelles",
+      "comingSoon": "Analytiques d'utilisation bientôt disponibles"
+    },
+    "settings": {
+      "emailVerification": "Vérification d'email",
+      "twoFactor": "Authentification à deux facteurs",
+      "sessions": "Sessions actives"
+    }
+  }
+}

@@ -7,7 +7,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'
@@ -20,6 +20,7 @@ import { quickSignupRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 import { issueSession } from '../../services/auth.service.js'
 
 export const quickSignupRegistry = new OpenAPIRegistry()
@@ -47,9 +48,20 @@ const quickSignupController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid quick-signup request', parsed.error.issues)
     }
 
-    const { username, email, app, promoCode, locale, emailOverride } = parsed.data
+    const {
+      username,
+      email,
+      app,
+      promoCode,
+      utmSource,
+      locale: bodyLocale,
+      emailOverride,
+    } = parsed.data
     const normalizedUsername = username.trim().toLowerCase()
     const normalizedEmail = email.trim().toLowerCase()
+    // Body-locale wins (form-provided); otherwise infer from Accept-Language
+    // so the welcome email matches the browser the user just signed up from.
+    const locale = resolveUserLocale(req, bodyLocale)
 
     const AuthUserModel = await getAuthUserModel()
 
@@ -75,9 +87,22 @@ const quickSignupController = async (req: Request, res: Response) => {
       isVerified: false,
       hasSetOwnPassword: false,
       ...(promoCode ? { promoCode } : {}),
+      ...(utmSource ? { utmSource } : {}),
     })
 
-    await user.save()
+    try {
+      await user.save()
+    } catch (saveError: unknown) {
+      // Handle MongoDB duplicate key error (race condition with concurrent signups)
+      if (
+        saveError instanceof Error &&
+        'code' in saveError &&
+        (saveError as { code: number }).code === 11000
+      ) {
+        return sendError(res, 'User already exists with this email or username', 409)
+      }
+      throw saveError
+    }
 
     // Send welcome email with set-password link (doubles as email verification).
     try {
@@ -143,8 +168,11 @@ const quickSignupController = async (req: Request, res: Response) => {
       refreshToken: session.refreshToken,
     })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals
+    // (e.g. Mongoose E11000 dup-key with collection/index names). The
+    // intentional 'User already exists' 409 is returned inline above.
     logger.error('Quick-signup error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Quick signup failed', 400)
+    sendError(res, 'Quick signup failed', 400)
   }
 }
 

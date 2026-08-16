@@ -15,7 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { use, useCallback, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'

@@ -1,0 +1,32 @@
+{
+  "account": {
+    "myProfile": {
+      "title": "Tài khoản của tôi",
+      "subtitle": "Hồ sơ, bảo mật, phiên đăng nhập và các ứng dụng đã kết nối"
+    },
+    "myAppsUsers": {
+      "title": "Người dùng ứng dụng của tôi",
+      "subtitle": "Người dùng đã đăng ký vào các ứng dụng bạn sở hữu"
+    },
+    "platform": {
+      "title": "Người dùng nền tảng",
+      "subtitle": "Tất cả người dùng trên mọi tenant (superadmin)"
+    },
+    "deleteAccount": {
+      "navLabel": "Vùng nguy hiểm",
+      "title": "Xóa tài khoản",
+      "description": "Xóa vĩnh viễn tài khoản của bạn và tất cả dữ liệu liên quan. Hành động này không thể hoàn tác.",
+      "triggerLabel": "Xóa tài khoản của tôi",
+      "confirmTitle": "Bạn có hoàn toàn chắc chắn không?",
+      "confirmDescription": "Tài khoản của bạn sẽ được lên lịch xóa sau 30 ngày. Bạn có thể hủy trong khoảng thời gian này bằng cách đăng nhập lại.",
+      "emailLabel": "Nhập email của bạn để xác nhận",
+      "emailPlaceholder": "ban@example.com",
+      "passwordLabel": "Mật khẩu (bắt buộc)",
+      "passwordPlaceholder": "Mật khẩu tài khoản của bạn",
+      "cancel": "Hủy",
+      "confirm": "Xóa tài khoản của tôi",
+      "successMessage": "Tài khoản của bạn đã được lên lịch xóa.",
+      "errorMessage": "Không thể xóa tài khoản"
+    }
+  }
+}

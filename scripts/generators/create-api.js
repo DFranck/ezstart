@@ -73,7 +73,7 @@ const packageJson = {
     typecheck: 'tsc --noEmit',
   },
   dependencies: {
-    '@ezstart/express-core': 'workspace:*',
+    '@ezstart/api-core': 'workspace:*',
     '@ezstart/types': 'workspace:*',
     cors: '^2.8.5',
     dotenv: '^16.4.7',
@@ -145,7 +145,7 @@ const serverContent = `import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 
 const PORT = process.env.PORT || ${assignedPort}
 const app = createApp()

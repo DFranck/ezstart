@@ -7,10 +7,11 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../utils/safe-error.js'
 import {
   tokenRequestSchema,
   tokenResponseSchema,
@@ -48,8 +49,8 @@ const tokenController = async (req: Request, res: Response) => {
     })
 
     // DUAL-MODE: Set httpOnly cookies (apps using cookie mode) + return tokens in body
-    res.cookie(ACCESS_COOKIE_NAME, token.access_token, buildAuthCookieOptions())
-    res.cookie(REFRESH_COOKIE_NAME, token.refreshToken, buildRefreshCookieOptions())
+    res.cookie(ACCESS_COOKIE_NAME, token.access_token, buildAuthCookieOptions(req))
+    res.cookie(REFRESH_COOKIE_NAME, token.refreshToken, buildRefreshCookieOptions(req))
 
     sendSuccess(res, {
       access_token: token.access_token,
@@ -59,10 +60,27 @@ const tokenController = async (req: Request, res: Response) => {
       refresh_token: token.refreshToken,
     })
   } catch (error) {
+    // MED-3 — only the exchange service's intentional, client-safe messages
+    // are echoed verbatim. Everything else returns a stable generic message
+    // so unexpected internal detail never leaks. The thrown error is logged.
     logger.error('Token exchange error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Token exchange failed', 400)
+    sendError(
+      res,
+      toSafeErrorMessage(error, { allow: SAFE_TOKEN_MESSAGES, fallback: 'Token exchange failed' }),
+      400
+    )
   }
 }
+
+/**
+ * MED-3 — allowlist of intentional, client-safe token-exchange error
+ * messages thrown by `exchangeCodeForToken`. Anything else collapses to a
+ * generic `'Token exchange failed'`.
+ */
+const SAFE_TOKEN_MESSAGES = new Set<string>([
+  'Invalid or expired authorization code',
+  'User not found',
+])
 
 docRouter.post('/token', tokenRateLimiter, tokenController, {
   summary: 'Exchange authorization code for access token',

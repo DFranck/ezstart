@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { hasAnyRole } from '@ezstart/rbac'
+import { hasAnyRole } from '@ezstart/auth-sdk'
 import { useTranslations } from 'next-intl'
 import { Card, Div, H1, Icon, Main, P } from '@ezstart/ui/components'
 import { ReactNode } from 'react'

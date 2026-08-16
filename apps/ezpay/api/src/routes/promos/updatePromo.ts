@@ -6,9 +6,11 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -25,20 +27,45 @@ const updatePromoParamsSchema = z.object({
 })
 
 const updatePromoSchema = z.object({
-  discountType: z.enum(['percent', 'fixed']).optional(),
-  discountValue: z.number().positive().optional(),
-  currency: z.string().optional(),
-  duration: z.enum(['once', 'repeating', 'forever']).optional(),
-  durationInMonths: z.number().int().min(1).optional(),
-  maxUses: z.number().int().min(1).nullable().optional(),
-  active: z.boolean().optional(),
-  expiresAt: z.string().datetime().nullable().optional(),
+  discountType: z
+    .enum(['percent', 'fixed'])
+    .optional()
+    .describe('Discount type (percent or fixed amount)'),
+  discountValue: z
+    .number()
+    .positive()
+    .optional()
+    .describe('Discount value (e.g. 20 for 20% or 500 for $5.00)'),
+  currency: z
+    .string()
+    .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
+    .optional()
+    .describe('ISO 4217 currency code (required for fixed discounts)'),
+  duration: z
+    .enum(['once', 'repeating', 'forever'])
+    .optional()
+    .describe('How long the discount applies'),
+  durationInMonths: z.number().int().min(1).optional().describe('Months for repeating duration'),
+  maxUses: z
+    .number()
+    .int()
+    .min(1)
+    .nullable()
+    .optional()
+    .describe('Maximum uses (null = unlimited)'),
+  active: z.boolean().optional().describe('Whether the promo is active'),
+  expiresAt: z
+    .string()
+    .datetime()
+    .nullable()
+    .optional()
+    .describe('Expiration date (ISO 8601, null = never)'),
 })
 
 const promoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.record(z.unknown()).optional().describe('Response payload (the promo object on success)'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================
@@ -64,8 +91,24 @@ const updatePromoHandler = async (req: Request, res: Response) => {
     const { id } = paramsValidation.data
     const updates = validation.data
 
-    // Validate: percent discount must be between 1 and 100
-    if (updates.discountType === 'percent' && updates.discountValue && updates.discountValue > 100) {
+    const Promo = await getPromoModel()
+
+    // Validate: percent discount must be between 1 and 100.
+    // When only discountValue is updated, fetch the current discountType from DB.
+    let effectiveDiscountType = updates.discountType
+    if (!effectiveDiscountType && updates.discountValue !== undefined) {
+      const existing = await Promo.findById(id).lean()
+      if (!existing) {
+        return sendError(res, 'Promo not found', 404)
+      }
+      effectiveDiscountType = existing.discountType
+    }
+
+    if (
+      effectiveDiscountType === 'percent' &&
+      updates.discountValue !== undefined &&
+      updates.discountValue > 100
+    ) {
       return sendError(res, 'Percent discount cannot exceed 100', 400)
     }
 
@@ -75,8 +118,6 @@ const updatePromoHandler = async (req: Request, res: Response) => {
       updateData.expiresAt = updates.expiresAt ? new Date(updates.expiresAt) : null
     }
 
-    const Promo = await getPromoModel()
-
     const promo = await Promo.findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
 
     if (!promo) {
@@ -84,6 +125,17 @@ const updatePromoHandler = async (req: Request, res: Response) => {
     }
 
     logger.info(`Promo updated: ${promo.code} for ${promo.appName}`)
+
+    void auditLogService.createFromRequest(req, {
+      action: 'promo.updated',
+      userId: req.userId,
+      metadata: {
+        promoId: String(promo._id),
+        code: promo.code,
+        appName: promo.appName,
+        updatedFields: Object.keys(updates),
+      },
+    })
 
     sendSuccess(res, { promo })
   } catch (error) {
@@ -96,7 +148,7 @@ const updatePromoHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.patch('/promos/:id', authMiddleware, populateUserFromToken, updatePromoHandler, {
+docRouter.patch('/promos/:id', authJwtOrKey({ requireKeyScope: 'admin' }), updatePromoHandler, {
   summary: 'Update a promo code (admin only)',
   tags: ['Promos'],
   bodySchema: updatePromoSchema,

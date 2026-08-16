@@ -16,10 +16,7 @@ export interface DiscountResult {
  * Validate a promo code for a given app.
  * Checks: exists, active, not expired, usage limit not reached.
  */
-export async function validatePromo(
-  code: string,
-  appName: string
-): Promise<PromoValidationResult> {
+export async function validatePromo(code: string, appName: string): Promise<PromoValidationResult> {
   const Promo = await getPromoModel()
 
   const promo = await Promo.findOne({
@@ -73,9 +70,44 @@ export function calculateDiscount(amount: number, promo: PromoDocument): Discoun
 }
 
 /**
- * Increment the usage counter for a promo code.
+ * Atomically claim one redemption of a promo code.
+ *
+ * Increments `usedCount` ONLY if the promo still has capacity. The check
+ * (`usedCount < maxUses`) and the increment happen in a single atomic
+ * `findOneAndUpdate` — there is no read-then-write window, so concurrent
+ * redemptions of a `maxUses: 1` promo cannot both succeed (TOCTOU-safe).
+ *
+ * - When `maxUses` is set, the update matches `{ _id, usedCount: { $lt: maxUses } }`.
+ *   If the promo is already exhausted the filter matches nothing and the call
+ *   returns `false` (no increment performed) — the caller must reject the
+ *   redemption.
+ * - When `maxUses` is unset/null (unlimited), the increment is unconditional
+ *   and always returns `true`.
+ *
+ * @param promoId - Mongo `_id` of the promo to redeem.
+ * @returns `true` if a redemption was atomically claimed, `false` if the promo
+ *   was already at its usage limit (over-redemption prevented).
  */
-export async function incrementUsage(promoId: string): Promise<void> {
+export async function incrementUsage(promoId: string): Promise<boolean> {
   const Promo = await getPromoModel()
-  await Promo.findByIdAndUpdate(promoId, { $inc: { usedCount: 1 } })
+
+  // Unlimited promos (no maxUses): unconditional atomic increment.
+  // We use $expr so the same single-statement guard also covers the
+  // bounded case below — `$lt: ['$usedCount', '$maxUses']` is evaluated
+  // server-side against the live document, never a stale read.
+  const updated = await Promo.findOneAndUpdate(
+    {
+      _id: promoId,
+      $or: [
+        { maxUses: { $in: [null, undefined] } },
+        { $expr: { $lt: ['$usedCount', '$maxUses'] } },
+      ],
+    },
+    { $inc: { usedCount: 1 } },
+    { new: true }
+  )
+
+  // No document returned → either the promo doesn't exist OR it was already
+  // at its usage limit. Both mean: redemption NOT claimed.
+  return updated !== null
 }

@@ -1,0 +1,19 @@
+{
+  "name": "auth-sdk-vanilla-standalone-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vanilla TypeScript browser starter using @ezstart/auth-sdk/core — zero React, zero framework.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ezstart/auth-sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vite": "^5.4.0"
+  }
+}

@@ -3,9 +3,9 @@
 import { getGradientWithOpacity, GRADIENT_TEXT } from '@/lib/theme-colors'
 import { logger } from '@ezstart/logger'
 import { Button, Div, H1, H3, Icon, LI, P, Section, Span, UL } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -17,12 +17,12 @@ export default function DonateSuccessPage() {
 
   useEffect(() => {
     if (sessionId && !verified) {
-      callApi(`/verify-payment/${sessionId}`, {
+      apiCall<{ success?: boolean } | null>(`/verify-payment/${sessionId}`, {
         appName: 'ezpay',
         method: 'POST',
       })
-        .then(response => {
-          if (response.ok && (response.data as Record<string, unknown>)?.success) {
+        .then(data => {
+          if (data?.success) {
             setVerified(true)
           }
         })

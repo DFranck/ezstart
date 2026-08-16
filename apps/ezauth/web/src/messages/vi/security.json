@@ -1,0 +1,13 @@
+{
+  "security": {
+    "title": "Bao mat",
+    "lead": "Chung toi rat coi trong bao mat cua EZAuth va du lieu chung toi nam giu cho nguoi dung. Trang nay mo ta cach bao cao mot lo hong, nhung gi trong pham vi, va cach chung toi phoi hop cong bo.",
+    "contactHeading": "Bao cao mot lo hong",
+    "contactBody": "Vui long gui email den security@ezstart.xyz kem mo ta ro rang ve van de, cac buoc de tai hien, va bat ky bang chung khai niem nao. Chung toi xac nhan cac bao cao moi trong vong hai ngay lam viec. Mot khoa PGP cho cac bao cao ma hoa se duoc cong bo o day sau khi hoan thien.",
+    "scopeHeading": "Pham vi",
+    "scopeBody": "Tat ca cac mien EZAuth san xuat nam trong pham vi, bao gom ezauth.ezstart.xyz va API api.ezauth.ezstart.xyz. Ngoai pham vi: tu choi dich vu, ky thuat xa hoi, tan cong vat ly, va cac phat hien yeu cau thong tin xac thuc da bi xam pham.",
+    "disclosureHeading": "Cong bo phoi hop",
+    "disclosureBody": "Chung toi tuan theo mo hinh cong bo phoi hop: vui long cho chung toi mot khoang thoi gian hop ly de dieu tra va phat hanh ban va truoc khi cong bo. Chung toi san long ghi nhan cac nha nghien cuu trong changelog khi mot ban va duoc phat hanh, tru khi ban muon ngu danh.",
+    "txtLinkLabel": "Xem security.txt (RFC 9116)"
+  }
+}

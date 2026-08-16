@@ -1,6 +1,7 @@
 // apps/green-pulse/web/middleware.ts
 import createIntlMiddleware from 'next-intl/middleware'
 import { createAuthMiddleware } from '@ezstart/auth-sdk'
+import { getWebUrl } from '@ezstart/config'
 import { routing } from './i18n/routing'
 
 // Create i18n middleware
@@ -13,6 +14,7 @@ const intlMiddleware = createIntlMiddleware(routing)
 export default createAuthMiddleware({
   appName: 'green-pulse',
   authMode: 'jwt', // External domain requires JWT mode
+  ezauthUrl: getWebUrl('ezauth'),
   protectedPaths: ['/dashboard', '/chat'],
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,

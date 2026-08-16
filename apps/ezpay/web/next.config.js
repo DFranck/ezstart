@@ -5,9 +5,13 @@ export default createNextConfig({
   i18n: true,
   i18nRequestPath: './src/i18n.ts',
   extend: {
-    transpilePackages: ['@ezstart/pay-sdk', '@ezstart/next-theme'],
+    transpilePackages: ['@ezstart/pay-sdk'],
     eslint: {
       ignoreDuringBuilds: true,
+    },
+    // Include SDK README in the serverless function bundle so /docs page can read it at runtime
+    outputFileTracingIncludes: {
+      '/**/docs/**': ['../../../packages/pay-sdk/README.md'],
     },
   },
 })

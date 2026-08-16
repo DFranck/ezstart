@@ -1,559 +1,455 @@
-#!/usr/bin/env node
-
 /**
- * @ezstart/insert-app - Flexible app scaffolding with options
+ * insert-app.js — Import a standalone project back into the monorepo.
+ *
+ * Reverse operation of extract-app.js. Takes a self-contained standalone
+ * produced by extract-app.js (or a similar single-layer project) and places
+ * it under `apps/<app-name>/` with the correct monorepo wiring.
+ *
+ * For SCAFFOLDING a brand new (empty) app, use `scaffold-app.js` instead.
  *
  * Usage:
- *   node scripts/generators/insert-app.js --name my-app --has-api --has-web --depends-on ezauth
+ *   node scripts/generators/insert-app.js <standalone-path> <app-name> [flags]
+ *   node scripts/generators/insert-app.js --path <dir> --name <app> [flags]
  *
- * Arguments:
- *   --name        (required) App name in kebab-case
- *   --has-api     Create the API sub-package
- *   --has-web     Create the web sub-package
- *   --has-types   Create the types sub-package (default: true)
- *   --no-types    Skip the types sub-package
- *   --depends-on  Comma-separated list of app dependencies (for dev script turbo filters)
- *   --shortcut    Custom shortcut for pnpm dev:x (default: auto-generated)
- *   --description Custom description for the app
+ * Flags:
+ *   --dry-run         Print the plan without copying anything.
+ *   --force           Overwrite apps/<app-name>/ if it already exists.
+ *   --layer <auto|web|api>
+ *                     For single-layer standalones, force the layer instead
+ *                     of auto-detecting.
+ *   --help, -h        Show this help.
+ *
+ * Behavior:
+ *   - Detects multi-layer (web/ + api/ + types/) vs single-layer standalones.
+ *   - Copies each layer to apps/<app-name>/<layer>/ (minus build artifacts
+ *     and envs — envs are re-integrated separately).
+ *   - Rewrites per-layer package.json: `@ezstart/*` deps become `workspace:*`,
+ *     and `name` is normalized to the monorepo convention.
+ *   - Diffs the standalone `.env.local` against the monorepo root `.env.local`:
+ *     matching vars are treated as shared (no duplication), differing vars go
+ *     into apps/<app-name>/<layer>/.env.local.
+ *   - Emits a .env.example alongside each per-app .env.local (same keys,
+ *     empty values).
+ *
+ * NOT done here (intentional):
+ *   - Port registration in packages/config/src/urls.ts (do it manually or run
+ *     scaffold-app.js first to reserve ports — the standalone may want custom
+ *     ports anyway).
+ *   - Root tsconfig references.
+ *   - Root package.json dev scripts.
+ *   Reason: insert-app is meant for re-importing a project that was round-
+ *   tripped through extract, where wiring decisions are project-specific.
+ *   The script prints what remains to be wired.
  */
 
+'use strict'
+
+const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
+
+const { ROOT_DIR, APPS_DIR } = require('./lib/utils')
+const { parseEnvFile } = require('./lib/env-handler')
 const {
-  ROOT_DIR,
-  APPS_DIR,
-  renderTemplate,
-  findNextPortPair,
-  findNextApiPort,
-  findNextWebPort,
-  toPascalCase,
-  generateShortcut,
-  registerInUrls,
-  addTsconfigReferences,
-  addDevScript,
-  appExists,
-  mkdirp,
-  writeFile,
-} = require('./lib/utils')
+  detectStandaloneLayout,
+  diffEnvAgainstRoot,
+  transformPackageJson,
+  inferOriginalAppName,
+} = require('./lib/insert-helpers')
 
-// --- Parse args ---
+// ---------------------------------------------------------------------------
+// CLI
+// ---------------------------------------------------------------------------
+
+function printHelp() {
+  console.info(`
+insert-app — import a standalone project back into the monorepo (reverse of extract-app)
+
+Usage:
+  node scripts/generators/insert-app.js <standalone-path> <app-name> [flags]
+  node scripts/generators/insert-app.js --path <dir> --name <app> [flags]
+
+Flags:
+  --dry-run                 Print the plan without writing files.
+  --force                   Overwrite apps/<app-name>/ if it exists.
+  --layer <auto|web|api>    Force layer for a single-layer standalone (default: auto).
+  --help, -h                Show this help.
+
+Examples:
+  node scripts/generators/insert-app.js /tmp/green-pulse-standalone test-imported
+  node scripts/generators/insert-app.js --path ../my-app --name my-app --dry-run
+`)
+}
+
+/**
+ * @param {string[]} argv
+ */
 function parseArgs(argv) {
-  const args = {
-    name: null,
-    hasApi: false,
-    hasWeb: false,
-    hasTypes: true,
-    dependsOn: [],
-    shortcut: null,
-    description: null,
+  if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
+    printHelp()
+    process.exit(0)
   }
 
-  let i = 2
-  while (i < argv.length) {
+  /** @type {string | null} */
+  let standalonePath = null
+  /** @type {string | null} */
+  let name = null
+  let dryRun = false
+  let force = false
+  /** @type {'auto' | 'web' | 'api'} */
+  let layer = 'auto'
+
+  for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
-    switch (arg) {
-      case '--name':
-        args.name = argv[++i]
-        break
-      case '--has-api':
-        args.hasApi = true
-        break
-      case '--has-web':
-        args.hasWeb = true
-        break
-      case '--has-types':
-        args.hasTypes = true
-        break
-      case '--no-types':
-        args.hasTypes = false
-        break
-      case '--depends-on':
-        args.dependsOn = argv[++i].split(',').map(s => s.trim()).filter(Boolean)
-        break
-      case '--shortcut':
-        args.shortcut = argv[++i]
-        break
-      case '--description':
-        args.description = argv[++i]
-        break
-      default:
-        console.error(`Unknown argument: ${arg}`)
+    if (arg === '--path' && argv[i + 1]) {
+      standalonePath = argv[++i]
+    } else if (arg === '--name' && argv[i + 1]) {
+      name = argv[++i]
+    } else if (arg === '--layer' && argv[i + 1]) {
+      const v = argv[++i]
+      if (v !== 'auto' && v !== 'web' && v !== 'api') {
+        console.error(`Error: --layer must be one of auto|web|api (got ${v})`)
         process.exit(1)
+      }
+      layer = v
+    } else if (arg === '--dry-run') {
+      dryRun = true
+    } else if (arg === '--force') {
+      force = true
+    } else if (!arg.startsWith('--')) {
+      if (!standalonePath) standalonePath = arg
+      else if (!name) name = arg
     }
-    i++
   }
 
-  return args
-}
-
-const args = parseArgs(process.argv)
-
-if (!args.name) {
-  console.error('Usage: node scripts/generators/insert-app.js --name <app-name> [--has-api] [--has-web] [--depends-on app1,app2] [--shortcut xx]')
-  console.error('')
-  console.error('Examples:')
-  console.error('  node scripts/generators/insert-app.js --name my-app --has-api --has-web --depends-on ezauth')
-  console.error('  node scripts/generators/insert-app.js --name my-tool --has-web --shortcut mt')
-  process.exit(1)
-}
-
-if (!/^[a-z][a-z0-9-]*$/.test(args.name)) {
-  console.error('App name must be kebab-case (lowercase letters, numbers, hyphens)')
-  process.exit(1)
-}
-
-if (!args.hasApi && !args.hasWeb) {
-  console.error('At least one of --has-api or --has-web is required')
-  process.exit(1)
-}
-
-if (appExists(args.name)) {
-  console.error(`App "${args.name}" already exists at apps/${args.name}/`)
-  process.exit(1)
-}
-
-// --- Config ---
-const appName = args.name
-const displayName = toPascalCase(appName)
-const shortcut = args.shortcut || generateShortcut(appName)
-const description = args.description || `${displayName} application`
-
-// Determine ports
-let apiPort = null
-let webPort = null
-
-if (args.hasApi && args.hasWeb) {
-  const pair = findNextPortPair()
-  apiPort = pair.apiPort
-  webPort = pair.webPort
-} else if (args.hasApi) {
-  apiPort = findNextApiPort()
-} else if (args.hasWeb) {
-  webPort = findNextWebPort()
-}
-
-const appDir = path.join(APPS_DIR, appName)
-
-const vars = {
-  APP_NAME: appName,
-  DISPLAY_NAME: displayName,
-  DESCRIPTION: description,
-  API_PORT: apiPort ? String(apiPort) : '',
-  WEB_PORT: webPort ? String(webPort) : '',
-  SHORTCUT: shortcut,
-}
-
-console.log(`\nCreating app: ${appName}`)
-console.log(`  Display name: ${displayName}`)
-if (apiPort) console.log(`  API port: ${apiPort}`)
-if (webPort) console.log(`  Web port: ${webPort}`)
-console.log(`  Dev shortcut: pnpm dev:${shortcut}`)
-console.log(`  Components: ${[args.hasApi && 'api', args.hasWeb && 'web', args.hasTypes && 'types'].filter(Boolean).join(', ')}`)
-if (args.dependsOn.length) console.log(`  Depends on: ${args.dependsOn.join(', ')}`)
-console.log()
-
-// --- Create API ---
-if (args.hasApi) {
-  console.log('Creating api/ ...')
-  const apiDir = path.join(appDir, 'api')
-  mkdirp(path.join(apiDir, 'src', 'routes'))
-  mkdirp(path.join(apiDir, 'src', 'middleware'))
-  mkdirp(path.join(apiDir, 'src', 'services'))
-
-  writeFile(path.join(apiDir, 'package.json'), renderTemplate('api/package.json', vars))
-  writeFile(path.join(apiDir, 'src', 'server.ts'), renderTemplate('api/index.ts', vars))
-
-  writeFile(path.join(apiDir, 'tsconfig.json'), JSON.stringify({
-    extends: '@ezstart/typescript-config/api.json',
-    compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist'],
-  }, null, 2))
-
-  writeFile(path.join(apiDir, 'eslint.config.js'),
-    `import eslintConfig from '@ezstart/eslint-config/base'\n\nexport default [...eslintConfig]\n`)
-
-  const corsOrigin = webPort ? `http://localhost:${webPort}` : 'http://localhost:3000'
-  const envContent = `# Server
-NODE_ENV=development
-PORT=${apiPort}
-
-# Database
-MONGODB_URI=mongodb://localhost:27017/${appName}
-
-# CORS
-CORS_ORIGIN=${corsOrigin}
-`
-  writeFile(path.join(apiDir, '.env.example'), envContent)
-  writeFile(path.join(apiDir, '.env.local'), envContent)
-}
-
-// --- Create Web ---
-if (args.hasWeb) {
-  console.log('Creating web/ ...')
-  const webDir = path.join(appDir, 'web')
-  mkdirp(path.join(webDir, 'src', 'app', '[locale]'))
-  mkdirp(path.join(webDir, 'src', 'components'))
-  mkdirp(path.join(webDir, 'src', 'i18n'))
-  mkdirp(path.join(webDir, 'src', 'messages', 'en'))
-  mkdirp(path.join(webDir, 'src', 'scripts'))
-  mkdirp(path.join(webDir, 'src', 'providers'))
-  mkdirp(path.join(webDir, 'public'))
-
-  writeFile(path.join(webDir, 'package.json'), renderTemplate('web/package.json', vars))
-
-  writeFile(path.join(webDir, 'tsconfig.json'), JSON.stringify({
-    extends: '@ezstart/typescript-config/nextjs.json',
-    compilerOptions: {
-      composite: true,
-      incremental: true,
-      plugins: [{ name: 'next' }],
-      paths: { '@/*': ['./src/*'] },
-    },
-    include: ['next-env.d.ts', '**/*.ts', '**/*.tsx', '.next/types/**/*.ts'],
-    exclude: ['node_modules'],
-  }, null, 2))
-
-  writeFile(path.join(webDir, 'eslint.config.js'),
-    `import eslintConfig from '@ezstart/eslint-config/next-js'\n\nexport default [...eslintConfig]\n`)
-
-  writeFile(path.join(webDir, 'tailwind.config.ts'), `import type { Config } from 'tailwindcss'
-import baseConfig from '@ezstart/tailwind-config/base.js'
-
-const config: Config = {
-  presets: [baseConfig],
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    '../../../packages/ui/src/**/*.{ts,tsx}',
-  ],
-}
-
-export default config
-`)
-
-  writeFile(path.join(webDir, 'postcss.config.mjs'), `/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: { "@tailwindcss/postcss": {} },
-}
-
-export default config
-`)
-
-  writeFile(path.join(webDir, 'next.config.mjs'), `import createNextIntlPlugin from 'next-intl/plugin'
-import withPWA from 'next-pwa'
-
-/** @type {import('next').NextConfig} */
-const baseConfig = {
-  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk', '@ezstart/next-theme'],
-}
-
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
-
-const pwaConfig = withPWA({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-})
-
-export default withNextIntl(pwaConfig(baseConfig))
-`)
-
-  writeFile(path.join(webDir, 'next-env.d.ts'),
-    `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.\n`)
-
-  const apiUrl = apiPort ? `http://localhost:${apiPort}/api` : ''
-  const webEnvContent = `# Application
-NODE_ENV=development
-PORT=${webPort}
-NEXT_PUBLIC_APP_URL=http://localhost:${webPort}
-${apiUrl ? `\n# API URLs\nNEXT_PUBLIC_API_URL=${apiUrl}` : ''}
-`
-  writeFile(path.join(webDir, '.env.example'), webEnvContent)
-  writeFile(path.join(webDir, '.env.local'), webEnvContent)
-
-  // i18n files
-  writeFile(path.join(webDir, 'src', 'i18n', 'routing.ts'), `import { defineRouting } from 'next-intl/routing'
-
-export const routing = defineRouting({
-  locales: ['en'],
-  defaultLocale: 'en',
-  localeDetection: true,
-})
-
-export type AppLocale = (typeof routing.locales)[number]
-
-export function getTimeZoneFromLocale(locale: string): string {
-  const timeZoneMap: Record<string, string> = {
-    en: 'UTC',
-    fr: 'Europe/Paris',
+  if (!standalonePath || !name) {
+    console.error('Error: missing required arguments')
+    printHelp()
+    process.exit(1)
   }
-  return timeZoneMap[locale] || 'UTC'
-}
-`)
 
-  writeFile(path.join(webDir, 'src', 'i18n', 'request.ts'), `import merge from 'deepmerge'
-import { getRequestConfig } from 'next-intl/server'
-import { routing } from './routing'
-
-function isSupportedLocale(
-  locale: string | undefined
-): locale is (typeof routing.locales)[number] {
-  return locale !== undefined && routing.locales.includes(locale as any)
-}
-
-export default getRequestConfig(async ({ requestLocale }) => {
-  const resolved = await requestLocale
-  const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
-
-  const [common, home] = await Promise.all([
-    import(\`../messages/\${locale}/common.json\`),
-    import(\`../messages/\${locale}/home.json\`),
-  ])
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+    console.error(`Error: app name "${name}" is not a valid kebab-case slug`)
+    process.exit(1)
+  }
 
   return {
-    locale,
-    timeZone: 'UTC',
-    messages: merge.all([common.default, home.default]),
+    standalonePath: path.resolve(standalonePath),
+    name,
+    dryRun,
+    force,
+    layer,
   }
-})
-`)
-
-  writeFile(path.join(webDir, 'src', 'i18n', 'navigation.ts'), `import { createNavigation } from 'next-intl/navigation'
-import { routing } from './routing'
-
-export const { Link, useRouter, usePathname, redirect, getPathname } =
-  createNavigation(routing)
-`)
-
-  writeFile(path.join(webDir, 'src', 'middleware.ts'), `import createMiddleware from 'next-intl/middleware'
-import { routing } from './i18n/routing'
-
-export default createMiddleware(routing)
-
-export const config = {
-  matcher: ['/((?!api|trpc|_next|_vercel|.*\\\\..*).*)'],
-}
-`)
-
-  writeFile(path.join(webDir, 'src', 'messages', 'en', 'common.json'), JSON.stringify({
-    common: {
-      appName: displayName,
-      loading: 'Loading...',
-      error: 'An error occurred',
-      retry: 'Try again',
-    },
-  }, null, 2))
-
-  writeFile(path.join(webDir, 'src', 'messages', 'en', 'home.json'), JSON.stringify({
-    home: {
-      title: `Welcome to ${displayName}`,
-      description: 'This app is pre-configured with all the essentials',
-      getStarted: 'Get Started',
-    },
-  }, null, 2))
-
-  writeFile(path.join(webDir, 'public', 'manifest.json'), JSON.stringify({
-    name: displayName,
-    short_name: displayName,
-    description: `${displayName} application`,
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#000000',
-    icons: [
-      { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-  }, null, 2))
-
-  writeFile(path.join(webDir, 'src', 'providers', 'providers.tsx'), `'use client'
-
-import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
-import { NextIntlClientProvider } from 'next-intl'
-import { ReactNode } from 'react'
-
-interface ProvidersProps {
-  children: ReactNode
-  locale: string
-  messages: any
-  timeZone?: string
 }
 
-export function Providers({ children, locale, messages, timeZone }: ProvidersProps) {
-  return (
-    <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <AuthProvider appName="${appName}">
-          {children}
-        </AuthProvider>
-      </ThemeProvider>
-    </NextIntlClientProvider>
+// ---------------------------------------------------------------------------
+// Copy helpers
+// ---------------------------------------------------------------------------
+
+const COPY_SKIP = new Set([
+  'node_modules',
+  '.next',
+  'dist',
+  '.turbo',
+  '.cache',
+  'coverage',
+  '.git',
+  'tsconfig.tsbuildinfo',
+  // Envs handled separately
+  '.env',
+  '.env.local',
+  '.env.staging',
+  '.env.production',
+  '.env.test',
+])
+
+/**
+ * @param {string} src
+ * @param {string} dest
+ * @returns {{ files: number, dirs: number }}
+ */
+function copyDirSync(src, dest) {
+  const stats = { files: 0, dirs: 0 }
+  fs.mkdirSync(dest, { recursive: true })
+  stats.dirs++
+  const entries = fs.readdirSync(src, { withFileTypes: true })
+  for (const entry of entries) {
+    if (COPY_SKIP.has(entry.name)) continue
+    const srcPath = path.join(src, entry.name)
+    const destPath = path.join(dest, entry.name)
+    if (entry.isDirectory()) {
+      const sub = copyDirSync(srcPath, destPath)
+      stats.files += sub.files
+      stats.dirs += sub.dirs
+    } else {
+      fs.copyFileSync(srcPath, destPath)
+      stats.files++
+    }
+  }
+  return stats
+}
+
+/**
+ * Remove a directory recursively. No-op if it doesn't exist.
+ * @param {string} dir
+ */
+function rmDirSync(dir) {
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Per-layer processing
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy a single layer from the standalone into apps/<appName>/<layer>/.
+ * Rewrites package.json along the way.
+ *
+ * @param {{
+ *   srcDir: string,
+ *   destDir: string,
+ *   appName: string,
+ *   layer: 'web' | 'api' | 'types',
+ *   originalAppName: string | null,
+ *   dryRun: boolean,
+ * }} args
+ * @returns {{ files: number, dirs: number }}
+ */
+function processLayer({ srcDir, destDir, appName, layer, originalAppName, dryRun }) {
+  if (dryRun) {
+    console.info(`  [DRY] Would copy ${srcDir} -> ${destDir}`)
+    return { files: 0, dirs: 0 }
+  }
+
+  const stats = copyDirSync(srcDir, destDir)
+
+  // Rewrite package.json
+  const pkgPath = path.join(destDir, 'package.json')
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
+      const rewritten = transformPackageJson(raw, appName, layer, { originalAppName })
+      fs.writeFileSync(pkgPath, JSON.stringify(rewritten, null, 2) + '\n')
+    } catch (err) {
+      console.warn(`  Warning: failed to rewrite ${pkgPath}: ${String(err)}`)
+    }
+  }
+
+  return stats
+}
+
+// ---------------------------------------------------------------------------
+// Env re-integration
+// ---------------------------------------------------------------------------
+
+/**
+ * Write a per-app .env.local (only vars not already shared at root) plus a
+ * matching .env.example template.
+ *
+ * @param {{
+ *   layerDir: string,
+ *   perAppVars: Map<string, string>,
+ *   appName: string,
+ *   layer: 'web' | 'api' | 'types',
+ *   dryRun: boolean,
+ * }} args
+ * @returns {{ written: boolean, count: number }}
+ */
+function writePerAppEnv({ layerDir, perAppVars, appName, layer, dryRun }) {
+  if (perAppVars.size === 0) {
+    return { written: false, count: 0 }
+  }
+
+  if (dryRun) {
+    return { written: false, count: perAppVars.size }
+  }
+
+  const sortedKeys = [...perAppVars.keys()].sort()
+
+  const localLines = [
+    `# ${appName} ${layer} — per-app env (imported by insert-app.js)`,
+    `# Vars shared with the monorepo root .env.local are NOT listed here.`,
+    '',
+  ]
+  const exampleLines = [`# ${appName} ${layer} — per-app env template (committed)`, '']
+
+  for (const key of sortedKeys) {
+    const value = perAppVars.get(key) || ''
+    const needsQuote = /[\s#'"\\$`]/.test(value)
+    const written = needsQuote ? `"${value.replace(/"/g, '\\"')}"` : value
+    localLines.push(`${key}=${written}`)
+    exampleLines.push(`${key}=`)
+  }
+  localLines.push('')
+  exampleLines.push('')
+
+  fs.writeFileSync(path.join(layerDir, '.env.local'), localLines.join('\n'))
+  fs.writeFileSync(path.join(layerDir, '.env.example'), exampleLines.join('\n'))
+
+  return { written: true, count: perAppVars.size }
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+function main() {
+  const {
+    standalonePath,
+    name,
+    dryRun,
+    force,
+    layer: layerOverride,
+  } = parseArgs(process.argv.slice(2))
+
+  // Validate standalone exists
+  if (!fs.existsSync(standalonePath) || !fs.statSync(standalonePath).isDirectory()) {
+    console.error(`Error: standalone path not found or not a directory: ${standalonePath}`)
+    process.exit(1)
+  }
+
+  // Validate target
+  const appDir = path.join(APPS_DIR, name)
+  if (fs.existsSync(appDir)) {
+    if (!force) {
+      console.error(`Error: apps/${name}/ already exists. Use --force to overwrite.`)
+      process.exit(1)
+    }
+    if (!dryRun) {
+      console.info(`  --force: removing existing apps/${name}/`)
+      rmDirSync(appDir)
+    } else {
+      console.info(`  [DRY] Would remove existing apps/${name}/`)
+    }
+  }
+
+  // Detect layout
+  const layout = detectStandaloneLayout(standalonePath)
+  if (layout.layers.length === 0) {
+    console.error(`Error: could not detect any web/api/types layer in ${standalonePath}`)
+    console.error('  - Multi-layer expected: subfolders web/, api/, types/')
+    console.error('  - Single-layer expected: next.config.*, src/app/, src/server.ts, etc.')
+    process.exit(1)
+  }
+
+  // Apply --layer override in single-layer mode
+  if (layout.mode === 'single' && layerOverride !== 'auto') {
+    layout.layers[0].name = layerOverride
+  }
+
+  // Try to infer original app name (so we can rewrite cross-layer @<old>/* refs)
+  const originalAppName = inferOriginalAppName(standalonePath)
+
+  console.info(
+    `\nInserting standalone "${standalonePath}" as app "${name}"${dryRun ? ' (DRY RUN)' : ''}\n`
   )
-}
-`)
+  console.info(`Layout: ${layout.mode}`)
+  if (originalAppName && originalAppName !== name) {
+    console.info(
+      `Original app name detected: "${originalAppName}" → rewriting local workspace refs`
+    )
+  }
+  for (const l of layout.layers) {
+    console.info(`  - ${l.name}: ${l.dir}`)
+  }
 
-  writeFile(path.join(webDir, 'src', 'app', '[locale]', 'layout.tsx'), `import { getTimeZoneFromLocale } from '@/i18n/routing'
-import { Providers } from '@/providers/providers'
-import '@ezstart/ui/globals.css'
-import type { Metadata } from 'next'
-import { getMessages } from 'next-intl/server'
+  // Process each layer
+  let totalFiles = 0
+  let totalDirs = 0
+  const envReport = []
 
-export const metadata: Metadata = {
-  title: '${displayName}',
-  description: '${displayName} application',
-}
+  const rootEnvPath = path.join(ROOT_DIR, '.env.local')
+  const rootEnv = parseEnvFile(rootEnvPath)
 
-interface RootLayoutProps {
-  children: React.ReactNode
-  params: Promise<{ locale: string }>
-}
+  for (const l of layout.layers) {
+    const destDir = path.join(appDir, l.name)
+    console.info(`\n  Processing ${l.name}/ ...`)
 
-export default async function RootLayout({
-  children,
-  params,
-}: RootLayoutProps) {
-  const { locale } = await params
-  const messages = await getMessages()
-  const timeZone = getTimeZoneFromLocale(locale)
-
-  return (
-    <html lang={locale} suppressHydrationWarning>
-      <body>
-        <Providers locale={locale} messages={messages} timeZone={timeZone}>
-          {children}
-        </Providers>
-      </body>
-    </html>
-  )
-}
-`)
-
-  writeFile(path.join(webDir, 'src', 'app', '[locale]', 'page.tsx'), `'use client'
-
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
-
-export default function HomePage() {
-  const t = useTranslations('home')
-
-  return (
-    <main className="container mx-auto p-8">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-          <CardDescription>{t('description')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            This app is pre-configured with:
-          </p>
-          <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Internationalization (i18n) with next-intl</li>
-            <li>Progressive Web App (PWA) support</li>
-            <li>@ezstart/ui components library</li>
-            <li>@ezstart/next-theme & auth-sdk providers</li>
-            <li>Centralized TypeScript, ESLint, and Tailwind configs</li>
-          </ul>
-          <div className="pt-4">
-            <Button>{t('getStarted')}</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </main>
-  )
-}
-`)
-
-  writeFile(path.join(webDir, 'src', 'scripts', 'dev-with-port.js'), `import { spawn } from 'child_process'
-import net from 'net'
-
-async function isPortFree(port) {
-  return new Promise((resolve) => {
-    const server = net.createServer()
-    server.listen(port, () => {
-      server.once('close', () => resolve(true))
-      server.close()
+    const stats = processLayer({
+      srcDir: l.dir,
+      destDir,
+      appName: name,
+      layer: l.name,
+      originalAppName,
+      dryRun,
     })
-    server.on('error', () => resolve(false))
-  })
-}
+    totalFiles += stats.files
+    totalDirs += stats.dirs
 
-async function findFreePort(startPort = 4000) {
-  let port = startPort
-  while (!(await isPortFree(port))) {
-    port++
+    // Env re-integration: parse standalone .env.local at the layer OR project root
+    /** @type {Map<string, string>} */
+    const standaloneEnv = new Map()
+
+    // Multi-layer: envs at project root AND per-layer (extract-app emits at root only)
+    if (layout.mode === 'multi') {
+      const rootStandaloneEnv = parseEnvFile(path.join(standalonePath, '.env.local'))
+      for (const [k, v] of rootStandaloneEnv) standaloneEnv.set(k, v)
+      const layerEnv = parseEnvFile(path.join(l.dir, '.env.local'))
+      for (const [k, v] of layerEnv) standaloneEnv.set(k, v)
+    } else {
+      const singleEnv = parseEnvFile(path.join(l.dir, '.env.local'))
+      for (const [k, v] of singleEnv) standaloneEnv.set(k, v)
+    }
+
+    const { sharedMatches, perApp } = diffEnvAgainstRoot(standaloneEnv, rootEnv)
+    const result = writePerAppEnv({
+      layerDir: destDir,
+      perAppVars: perApp,
+      appName: name,
+      layer: l.name,
+      dryRun,
+    })
+
+    envReport.push({
+      layer: l.name,
+      total: standaloneEnv.size,
+      shared: sharedMatches.length,
+      perApp: perApp.size,
+      written: result.written,
+    })
   }
-  return port
+
+  // Summary
+  console.info('\n========================================')
+  console.info(`  ${dryRun ? 'Dry run complete (no files written)' : 'Insert complete!'}`)
+  console.info(`  Target: apps/${name}/`)
+  if (!dryRun) {
+    console.info(`  Files: ${totalFiles}`)
+    console.info(`  Dirs:  ${totalDirs}`)
+  }
+  for (const r of envReport) {
+    console.info(
+      `  Env [${r.layer}]: ${r.total} vars → ${r.shared} shared (root), ${r.perApp} per-app${
+        r.written ? ' (written)' : ''
+      }`
+    )
+  }
+  console.info('========================================\n')
+
+  if (!dryRun) {
+    console.info('Next steps (manual — by design):')
+    console.info('  1. Register ports for this app in packages/config/src/urls.ts')
+    console.info('  2. Add tsconfig references in the root tsconfig.json')
+    console.info('  3. Add a `dev:<shortcut>` script in the root package.json if needed')
+    console.info('  4. Run: pnpm install')
+    console.info(`  5. Run: pnpm --filter web-${name} typecheck (or api-${name})`)
+    console.info('  6. Review apps/' + name + '/<layer>/.env.local — rotate secrets!')
+    console.info('')
+
+    // Attempt a minimal validation: pnpm install
+    if (process.argv.includes('--validate')) {
+      console.info('Validating with `pnpm install`...')
+      try {
+        execSync('pnpm install', { cwd: ROOT_DIR, stdio: 'inherit' })
+        console.info('\n[OK] pnpm install passed')
+      } catch {
+        console.error('\n[FAIL] pnpm install failed — review the output above')
+        process.exit(1)
+      }
+    }
+  }
 }
 
-async function startDev() {
-  const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : ${webPort}
-  const port = await findFreePort(preferredPort)
-  console.log(\`Starting dev server on port \${port}\`)
-
-  const child = spawn('next', ['dev', '-p', port.toString()], {
-    stdio: 'inherit',
-    shell: true,
-  })
-
-  child.on('error', (error) => {
-    console.error('Error starting dev server:', error)
-  })
-}
-
-startDev()
-`)
-}
-
-// --- Create Types ---
-if (args.hasTypes) {
-  console.log('Creating types/ ...')
-  const typesDir = path.join(appDir, 'types')
-  mkdirp(path.join(typesDir, 'src'))
-
-  writeFile(path.join(typesDir, 'package.json'), renderTemplate('types/package.json', vars))
-
-  writeFile(path.join(typesDir, 'tsconfig.json'), JSON.stringify({
-    extends: '@ezstart/typescript-config/library.json',
-    compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist'],
-  }, null, 2))
-
-  writeFile(path.join(typesDir, 'src', 'index.ts'), `// ${displayName} shared types\nexport {}\n`)
-}
-
-// --- Create BACKLOG.md & README.md ---
-console.log('Creating BACKLOG.md & README.md ...')
-writeFile(path.join(appDir, 'BACKLOG.md'), renderTemplate('BACKLOG.md', vars))
-writeFile(path.join(appDir, 'README.md'), renderTemplate('README.md', vars))
-
-// --- Register in monorepo ---
-console.log('\nRegistering in monorepo...')
-registerInUrls(appName, displayName, description, apiPort, webPort, args.hasApi, args.hasWeb)
-addTsconfigReferences(appName, args.hasApi, args.hasWeb, args.hasTypes)
-addDevScript(appName, shortcut, args.dependsOn, args.hasApi, args.hasWeb)
-
-// --- Install ---
-console.log('\nInstalling dependencies...')
-execSync('pnpm install', { stdio: 'inherit', cwd: ROOT_DIR })
-
-// --- Done ---
-console.log(`\nApp "${appName}" created successfully!`)
-console.log(`\nStructure:`)
-console.log(`  apps/${appName}/`)
-if (args.hasApi) console.log(`  ├── api/        Express API (port ${apiPort})`)
-if (args.hasWeb) console.log(`  ├── web/        Next.js frontend (port ${webPort})`)
-if (args.hasTypes) console.log(`  ├── types/      Shared TypeScript types`)
-console.log(`  ├── BACKLOG.md`)
-console.log(`  └── README.md`)
-console.log(`\nRun: pnpm dev:${shortcut}`)
+main()

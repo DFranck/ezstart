@@ -13,7 +13,7 @@ Toutes les APIs utilisent le même pattern de configuration dans le Railway Dash
 - **Root Directory** : `/` (racine monorepo)
 - **Build Command** : `pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-{name}...`
 - **Start Command** : `pnpm --filter api-{name} start`
-- **Watch Paths** : `apps/{name}/api/**`, `packages/express-core/**`, `packages/config/**`, `packages/logger/**`, `packages/monitoring/**`
+- **Watch Paths** : `apps/{name}/api/**`, `packages/api-core/**`, `packages/config/**`, `packages/logger/**`, `packages/monitoring/**`
 - **Healthcheck** : `/health`
 
 | Service            | Projet Railway | URL Production                            |
@@ -55,29 +55,36 @@ Variables `NEXT_PUBLIC_*` configurées dans Vercel Dashboard → Environment Var
 ## Tooling
 
 ```bash
-pnpm setup:env         # Génère/met à jour root .env.local + per-app overrides (idempotent)
-pnpm validate-env      # Valide root + per-app .env contre les templates, détecte redondances
-pnpm rotate-secrets    # Rotate JWT_SECRET (+ OAUTH_KEY ezauth), push Railway + Vercel via CLI
-pnpm secrets:sync      # Push root .env.production → Vercel + Railway (shared vars uniquement)
-pnpm secret:gen        # Génère un secret crypto random (utilitaire ad-hoc)
+pnpm env:validate                   # Valide la cascade per-app (.env.local → .env.staging → .env.production)
+pnpm env:push:railway <app> <env>   # Push merged cascade vers Railway pour 1 app+env
+pnpm env:push:vercel <app> <env>    # Push merged cascade vers Vercel pour 1 app+env
+pnpm env:push:all <env>             # Push toutes les apps en une seule commande
+pnpm env:push:all <env> --dry-run   # Preview sans cloud call
+pnpm secret:gen                     # Génère un secret crypto random (utilitaire ad-hoc)
+
+# DEPRECATED (legacy hybrid layout — root .env.* dropped 2026-05-01)
+# pnpm setup:env, pnpm validate-env, pnpm rotate-secrets, pnpm secrets:sync
 ```
 
-Voir [SECRETS.md](./SECRETS.md) pour le détail des flags (`--dry-run`, `--prod`, `--vars`, etc.).
+Voir [SECRETS.md](./SECRETS.md) pour le détail des flags (`--dry-run`, `--from`, `--override`, `--apps`, `--continue-on-error`, etc.).
 
 ---
 
-## Structure .env
+## Structure .env (per-app ONLY — pas de fichier root)
 
 ```
-apps/{name}/api/
-├── .env.example       ← Template (committé)
-├── .env.local         ← Dev local (gitignored)
-└── .env.production    ← Production (gitignored)
+apps/{name}/{api|web}/
+├── .env.example       ← Template (committé, sans secrets)
+├── .env.local         ← Dev local complet (gitignored — TOUS les vars y vivent)
+├── .env.staging       ← Staging overrides (gitignored — diffs vs local)
+└── .env.production    ← Production overrides (gitignored — diffs vs local+staging)
 ```
 
-- `.env.example` : toujours à jour, contient placeholders
-- `.env.local` : valeurs réelles de dev, chargé par express-core
-- `.env.production` : référence pour les variables Railway
+- `.env.example` : à jour, contient placeholders + commentaires
+- `.env.local` : valeurs réelles de dev, chargé par api-core / next-config
+- `.env.staging` : DIFFS vs `.env.local` uniquement (ex: cluster URL staging)
+- `.env.production` : DIFFS vs `.env.local + .env.staging` uniquement
+- Pas de fichier `.env*` à la racine du monorepo (per-app cascade canonique)
 
 ---
 
@@ -96,12 +103,11 @@ apps/{name}/api/
 
 ### Installation
 
-Les CLIs **npm** sont installés en devDependencies à la racine (`vercel`, `@sentry/cli`). Les CLIs **système** (`gh`, `railway`, `atlas`) s'installent via le package manager de l'OS.
+Les CLIs **npm** sont installés en devDependencies à la racine (`vercel`). Les CLIs **système** (`gh`, `railway`, `atlas`) s'installent via le package manager de l'OS.
 
 ```bash
 # npm (déjà dans package.json → pnpm install)
 pnpm exec vercel --version
-pnpm exec sentry-cli --version
 
 # Système (Windows: winget / macOS: brew)
 winget install GitHub.cli        # ou brew install gh
@@ -116,7 +122,6 @@ winget install MongoDB.Atlas     # ou brew install mongodb-atlas-cli
 | GitHub        | `gh` (système)            | `gh auth login`    | `gh auth token`                                                       | https://github.com/settings/personal-access-tokens/new |
 | Vercel        | `pnpm exec vercel`        | `vercel login`     | `%APPDATA%\com.vercel.cli\Data\auth.json` → `.token` (ou `~/.vercel`) | https://vercel.com/account/tokens                      |
 | Railway       | `railway` (système)       | `railway login`    | `~/.railway/config.json` → `.user.accessToken`                        | https://railway.app/account/tokens                     |
-| Sentry        | `pnpm exec sentry-cli`    | `sentry-cli login` | `~/.sentryclirc` ou env `SENTRY_AUTH_TOKEN`                           | https://sentry.io/settings/account/api/auth-tokens/    |
 | MongoDB Atlas | `atlas` (installer dédié) | `atlas auth login` | Dashboard only (API keys public/private)                              | https://cloud.mongodb.com/v2#/preferences/publicApi    |
 | Resend        | aucun                     | dashboard only     | n/a                                                                   | https://resend.com/api-keys                            |
 | Anthropic     | aucun                     | dashboard only     | n/a                                                                   | https://console.anthropic.com/settings/keys            |
@@ -130,7 +135,6 @@ winget install MongoDB.Atlas     # ou brew install mongodb-atlas-cli
 gh auth status
 pnpm exec vercel whoami
 railway whoami
-SENTRY_AUTH_TOKEN=xxx pnpm exec sentry-cli info
 ```
 
 ### Tokens auto-gérés (dans `apps/ezstart/api/.env.local`)
@@ -141,7 +145,6 @@ Ces variables sont auto-extraites depuis les CLIs locaux par le flow d'onboardin
 - `GITHUB_USERNAME` — `gh api user --jq '.login'`
 - `VERCEL_TOKEN` — Vercel auth.json
 - `RAILWAY_TOKEN` — Railway config.json (access token)
-- `SENTRY_AUTH_TOKEN` + `SENTRY_ORG_SLUG` — via Sentry dashboard (auth token), slug récupérable avec `sentry-cli organizations list`
 
 ### Tokens manuels obligatoires (dashboard only)
 

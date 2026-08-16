@@ -1,0 +1,24 @@
+{
+  "subscribe": {
+    "success": {
+      "title": "Dang ky thanh cong!",
+      "description": "Dang ky cua ban da duoc kich hoat va tai khoan da duoc nang cap.",
+      "redirecting": "Chuyen huong den bang dieu khien trong {seconds}s…",
+      "goToDashboard": "Toi bang dieu khien",
+      "whatNext": "Tiep theo la gi?",
+      "emailConfirmation": "Bien lai da duoc gui qua email boi Stripe.",
+      "accessGranted": "Cac vai tro va tinh nang moi cua ban da duoc cap.",
+      "receiptAvailable": "Quan ly dang ky moi luc tu trang tai khoan cua ban.",
+      "reference": "Tham chieu: {id}"
+    },
+    "cancel": {
+      "title": "Da huy thanh toan",
+      "description": "Dang ky chua duoc bat dau. Khong co khoan phi nao duoc tinh.",
+      "backToPricing": "Quay lai bang gia",
+      "backHome": "Ve trang chu",
+      "needHelp": "Can tro giup?",
+      "noCharge": "Dung lo, khong co khoan nao duoc tinh tren tai khoan cua ban.",
+      "contactSupport": "Neu gap van de, vui long lien he voi bo phan ho tro."
+    }
+  }
+}

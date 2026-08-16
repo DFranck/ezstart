@@ -12,7 +12,7 @@
  * - POST /api/esg/process               -> processEsgData (complete workflow)
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { authMiddleware } from '../../middleware/auth.js'
 
 // Import individual action routers
@@ -33,16 +33,21 @@ export const esgRegistries = [
   extractEsgDataRegistry,
 ]
 
-// Consolidate all action routers — all ESG routes require authentication
+// Consolidate all action routers — all ESG routes require authentication.
+// This parent is mounted at /api (no /esg prefix) — children own their basePaths
+// ('/projects', '/activity-data', '/reports', '/reports/:jobId/status',
+// '/process', '/extract') via createRouterWithDoc. We re-prefix them with '/esg'
+// here so the final URL matches /api/esg/<resource>, and scope auth middleware
+// to '/esg' to avoid leaking to sibling features.
 const router: import('express').Router = Router()
-router.use(authMiddleware)
+router.use('/esg', authMiddleware)
 
 router
-  .use('/projects', createProjectRouter) // POST /projects
-  .use('/activity-data', pushActivityDataRouter) // POST /activity-data
-  .use('/reports', generateReportRouter) // POST /reports
-  .use('/reports/:jobId/status', getReportStatusRouter) // GET /reports/:jobId/status
-  .use('/process', processEsgDataRouter) // POST /process
-  .use('/extract', extractEsgDataRouter) // POST /extract (ESG data extraction from text)
+  .use('/esg', createProjectRouter)
+  .use('/esg', pushActivityDataRouter)
+  .use('/esg', generateReportRouter)
+  .use('/esg', getReportStatusRouter)
+  .use('/esg', processEsgDataRouter)
+  .use('/esg', extractEsgDataRouter)
 
 export default router

@@ -3,6 +3,8 @@
  * Single interface to chat with any AI provider
  */
 
+import '../_internal/server-only.js'
+
 import { logger } from '@ezstart/logger'
 import { providerRegistry } from '../registry/ProviderRegistry.js'
 import type { ChatMessage, ProviderSendOptions, ProviderResponse } from '../providers/base.js'

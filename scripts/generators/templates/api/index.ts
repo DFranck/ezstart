@@ -5,7 +5,7 @@ import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 
 const PORT = process.env.PORT || {{API_PORT}}
 const app = createApp()

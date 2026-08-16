@@ -1,84 +1,60 @@
 'use client'
 
-import {
-  Button,
-  Div,
-  P,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  PasswordInput,
-} from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
-import { logger } from '@ezstart/logger'
-import { useState } from 'react'
+import { Button, Div, Form } from '@ezstart/ui/components'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
+import { logger } from './internal-logger.js'
+import { generatePkcePair } from '../core/pkce.js'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocale } from 'next-intl'
-import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
+import { OAuthButtons } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
-import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
+import { DevModeBanner } from './DevModeBanner.js'
+import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
+import { useAuth } from '../react/hooks.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
+import { getAuthTexts } from '../i18n/index.js'
+import {
+  SIGN_IN_DEFAULT_FORM_ID,
+  type SignInFormData,
+  type SignInFormProps,
+  type SignInFormTexts,
+} from './_internal/sign-in-form/types.js'
+import { useAuthedRedirect } from './_internal/sign-in-form/use-authed-redirect.js'
+import { completeLoginRedirect } from './_internal/sign-in-form/complete-login-redirect.js'
+import { SignInFormFields } from './_internal/sign-in-form/SignInFormFields.js'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+export type { SignInFormProps, SignInFormTexts } from './_internal/sign-in-form/types.js'
 
-export interface SignInFormTexts {
-  emailOrUsername: string
-  emailOrUsernamePlaceholder: string
-  password: string
-  passwordPlaceholder: string
-  forgotPassword: string
-  submit: string
-  submitting: string
-  required: string
-  minLength: string
-  noRedirectUri: string
-  fallbackError: string
-  // 2FA texts (optional — only needed if 2FA is enabled)
-  twoFactorPrompt?: string
-  twoFactorCodePlaceholder?: string
-  twoFactorVerify?: string
-  twoFactorVerifying?: string
-  twoFactorBack?: string
-  // OAuth texts (optional — only needed if showOAuth is true)
-  continueWithGoogle?: string
-  orContinueWith?: string
+/**
+ * True when `redirectUri` resolves to the SAME origin as the current page.
+ *
+ * PKCE for password login is only minted in this case: the verifier stays in
+ * the submit-handler closure and the SDK exchanges the code itself
+ * (`handleCallback`) before navigating. A cross-origin redirect hands the code
+ * to a foreign `/auth/callback` that cannot read this verifier, so PKCE is
+ * skipped there (backward-compat). Returns `false` server-side or when the
+ * URI is missing/unparseable so the caller falls back to no-PKCE safely.
+ *
+ * @internal
+ */
+function isSameOriginRedirect(redirectUri: string | undefined): boolean {
+  if (!redirectUri || typeof window === 'undefined') return false
+  try {
+    return new URL(redirectUri, window.location.origin).origin === window.location.origin
+  } catch {
+    return false
+  }
 }
 
-export interface SignInFormProps {
-  /** App name for the login request */
-  appName: string
-  /** Redirect URI after login (OAuth code flow) */
-  redirectUri?: string
-  /** Called after successful login (if not using redirect) */
-  onSuccess?: () => void
-  /** Called when user clicks "Forgot password" */
-  onForgotPassword?: () => void
-  /** Href for forgot password link (used if onForgotPassword is not provided) */
-  forgotPasswordHref?: string
-  /** Show OAuth buttons above the form */
-  showOAuth?: boolean
-  /** OAuth providers to display */
-  oauthProviders?: OAuthProvider[]
-  /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
-   * Any keys provided in `texts` take precedence over the localized defaults.
-   */
-  locale?: AuthLocale | string
-  /** Override texts (merged on top of the localized defaults). */
-  texts?: Partial<SignInFormTexts>
-}
-
-// ─── Component ──────────────────────────────────────────────────────────────
-
-type FormData = {
-  email: string
-  password: string
-}
-
+/**
+ * Email + password sign-in form with optional 2FA prompt and OAuth
+ * provider buttons.
+ *
+ * @example
+ * ```tsx
+ * <SignInForm appName="myapp" redirectUri="/dashboard" />
+ * ```
+ */
 export function SignInForm({
   appName,
   redirectUri,
@@ -89,64 +65,173 @@ export function SignInForm({
   oauthProviders,
   locale: propLocale,
   texts,
+  disabled = false,
+  keyStatus,
+  urlKey,
+  formId = SIGN_IN_DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
+  turnstileSiteKey,
+  turnstileShowAfterFails = 3,
 }: SignInFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
-  const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const navigation = useAuthNavigation()
+  const { handleCallback, isAuthenticated, isAuthReady, verifyAndRefresh, clearSession } = useAuth()
+  const locale = propLocale ?? navigation.locale
+  const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
+
+  // Resolve redirectUri with sensible defaults so consumers (including the
+  // first-party ezauth/web dogfooder) don't have to compute it themselves:
+  //
+  // 1. Explicit `redirectUri` prop (highest priority — caller knows best).
+  // 2. `?redirect_uri=` URL param (cross-app SSO arriving from a consumer).
+  // 3. Same-origin default → `/{locale}/dashboard`. The SDK detects same
+  //    origin in the submit handler and runs `handleCallback()` BEFORE the
+  //    navigation, so the destination receives the user already authenticated
+  //    — no `/auth/callback` bounce required for first-party logins.
+  const resolvedRedirectUri =
+    redirectUri ??
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
+      : undefined)
+
+  useAuthedRedirect({
+    isAuthReady,
+    isAuthenticated,
+    resolvedRedirectUri,
+    appName,
+    // Prove the session is LIVE before the cross-origin SSO handoff — the
+    // persisted `isAuthenticated` flag outlives the httpOnly access cookie, so
+    // firing `sso/authorize` off the flag alone 401s (and, unguarded, storms).
+    // `verifyAndRefresh` hits `GET /me` (dual-mode) and returns the user, `null`
+    // (no credential), or throws. Tri-state: only a DEFINITIVE 401 is
+    // `'expired'` (→ clear); a transient network/5xx blip is `'error'` and must
+    // NOT clear/broadcast logout across tabs on a still-valid cookie.
+    revalidateSession: async () => {
+      try {
+        return (await verifyAndRefresh()) != null ? 'live' : 'expired'
+      } catch (err) {
+        return (err as { status?: number })?.status === 401 ? 'expired' : 'error'
+      }
+    },
+    // `'expired'` only → drop the stale flag so the form renders signed-out.
+    onStaleSession: clearSession,
+  })
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
+  const [twoFactorState, setTwoFactorState] = useState<{
+    tempToken: string
+    /** PKCE verifier from the originating same-origin login (RFC 7636). */
+    codeVerifier?: string
+  } | null>(null)
+  // Anti-friction Turnstile: only show after the user has failed
+  // `turnstileShowAfterFails` consecutive logins. Reset on success.
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const showTurnstile = Boolean(turnstileSiteKey) && failedAttempts >= turnstileShowAfterFails
 
-  const form = useForm<FormData>({
+  // Lift `loading` out so a parent (e.g. `<SignInModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
+  useEffect(() => {
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
+
+  const form = useForm<SignInFormData>({
     defaultValues: {
       email: '',
       password: '',
     },
   })
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: SignInFormData) => {
     if (loading) return
+    // Block submission when the captcha widget is showing but the user
+    // hasn't completed the challenge yet. Defensive guard for cases where
+    // the submit button lives outside the form (e.g. `<SignInModal>` footer)
+    // and the caller hasn't wired the disabled state.
+    if (showTurnstile && !turnstileToken) return
 
     setLoading(true)
     setError('')
 
     try {
-      const response = await callApi('/auth/login', {
+      // PKCE (RFC 7636 / OAuth 2.1) — only mint a challenge when THIS SDK will
+      // perform the /token exchange itself, i.e. a same-origin redirect (the
+      // verifier lives in this closure and never crosses an origin boundary).
+      // For a cross-origin SSO redirect the consumer's `/auth/callback` does
+      // the exchange on a different origin and cannot read this verifier, so
+      // we deliberately skip PKCE there (the code is minted without a
+      // challenge → backward-compat path; the redirect_uri cross-check still
+      // protects against authcode injection). When `crypto.subtle` is missing
+      // (very old browser / non-secure context) `generatePkcePair` throws and
+      // we fall back to the no-PKCE flow.
+      let pkceVerifier: string | undefined
+      let pkceChallenge: string | undefined
+      let pkceMethod: 'S256' | undefined
+      if (isSameOriginRedirect(resolvedRedirectUri)) {
+        try {
+          const pair = await generatePkcePair()
+          pkceVerifier = pair.codeVerifier
+          pkceChallenge = pair.codeChallenge
+          pkceMethod = pair.codeChallengeMethod
+        } catch (pkceErr) {
+          logger.warn(
+            'PKCE pair generation unavailable, falling back to no-PKCE login',
+            pkceErr instanceof Error ? pkceErr.message : String(pkceErr)
+          )
+        }
+      }
+
+      const result = await apiCall<{
+        code?: string
+        requires2FA?: boolean
+        tempToken?: string
+      }>('/auth/login', {
         appName: 'ezauth',
         method: 'POST',
         body: {
           email: formData.email,
           password: formData.password,
           app: appName,
-          redirect_uri: redirectUri || undefined,
+          redirect_uri: resolvedRedirectUri || undefined,
+          ...(pkceChallenge
+            ? { code_challenge: pkceChallenge, code_challenge_method: pkceMethod }
+            : {}),
+          ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
 
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Login failed')
-      }
-
-      const result = response.data as {
-        code?: string
-        requires2FA?: boolean
-        tempToken?: string
-      }
+      // Successful credential check — reset failure counter so the captcha
+      // hides again next time the user types something valid.
+      setFailedAttempts(0)
+      setTurnstileToken(null)
 
       // Handle 2FA requirement
       if (result.requires2FA && result.tempToken) {
-        setTwoFactorState({ tempToken: result.tempToken })
+        // The PKCE challenge (if any) was carried into the temp token by the
+        // API, so the post-2FA code stays bound. The verifier survives in
+        // this same closure until the post-2FA exchange (TwoFactorPrompt runs
+        // in this same page), so stash it on the 2FA state.
+        setTwoFactorState({ tempToken: result.tempToken, codeVerifier: pkceVerifier })
         setLoading(false)
         return
       }
 
-      // Redirect with authorization code
-      if (redirectUri && result.code) {
-        logger.info('Redirecting to:', redirectUri)
-        const url = new URL(redirectUri)
-        url.searchParams.set('code', result.code)
-        window.location.href = url.toString()
+      // Redirect with the authorization code. `completeLoginRedirect`
+      // distinguishes same-origin first-party (exchange the code itself via
+      // `handleCallback` before navigating) from cross-origin SSO (forward
+      // `?code=`/`?theme=` so the consumer's `/auth/callback` exchanges it).
+      if (resolvedRedirectUri && result.code) {
+        await completeLoginRedirect({
+          resolvedRedirectUri,
+          code: result.code,
+          codeVerifier: pkceVerifier,
+          handleCallback,
+          fallbackError: t.fallbackError,
+        })
         return
       }
 
@@ -161,8 +246,20 @@ export function SignInForm({
       logger.error('No redirect_uri or onSuccess provided!')
       throw new Error(t.noRedirectUri)
     } catch (err) {
-      const message = err instanceof Error ? err.message : t.fallbackError
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
+      const message =
+        ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE'
+          ? t.networkError
+          : err instanceof Error
+            ? err.message
+            : t.fallbackError
       setError(message)
+      // Track failed attempts so the captcha widget surfaces after
+      // `turnstileShowAfterFails` consecutive errors. The token (if any)
+      // is single-use server-side, so clear it for the next attempt.
+      setFailedAttempts(prev => prev + 1)
+      setTurnstileToken(null)
       setLoading(false)
     }
   }
@@ -179,7 +276,15 @@ export function SignInForm({
     return (
       <TwoFactorPrompt
         tempToken={twoFactorState.tempToken}
-        redirectUri={redirectUri}
+        // Use the RESOLVED redirect URI (prop ?? URL param ?? same-origin
+        // default) so the post-2FA redirect matches the resolution we did
+        // for the no-2FA path. Passing the raw `redirectUri` prop here meant
+        // the SDK only worked when the consumer explicitly passed one,
+        // breaking dogfood standalone (e.g. ezauth /login → /dashboard).
+        redirectUri={resolvedRedirectUri}
+        // PKCE verifier (same-origin only) — completes the bound exchange
+        // after 2FA. Undefined ⇒ no-PKCE / cross-origin (backward compat).
+        {...(twoFactorState.codeVerifier ? { codeVerifier: twoFactorState.codeVerifier } : {})}
         onBack={() => setTwoFactorState(null)}
         texts={twoFactorTexts}
       />
@@ -187,7 +292,7 @@ export function SignInForm({
   }
 
   return (
-    <Div className="space-y-3 md:space-y-4">
+    <Div className={`space-y-3 md:space-y-4 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       {showOAuth && (
         <OAuthButtons
           appName={appName}
@@ -201,81 +306,58 @@ export function SignInForm({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+        <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           {error && (
             <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
               {error}
             </Div>
           )}
 
-          <FormField
-            control={form.control}
-            name="email"
-            rules={{
-              required: t.required,
-              minLength: { value: 3, message: t.minLength.replace('{min}', '3') },
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.emailOrUsername}</FormLabel>
-                <FormControl>
-                  <Input type="text" placeholder={t.emailOrUsernamePlaceholder} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <SignInFormFields
+            form={form}
+            texts={t}
+            disabled={disabled}
+            forgotPasswordHref={resolvedForgotPasswordHref}
+            onForgotPassword={onForgotPassword}
           />
 
-          <FormField
-            control={form.control}
-            name="password"
-            rules={{
-              required: t.required,
-              minLength: { value: 6, message: t.minLength.replace('{min}', '6') },
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.password}</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder={t.passwordPlaceholder} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {showTurnstile && (
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              onSuccess={setTurnstileToken}
+              onExpired={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
+          )}
 
-          <Div className="text-right">
-            <P size="xs">
-              {onForgotPassword ? (
-                <Button
-                  type="button"
-                  variant="link"
-                  className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-                  onClick={onForgotPassword}
-                >
-                  {t.forgotPassword}
-                </Button>
-              ) : (
-                <a
-                  href={resolvedForgotPasswordHref}
-                  className="text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-                >
-                  {t.forgotPassword}
-                </a>
-              )}
-            </P>
-          </Div>
-
-          <Button
-            type="submit"
-            disabled={loading || !form.formState.isValid}
-            className="w-full cursor-pointer"
-            variant="default"
-          >
-            {loading ? t.submitting : t.submit}
-          </Button>
+          {!hideSubmitButton && (
+            <Button
+              type="submit"
+              disabled={
+                disabled || loading || !form.formState.isValid || (showTurnstile && !turnstileToken)
+              }
+              className="w-full cursor-pointer"
+              variant="default"
+            >
+              {loading ? t.submitting : t.submit}
+            </Button>
+          )}
         </form>
       </Form>
+
+      {/*
+        Only pass `appName` as override when the caller surfaced a real URL
+        signal (a key/legacy app= param). Without this guard the banner can
+        never honour its first-party early-return (`scope === 'first-party' &&
+        !overrideAppName`) on ezauth's own pages, so the "Dev Mode — No API
+        key configured" hint leaks onto first-party pages.
+      */}
+      <DevModeBanner
+        {...(urlKey || keyStatus ? { appName } : {})}
+        keyStatus={keyStatus}
+        urlKey={urlKey}
+        locale={navigation.locale}
+      />
     </Div>
   )
 }

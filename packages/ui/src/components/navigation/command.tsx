@@ -4,6 +4,8 @@ import * as React from 'react'
 import { Command as CommandPrimitive } from 'cmdk'
 import { SearchIcon } from 'lucide-react'
 import { type VariantProps } from 'class-variance-authority'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 
 import { cn } from '../../lib'
 import { commandGroupVariants } from '../../lib/design-system/variants'
@@ -116,7 +118,15 @@ const intentToHeadingVariant = {
 } as const
 
 function CommandGroup({ className, headingVariant, intent, ...props }: CommandGroupProps) {
-  /** @deprecated headingVariant — Use intent instead */
+  // Surface deprecation warning when consumer passes the legacy `headingVariant` prop.
+  React.useEffect(() => {
+    if (headingVariant !== undefined) {
+      warnDeprecation('CommandGroup.headingVariant', 'intent prop', {
+        toast: msg => toast.warning(msg),
+      })
+    }
+  }, [headingVariant])
+
   const resolvedHeadingVariant =
     headingVariant ?? (intent ? intentToHeadingVariant[intent] : undefined)
 

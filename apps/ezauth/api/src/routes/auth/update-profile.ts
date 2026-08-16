@@ -1,13 +1,12 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
-  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
@@ -15,8 +14,8 @@ import { z } from 'zod'
 import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { isValidAvatarUrl, MAX_AVATAR_URL_LENGTH } from '../../utils/avatar.js'
-
-const { authMiddleware } = createAuthMiddleware()
+import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 
 export const updateProfileRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -63,21 +62,37 @@ const updateProfileController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { user: user.toAuthUser() })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('Update profile error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to update profile', 500)
+    sendError(res, 'Failed to update profile', 500)
   }
 }
 
-docRouter.put('/profile', verifyCookieCsrf, authMiddleware, updateProfileController, {
-  summary: 'Update own profile (firstName, lastName, avatar)',
-  tags: ['User'],
-  bodySchema: updateProfileSchema,
-  responseSchema: userResponseSchema,
-  extraResponses: {
-    400: { description: 'No fields to update', schema: errorResponseSchema },
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    404: { description: 'User not found', schema: errorResponseSchema },
-  },
-})
+docRouter.put(
+  '/profile',
+  verifyCookieCsrf,
+  authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — anti identity-squatting: an unverified
+  // account must not be able to set firstName/lastName/avatar (the
+  // squatter would otherwise build a "real-looking" profile on top of a
+  // stolen email address). Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
+  updateProfileController,
+  {
+    summary: 'Update own profile (firstName, lastName, avatar)',
+    tags: ['User'],
+    bodySchema: updateProfileSchema,
+    responseSchema: userResponseSchema,
+    extraResponses: {
+      400: { description: 'No fields to update', schema: errorResponseSchema },
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
+      404: { description: 'User not found', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

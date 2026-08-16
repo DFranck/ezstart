@@ -5,7 +5,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
-import { sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import { sendSuccess, sendError, sendValidationError } from '@ezstart/api-core'
 import {
   chatWithInvoiceAssistant,
   type ExtractedInvoiceData,

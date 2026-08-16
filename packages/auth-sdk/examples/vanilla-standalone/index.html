@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>auth-sdk vanilla standalone example</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 480px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+      }
+      input {
+        display: block;
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: #111;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 1rem;
+        border-radius: 4px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>auth-sdk — vanilla example</h1>
+
+    <section id="signed-out">
+      <form id="login-form">
+        <label>
+          Email
+          <input id="email" type="email" required autocomplete="email" />
+        </label>
+        <label>
+          Password
+          <input id="password" type="password" required autocomplete="current-password" />
+        </label>
+        <button type="submit" id="submit">Sign in</button>
+      </form>
+    </section>
+
+    <section id="signed-in" hidden>
+      <h2>Signed in as <span id="username"></span></h2>
+      <pre id="user-json"></pre>
+      <button id="logout">Sign out</button>
+    </section>
+
+    <script type="module" src="/app.ts"></script>
+  </body>
+</html>

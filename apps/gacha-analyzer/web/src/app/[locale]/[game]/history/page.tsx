@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import type { GameType, ScanStatus } from '@gacha-analyzer/types'

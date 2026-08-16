@@ -1,7 +1,7 @@
 'use client'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Card, CardContent, CardHeader, H3, Div, P } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export function EZAuthLoginSection() {
   const { user, isAuthenticated, login } = useAuth()

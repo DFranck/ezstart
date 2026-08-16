@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import type { Router as ExpressRouter } from 'express'
 import scanImageRoutes from './scan-image.js'
 import getScansRoutes from './get-scans.js'
@@ -12,6 +12,7 @@ import putGameConfigRoutes from './put-game-config.js'
 import deleteGameConfigRoutes from './delete-game-config.js'
 import feedbackScanRoutes from './feedback-scan.js'
 import reportScanRoutes from './report-scan.js'
+import { calculateRuneRouter } from './calculate-rune.js'
 import { scansRegistry, monstersRegistry, configRegistry, benchRegistry } from './openapi.js'
 import { authMiddleware } from '../middleware/auth.js'
 
@@ -32,5 +33,6 @@ router
   .use('/config', getGameConfigRoutes)
   .use('/config', authMiddleware, putGameConfigRoutes)
   .use('/config', authMiddleware, deleteGameConfigRoutes)
+  .use('/rune/calculate', calculateRuneRouter)
 
 export default router

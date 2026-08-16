@@ -4,7 +4,7 @@
  * Routes for fetching audit information and scores
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import listRouter, { registry as listRegistry } from './list.js'
 import getByTypeRouter, { registry as getByTypeRegistry } from './get-by-type.js'
 

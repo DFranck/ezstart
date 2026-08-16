@@ -1,12 +1,12 @@
-import js from '@eslint/js';
-import pluginNext from '@next/eslint-plugin-next';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import pluginReact from 'eslint-plugin-react';
-import pluginReactHooks from 'eslint-plugin-react-hooks';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import js from '@eslint/js'
+import pluginNext from '@next/eslint-plugin-next'
+import eslintConfigPrettier from 'eslint-config-prettier'
+import pluginReact from 'eslint-plugin-react'
+import pluginReactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
-import { config as baseConfig } from './base.js';
+import { config as baseConfig } from './base.js'
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -46,6 +46,20 @@ export const nextJsConfig = [
       // React scope no longer necessary with new JSX transform.
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
+      // @ezstart app-web conventions (next.js only — these rules are scoped
+      // internally to `apps/<app>/web/src/**` or packages/ui|*-sdk/src/components/**).
+      // TODO: upgrade to `error` once the current backlog is cleared.
+      //   - `no-raw-fetch`: ~8 matches across 6 files (2 useExternalStats + 4 app files)
+      //   - `no-raw-html`: ~46 matches across 22 files (mostly gacha-analyzer + cv-generator)
+      //   - `require-i18n-string` / `no-local-ui-components`: Phase 0 external-devs readiness
+      //     — expose debt without blocking commits.
+      '@ezstart/ezstart/no-raw-fetch': 'warn',
+      '@ezstart/ezstart/no-raw-html': 'warn',
+      '@ezstart/ezstart/require-i18n-string': 'warn',
+      '@ezstart/ezstart/no-local-ui-components': 'warn',
+      // Enforce locale-aware Link imports in apps/*/web/src so hrefs always
+      // include the active locale (no 307 redirect dance). Autofixable.
+      '@ezstart/ezstart/no-next-link-in-locale-apps': 'error',
     },
   },
-];
+]

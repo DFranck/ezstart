@@ -114,6 +114,40 @@ pnpm dev:status
 
 ## 🏗️ Architecture
 
+### Platform model (3 tiers)
+
+@ezstart follows a 3-tier SaaS platform architecture inspired by Stripe + Clerk + Vercel:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  Tier 3 — Platform hub (cross-cutting meta-features)       │
+│  ezstart : ia-sdk gateway, monitoring, federated admin,    │
+│  docs, status, audit logs cross-tenant                     │
+└────────────────────────┬───────────────────────────────────┘
+                         │ federates admin from ↓
+        ┌────────────────┴──────────────────────────┐
+        │ Tier 1 — Per-app SaaS services            │
+        │ ezauth  (auth)          ezpay  (payments) │
+        │ Clerk/Auth0 pattern     Stripe pattern    │
+        │ per-Application DB scoping + publishable  │
+        │ keys  (externally consumable)             │
+        └───────┬──────────────────┬────────────────┘
+                │ ez_pk_live_...   │
+                ▼                  ▼
+        ┌────────────────────────────────────────────┐
+        │ Tier 2 — Consumer apps                     │
+        │ ezbill, green-pulse, fengshui, asc-tcd,    │
+        │ gacha-analyzer, ezstart (dogfood), + any   │
+        │ third-party external customer              │
+        └────────────────────────────────────────────┘
+```
+
+- **Tier 1 SaaS services** (`ezauth`, `ezpay`) are designed to be consumed by any developer (internal apps OR third parties) via publishable keys + SDKs. Each Application tenant gets its own DB scope, theme, plans, keys.
+- **Tier 2 consumer apps** use the SDKs (`@ezstart/auth-sdk`, `@ezstart/pay-sdk`) with their own publishable keys. Zero monorepo coupling — they could be extracted into separate repos and still work.
+- **Tier 3 platform hub** (`ezstart`) owns features that don't fit a per-Application model: AI gateway (`@ezstart/ai-sdk`), federated admin (aggregates Tier-1 admin dashboards), status page, docs portal.
+
+The full placement rule tree + anti-patterns are documented in [`.claude/rules/standard-architecture.md`](./.claude/rules/standard-architecture.md). Every new feature must be classified into a tier before implementation.
+
 ### Monorepo Structure
 
 ```
@@ -128,17 +162,21 @@ pnpm dev:status
 │   ├── green-pulse/        # Sustainability (Next.js + API)
 │   └── monitoring/api      # Monitoring service
 │
-├── packages/               # Shared packages (16)
-│   ├── ui/                # UI components & design system
-│   ├── auth-sdk/          # Authentication client
-│   ├── pay-sdk/           # Payment client
-│   ├── express-core/      # API infrastructure
-│   ├── config/            # URLs & environment config
-│   ├── seo-config/        # SEO utilities (metadata, JSON-LD)
+├── packages/               # Shared packages (23)
+│   ├── ui/                # UI components, design system & theme (dark/light mode)
+│   ├── auth-sdk/          # Authentication client (core/react/components) + RBAC
+│   ├── pay-sdk/           # Payment client (core/react/components)
+│   ├── api-sdk/           # HTTP client (core/react)
+│   ├── api-core/          # API infrastructure (Express, MongoDB, OpenAPI)
+│   ├── api-contracts/     # Wire contracts (envelope, error, pagination)
+│   ├── ai-sdk/            # AI provider abstraction (multi-provider chat)
+│   ├── config/            # URLs, ports & environment config
 │   ├── logger/            # Pino structured logging
-│   ├── next-theme/        # Dark/light mode
 │   ├── monitoring/        # Health checks & metrics
-│   └── [11 more...]       # Config, types, utils
+│   ├── seo-config/        # SEO utilities (metadata, JSON-LD)
+│   └── [12 more...]      # next-config, eslint-config, eslint-plugin, tailwind-config,
+│                          # typescript-config, capture-sdk, ocr-sdk, pdf-sdk,
+│                          # email-service, test-utils, playwright-config
 │
 └── docs/                  # Audit data + long-form audit reports
     ├── audits.json        # Live audit scores (consumed by monitoring)
@@ -201,15 +239,15 @@ All URLs and ports are auto-configured via `@ezstart/config`.
 
 ### Root docs
 
-| File                                 | Purpose                                                           |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions, workflow, how to add a UI/feature/endpoint           |
-| [CLAUDE.md](./CLAUDE.md)             | Manager pipeline (8 steps), agents, dev servers                   |
-| [DEV-RULES.md](./DEV-RULES.md)       | Index of all rule files in `.claude/rules/` (mandatory)           |
-| [BACKLOG.md](./BACKLOG.md)           | Cross-project / monorepo backlog (per-app in `apps/*/BACKLOG.md`) |
-| [DEPLOY.md](./DEPLOY.md)             | Railway (APIs) + Vercel (web) deployment guide                    |
-| [SECRETS.md](./SECRETS.md)           | `.env` architecture, `secrets-loader`, shared vs app-specific     |
-| [GENERATORS.md](./GENERATORS.md)     | Zero-maintenance code generation pipeline                         |
+| File                                 | Purpose                                                                                 |
+| ------------------------------------ | --------------------------------------------------------------------------------------- |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions, workflow, how to add a UI/feature/endpoint                                 |
+| [CLAUDE.md](./CLAUDE.md)             | Manager pipeline (8 steps), agents, dev servers                                         |
+| [DEV-RULES.md](./DEV-RULES.md)       | Index of all rule files in `.claude/rules/` (mandatory)                                 |
+| [BACKLOG.md](./BACKLOG.md)           | Single source of truth for active backlog (done items archived in `BACKLOG-HISTORY.md`) |
+| [DEPLOY.md](./DEPLOY.md)             | Railway (APIs) + Vercel (web) deployment guide                                          |
+| [SECRETS.md](./SECRETS.md)           | `.env` architecture, `secrets-loader`, shared vs app-specific                           |
+| [GENERATORS.md](./GENERATORS.md)     | Zero-maintenance code generation pipeline                                               |
 
 ### Audits
 
@@ -264,7 +302,7 @@ Browse [packages/](./packages/) — each package has its own README with install
 
 - **7 Web Applications** (Next.js 15, React 19)
 - **6 API Services** (Express + Socket.IO)
-- **16+ Shared Packages** (100% TypeScript)
+- **23 Shared Packages** (100% TypeScript)
 - **100% TypeCheck Coverage** across all packages
 
 ---

@@ -2,22 +2,11 @@
 
 import ClientLayout from '@/components/ClientLayout'
 import { EZAuthLoginSection } from '@/components/ezauth-login-section'
-import { useAuth } from '@ezstart/auth-sdk'
 import { Card, CardContent, CardHeader, H1, H2, H3, Icon, P, Div } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 
 export default function HomePage() {
-  const { user, isAuthenticated } = useAuth()
-
-  // useEffect(() => {
-  //   cleanupOldAuth()
-  //   if (isAuthenticated && user) {
-  //     redirect('/dashboard')
-  //   }
-  // }, [isAuthenticated, user])
-
-  // if (isAuthenticated && user) {
-  //   return null
-  // }
+  const t = useTranslations('home')
 
   return (
     <ClientLayout>
@@ -33,10 +22,7 @@ export default function HomePage() {
             </H1>
           </CardHeader>
           <CardContent>
-            <P className="max-w-2xl mx-auto">
-              Professional invoicing and billing made simple. Create beautiful invoices, manage
-              clients, and track payments with ease.
-            </P>
+            <P className="max-w-2xl mx-auto">{t('description')}</P>
           </CardContent>
         </Card>
 
@@ -45,30 +31,30 @@ export default function HomePage() {
           <Card variant={'floating'}>
             <CardContent>
               <Div className="w-12 h-12 bg-gradient-company rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Icon name="lucide:FileText" className="w-6 h-6 text-white" />
+                <Icon name="lucide:FileText" className="w-6 h-6 text-primary-foreground" />
               </Div>
-              <H3 size={'h4'}>Smart Invoicing</H3>
-              <P>Create professional invoices and quotes in seconds with our intuitive interface</P>
+              <H3 size={'h4'}>{t('smartInvoicing')}</H3>
+              <P>{t('smartInvoicingDesc')}</P>
             </CardContent>
           </Card>
 
           <Card variant="floating">
             <CardContent>
               <Div className="w-12 h-12 bg-gradient-client rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Icon name="lucide:Users" className="w-6 h-6 text-white" />
+                <Icon name="lucide:Users" className="w-6 h-6 text-primary-foreground" />
               </Div>
-              <H3 size={'h4'}>Client Management</H3>
-              <P>Organize your clients and companies with detailed contact information</P>
+              <H3 size={'h4'}>{t('clientManagement')}</H3>
+              <P>{t('clientManagementDesc')}</P>
             </CardContent>
           </Card>
 
           <Card variant="floating">
             <CardContent>
               <Div className="w-12 h-12 bg-gradient-payment rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Icon name="lucide:TrendingUp" className="w-6 h-6 text-white" />
+                <Icon name="lucide:TrendingUp" className="w-6 h-6 text-primary-foreground" />
               </Div>
-              <H3 size={'h4'}>Payment Tracking</H3>
-              <P>Track payments and manage receipts to stay on top of your finances</P>
+              <H3 size={'h4'}>{t('paymentTracking')}</H3>
+              <P>{t('paymentTrackingDesc')}</P>
             </CardContent>
           </Card>
         </Div>
@@ -77,7 +63,7 @@ export default function HomePage() {
       {/* Login Section */}
       <Card id="login" variant="ghost" className="w-full max-w-md">
         <CardHeader>
-          <H2>Get Started</H2>
+          <H2>{t('getStarted')}</H2>
         </CardHeader>
         <CardContent>
           <EZAuthLoginSection />

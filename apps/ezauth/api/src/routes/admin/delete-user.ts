@@ -6,12 +6,12 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getOAuthAccountModel } from '../../models/oauth-account.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
@@ -22,7 +22,11 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(deleteUserRegistry, router)
 
 const deleteUserParamsSchema = z.object({
-  id: z.string().min(1, 'User ID is required'),
+  id: z
+    .string()
+    .min(1, 'User ID is required')
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
+    .describe('MongoDB ObjectId of the user to delete'),
 })
 
 const deleteUserResponseSchema = z.object({
@@ -60,6 +64,15 @@ const deleteUserController = async (req: Request, res: Response) => {
       return sendError(res, 'User not found', 404)
     }
 
+    // Prevent deleting another superadmin
+    if (user.globalRoles?.includes('superadmin')) {
+      return sendError(
+        res,
+        'Cannot delete a superadmin user. Only the user themselves can remove their superadmin status.',
+        403
+      )
+    }
+
     // Cascade delete: OAuth accounts linked to this user
     await OAuthAccount.deleteMany({ userId: user._id })
 
@@ -82,6 +95,7 @@ docRouter.delete(
   verifyCookieCsrf,
   verifyTokenMiddleware,
   requireAdmin,
+  enforceAdminTwoFactor,
   deleteUserController,
   {
     summary: 'Delete user (admin)',

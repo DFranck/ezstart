@@ -1,9 +1,12 @@
 'use client'
 
+import { useEffect } from 'react'
 import { type VariantProps } from 'class-variance-authority'
 import { useDevice } from '../../hooks/use-device'
 import { cn } from '../../lib/utils'
 import { heroVariants } from '../../lib/design-system/variants'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 import { H1, P, Section } from '../tag'
 import { Div } from '../tag/src/aliases'
 
@@ -110,6 +113,15 @@ export const Hero = ({
   const resolvedAlignment = align ?? alignment ?? 'center'
   const { isMobile } = useDevice()
 
+  // Surface deprecation warning when consumer passes the legacy `alignment` prop.
+  useEffect(() => {
+    if (alignment !== undefined) {
+      warnDeprecation('Hero.alignment', 'align prop', {
+        toast: msg => toast.warning(msg),
+      })
+    }
+  }, [alignment])
+
   // Auto-detect brightness based on media presence
   const hasMedia = !!(videoSrc || imageSrc)
   const textBrightness = brightness === 'auto' ? (hasMedia ? 'light' : 'dark') : brightness
@@ -180,7 +192,11 @@ export const Hero = ({
   )
 
   return (
-    <Section id={id} size={size} className={cn(heroVariants({ height, alignment: resolvedAlignment }), className)}>
+    <Section
+      id={id}
+      size={size}
+      className={cn(heroVariants({ height, alignment: resolvedAlignment }), className)}
+    >
       {/* ✅ Center mode: media as background overlay */}
       {layout === 'center' && (
         <>

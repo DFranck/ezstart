@@ -5,10 +5,11 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { getProvider } from '../../services/stripe.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { getProviderForRequest, isStripeModeUnavailableError } from '../../services/stripe.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -43,12 +44,22 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Subscription not found', 404)
     }
 
-    // Ownership check: non-admin users can only cancel their own subscriptions
-    if (!isAdminUser(req) && payment.userId !== req.userId) {
-      return sendError(res, 'You can only cancel your own subscriptions', 403)
+    // Ownership check. A subscriber may always cancel their own subscription
+    // (`payment.userId === req.userId`). Otherwise the caller must be a
+    // superadmin OR an admin of the Application the subscription belongs to —
+    // a binary admin gate would let an app admin cancel another tenant's
+    // subscription (cross-tenant escalation).
+    if (payment.userId !== req.userId) {
+      const access = await resolveTenantAccess(req, payment.projectId)
+      if (!access.allowed) {
+        return sendError(res, 'You can only cancel your own subscriptions', 403)
+      }
     }
 
-    await getProvider().cancelSubscription(subscriptionId)
+    // Use the provider for the caller's derived mode so the Stripe cancel hits
+    // the same account that created the subscription. Fail-closed (503) when
+    // the mode's key is missing — never downgrade across the test/live boundary.
+    await getProviderForRequest(req).cancelSubscription(subscriptionId)
 
     // Mark as canceling at period end — actual cancellation happens via webhook
     // when Stripe fires customer.subscription.deleted at end of billing period
@@ -58,6 +69,10 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { cancelled: true })
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Cancel subscription refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Cancel subscription error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to cancel subscription')
   }
@@ -67,17 +82,11 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post(
-  '/subscriptions/:subscriptionId/cancel',
-  authMiddleware,
-  populateUserFromToken,
-  cancelSubscriptionHandler,
-  {
-    summary: 'Cancel an active subscription',
-    tags: ['Subscriptions'],
-    responseSchema: cancelResponseSchema,
-  }
-)
+docRouter.post('/subscriptions/:subscriptionId/cancel', authJwtOrKey(), cancelSubscriptionHandler, {
+  summary: 'Cancel an active subscription',
+  tags: ['Subscriptions'],
+  responseSchema: cancelResponseSchema,
+})
 
 export { cancelSubscriptionRegistry as registry, router }
 export default router

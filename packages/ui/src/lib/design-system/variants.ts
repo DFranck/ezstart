@@ -1,26 +1,19 @@
 import { cva, type VariantProps } from 'class-variance-authority'
+import { isDebug } from '../debug'
 import {
-  touchHeight,
-  touchSize,
-  padding,
-  paddingX,
-  paddingY,
-  gap,
+  densityContainer,
   fontSize,
-  radius,
-  shadow,
+  gap,
   intentContainer,
   intentText,
+  layoutText,
+  paddingX,
+  paddingY,
+  sizeText,
+  touchHeight,
   variantContainer,
   variantText,
-  layoutContainer,
-  layoutText,
-  densityContainer,
-  densityText,
-  sizeContainer,
-  sizeText,
 } from './tokens'
-import { isDebug } from '../debug'
 
 /**
  * Variants Réutilisables - @ezstart/ui
@@ -147,6 +140,22 @@ export const cardVariantConfig = {
     border: 'hover:border-primary',
     scale: 'hover:scale-[1.02]',
   },
+  /**
+   * Semantic-color accent for callout / notification cards (Mantine `color` /
+   * Chakra `colorScheme` pattern). Adds a tinted border + soft tinted
+   * background that composes ON TOP of the `variant` base styling.
+   *
+   * `none` (default) = zero classes added → backward-compat for every
+   * existing Card usage.
+   */
+  intent: {
+    none: '',
+    warning: 'border-warning/40 bg-warning/5',
+    success: 'border-success/40 bg-success/5',
+    info: 'border-info/40 bg-info/5',
+    destructive: 'border-destructive/40 bg-destructive/5',
+    primary: 'border-primary/40 bg-primary/5',
+  },
 } as const
 
 /**
@@ -161,6 +170,7 @@ export const cardVariants = cva(
       size: 'default',
       interactive: false,
       hover: 'none',
+      intent: 'none',
     },
   }
 )
@@ -1549,11 +1559,14 @@ export const tagVariants = {
     variants: blockquoteVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
-  pre: cva('overflow-x-auto rounded-md bg-muted p-4 font-mono', {
-    variants: preVariantConfig,
-    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
-  }),
-  code: cva('rounded bg-muted px-1.5 py-0.5 font-mono', {
+  pre: cva(
+    'overflow-x-auto rounded-lg bg-muted/20 text-foreground p-4 font-mono text-sm [&_code]:bg-transparent [&_code]:p-0 [&_code]:rounded-none',
+    {
+      variants: preVariantConfig,
+      defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+    }
+  ),
+  code: cva('font-mono text-sm bg-muted/50 px-1 py-0.5 rounded-sm', {
     variants: codeVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),

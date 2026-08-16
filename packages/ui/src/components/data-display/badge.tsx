@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils'
 import { badgeVariants } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { radius as radiusTokens } from '../../lib/design-system/tokens'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 
 /**
  * Badge Component - Display status, count, or label
@@ -46,6 +47,8 @@ const dotVariantClasses: Record<string, string> = {
   success: 'bg-success',
   warning: 'bg-warning',
   info: 'bg-info',
+  // allowed: explicit color-named badge variants are public API surface
+  // (consumer opts in by picking variant="purple" etc., not theme-controlled)
   purple: 'bg-purple-600 dark:bg-purple-400',
   cyan: 'bg-cyan-600 dark:bg-cyan-400',
   indigo: 'bg-indigo-600 dark:bg-indigo-400',
@@ -135,4 +138,11 @@ export { Badge, badgeVariants }
  * Legacy export for backward compatibility
  * @deprecated Use named export Badge instead
  */
-export default Badge
+function DeprecatedDefaultBadge(props: BadgeProps) {
+  useDeprecationWarning('Badge default export', 'named export `Badge` from @ezstart/ui/components')
+  return <Badge {...props} />
+}
+
+DeprecatedDefaultBadge.displayName = 'DeprecatedDefaultBadge'
+
+export default DeprecatedDefaultBadge

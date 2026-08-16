@@ -14,6 +14,7 @@
  * - Strong CTAs
  */
 
+import { RegisterButton } from '@ezstart/auth-sdk'
 import {
   Badge,
   Button,
@@ -35,8 +36,10 @@ import {
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+
+import TestimonialsSection from './TestimonialsSection'
+import UseCasesSection from './UseCasesSection'
 
 export default function LandingV2Page() {
   const t = useTranslations('landing')
@@ -63,29 +66,29 @@ export default function LandingV2Page() {
             </Badge>
 
             {/* Subtitle */}
-            <H2 size="h3" className="text-white">
+            <H2 size="h3" className="text-primary-foreground">
               {t('hero.subtitle')}
             </H2>
 
             {/* Typewriter Effect */}
             <TypewriterEffectSmooth
               words={[{ text: t('hero.typewriter') }]}
-              className="text-white text-center"
+              className="text-primary-foreground text-center"
               duration={3}
               delay={0.5}
             />
 
             {/* Description */}
-            <P className="text-xl text-white/90 max-w-2xl">{t('hero.description')}</P>
+            <P className="text-xl text-primary-foreground/90 max-w-2xl">{t('hero.description')}</P>
 
             {/* CTA Button */}
-            <Button
-              asChild
+            <RegisterButton
               size="lg"
-              className="bg-white text-ezbill-invoice hover:bg-white/90 text-lg px-8 py-6"
+              alwaysShowText
+              className="bg-primary-foreground text-ezbill-invoice hover:bg-primary-foreground/90 text-lg px-8 py-6"
             >
-              <Link href="/signup">{t('hero.cta')}</Link>
-            </Button>
+              {t('hero.cta')}
+            </RegisterButton>
           </Div>
         </Div>
       </Section>
@@ -171,9 +174,9 @@ export default function LandingV2Page() {
             <Div className="absolute inset-0 flex items-center justify-center">
               <Div className="text-center space-y-4 p-8">
                 <Span className="text-6xl">📊</Span>
-                <P className="font-semibold text-lg">Dashboard Screenshot</P>
+                <P className="font-semibold text-lg">{t('solution.dashboardScreenshotLabel')}</P>
                 <P className="text-sm text-muted-foreground">
-                  Image: ezbill-dashboard.webp (1920x1080)
+                  {t('solution.dashboardScreenshotHint')}
                 </P>
               </Div>
             </Div>
@@ -237,7 +240,7 @@ export default function LandingV2Page() {
       </Section>
 
       {/* Comparison Section */}
-      <Section size="xl" className="bg-gradient-to-br from-background to-muted/20">
+      <Section id="pricing" size="xl" className="bg-gradient-to-br from-background to-muted/20">
         <Div className="text-center mb-12">
           <H2 size="h3" className="mb-4">
             {t('comparison.title')}
@@ -272,22 +275,24 @@ export default function LandingV2Page() {
           )}
 
           {/* EZBill - Highlighted */}
-          <Card className="bg-gradient-invoice text-white border-4 border-primary relative overflow-hidden">
+          <Card className="bg-gradient-invoice text-primary-foreground border-4 border-primary relative overflow-hidden">
             <Div className="absolute top-4 right-4">
-              <Badge className="bg-white text-ezbill-invoice">BEST VALUE</Badge>
+              <Badge className="bg-primary-foreground text-ezbill-invoice">
+                {t('comparison.bestValue')}
+              </Badge>
             </Div>
             <CardContent className="p-6 space-y-4">
-              <H3 size="h5" className="text-center text-white">
+              <H3 size="h5" className="text-center text-primary-foreground">
                 EZBill
               </H3>
               <Div className="text-center space-y-2">
-                <P className="text-2xl font-bold text-white">
+                <P className="text-2xl font-bold text-primary-foreground">
                   {(t.raw('comparison.ezbill') as Record<string, string>).price}
                 </P>
-                <P className="text-sm text-white/90">
+                <P className="text-sm text-primary-foreground/90">
                   {(t.raw('comparison.ezbill') as Record<string, string>).yearCost}
                 </P>
-                <P className="text-xs text-white/90 italic">
+                <P className="text-xs text-primary-foreground/90 italic">
                   {(t.raw('comparison.ezbill') as Record<string, string>).limits}
                 </P>
               </Div>
@@ -297,74 +302,17 @@ export default function LandingV2Page() {
 
         {/* Savings Highlight */}
         <Div className="text-center mt-8">
-          <Badge variant="default" className="text-xl px-6 py-3 bg-green-600">
+          <Badge variant="success" className="text-xl px-6 py-3">
             💰 {t('comparison.savings')}
           </Badge>
         </Div>
       </Section>
 
       {/* Use Cases Section */}
-      <Section size="xl">
-        <Div className="text-center mb-12">
-          <H2 size="h3" className="mb-4">
-            {t('useCases.title')}
-          </H2>
-          <P className="text-xl text-muted-foreground">{t('useCases.subtitle')}</P>
-        </Div>
-
-        <Div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {(Array.isArray(t.raw('useCases.cases')) ? t.raw('useCases.cases') : []).map(
-            (
-              useCase: { persona: string; challenge: string; solution: string; result: string },
-              index: number
-            ) => (
-              <Card key={index} className="hover:shadow-xl transition-all">
-                <CardHeader>
-                  <Badge className="mb-2 w-fit">{useCase.persona}</Badge>
-                  <H3 size="h5">Challenge</H3>
-                  <P className="text-sm text-muted-foreground">{useCase.challenge}</P>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Div>
-                    <H3 size="h6" className="mb-2">
-                      Solution
-                    </H3>
-                    <P className="text-sm">{useCase.solution}</P>
-                  </Div>
-                  <Div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                    <Strong className="text-green-700 dark:text-green-400">
-                      ✓ {useCase.result}
-                    </Strong>
-                  </Div>
-                </CardContent>
-              </Card>
-            )
-          )}
-        </Div>
-      </Section>
+      <UseCasesSection />
 
       {/* Testimonials Section */}
-      <Section size="xl" className="bg-gradient-payment text-white">
-        <H2 size="h3" className="text-center mb-12 text-white">
-          {t('testimonials.title')}
-        </H2>
-
-        <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {(Array.isArray(t.raw('testimonials.items')) ? t.raw('testimonials.items') : []).map(
-            (testimonial: { quote: string; author: string; role: string }, index: number) => (
-              <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20">
-                <CardContent className="p-6 space-y-4">
-                  <P className="text-white/90 italic">&ldquo;{testimonial.quote}&rdquo;</P>
-                  <Div>
-                    <P className="font-semibold text-white">{testimonial.author}</P>
-                    <P className="text-sm text-white/70">{testimonial.role}</P>
-                  </Div>
-                </CardContent>
-              </Card>
-            )
-          )}
-        </Div>
-      </Section>
+      <TestimonialsSection />
 
       {/* FAQ Section */}
       <Section size="xl">
@@ -395,33 +343,33 @@ export default function LandingV2Page() {
       </Section>
 
       {/* Final CTA Section */}
-      <Section size="full" className="bg-gradient-invoice text-white">
+      <Section size="full" className="bg-gradient-invoice text-primary-foreground">
         <Div className="container mx-auto text-center">
           <Div className="max-w-3xl mx-auto space-y-6">
-            <H2 size="h2" className="text-white">
+            <H2 size="h2" className="text-primary-foreground">
               {t('cta.title')}
             </H2>
-            <P className="text-xl text-white/90">{t('cta.description')}</P>
+            <P className="text-xl text-primary-foreground/90">{t('cta.description')}</P>
 
             <Div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                asChild
+              <RegisterButton
                 size="lg"
-                className="bg-white text-ezbill-invoice hover:bg-white/90 text-lg px-8 py-6"
+                alwaysShowText
+                className="bg-primary-foreground text-ezbill-invoice hover:bg-primary-foreground/90 text-lg px-8 py-6"
               >
-                <Link href="/signup">{t('cta.primary')}</Link>
-              </Button>
+                {t('cta.primary')}
+              </RegisterButton>
               <Button
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white/10"
+                className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
               >
-                <Link href="/pricing">{t('cta.secondary')}</Link>
+                <Link href="#pricing">{t('cta.secondary')}</Link>
               </Button>
             </Div>
 
-            <P className="text-sm text-white/70">{t('cta.guarantee')}</P>
+            <P className="text-sm text-primary-foreground/70">{t('cta.guarantee')}</P>
           </Div>
         </Div>
       </Section>
