@@ -1,6 +1,7 @@
 import { formatArticleDate, getAllArticleSlugs, getArticleBySlug } from '@/lib/articles'
 import { Link } from '@/i18n/navigation'
 import { getCanonicalUrl } from '@ezstart/config/urls'
+import { ArticleMarkdown } from '@/components/articles/article-markdown'
 import {
   Article as ArticleTag,
   Badge,
@@ -8,7 +9,6 @@ import {
   Div,
   H1,
   Main,
-  MarkdownContent,
   P,
   Section,
   Span,
@@ -118,7 +118,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </Div>
           )}
 
-          <MarkdownContent content={article.content} />
+          <ArticleMarkdown content={article.content} />
         </ArticleTag>
       </Section>
     </Main>
