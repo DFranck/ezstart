@@ -1,333 +1,484 @@
 {
   "home": {
     "hero": {
-      "title": "GreenPulse.AI - Tuân thủ ESG Được Hỗ trợ bởi AI cho Doanh nghiệp SME Đông Nam Á",
-      "subtitle": "Trợ lý bền vững cho 1 triệu doanh nghiệp",
-      "typewriterText": "Chuyển đổi tăng trưởng bền vững thành cơ hội tài chính xanh",
-      "description": "Giảm chi phí 30% • Mở khóa vay xanh • Đáp ứng tiêu chuẩn xuất khẩu • Tăng trưởng bền vững • Có KPI cho marketing xanh, KHÔNG tẩy xanh",
-      "cta": "Bắt đầu Miễn phí",
-      "ctaSecondary": "Khám phá Giải pháp Tích hợp",
-      "emailPlaceholder": "Địa chỉ email của bạn",
-      "notifyMe": "Thông báo cho tôi",
-      "getStarted": "Bắt đầu Miễn phí"
+      "title": "GreenPulse.AI - Thúc đẩy tăng trưởng carbon thấp bằng dữ liệu đáng tin cậy, AI và giải pháp thực tiễn",
+      "tagline": "Nền tảng nâng cao năng lực ứng dụng AI đầu tiên tại ASEAN",
+      "subtitle": "Thúc đẩy tăng trưởng carbon thấp bằng dữ liệu đáng tin cậy, AI và giải pháp thực tiễn",
+      "description": "GreenPulse.AI giúp doanh nghiệp nâng cao năng lực, cải thiện hiệu quả môi trường và biến tham vọng khí hậu thành hành động có thể đo lường. Tiến độ đo lường được, không tẩy xanh.",
+      "ctaPrimary": "Trao đổi về thách thức của bạn",
+      "ctaSecondary": "Dùng thử GP.A miễn phí"
     },
-    "value": {
-      "intro": "Với GreenPulse.AI, bạn không cần phải là chuyên gia môi trường hay thuê một chuyên gia. Chỉ cần trò chuyện đơn giản với trợ lý cá nhân, bạn sẽ nhận được hướng dẫn từng bước để:",
-      "points": {
-        "chat": "Trao đổi về tình hình hiện tại và tìm giải pháp đơn giản",
-        "measure": "Đo lường dấu chân carbon của bạn",
-        "improve": "Cải thiện hiệu quả và tiết kiệm chi phí",
-        "roadmap": "Xây dựng lộ trình bền vững với KPI",
-        "qualify": "Đủ điều kiện vay xanh và cơ hội xuất khẩu"
-      }
-    },
-    "example": {
-      "title": "Ví dụ tương tác",
-      "user": "Người dùng:",
-      "userMessage": "Tôi quản lý 4 phòng khám thẩm mỹ ở TP.HCM với 15 nhân viên và 10 máy móc. Tôi muốn giảm hóa đơn điện và thu hút khách hàng yêu cầu chất lượng cao và yêu thiên nhiên. Bạn có thể giúp tôi không?",
-      "ai": "GreenPulse.AI:",
-      "aiMessage": "Xin chào chị Hằng, vâng tôi hoàn toàn có thể giúp chị đạt được mục tiêu tăng trưởng bền vững. Hãy cùng xem xét chi phí hiện tại và kiểm kê thiết bị của chị. Chị có thể cho biết chị muốn marketing các hoạt động này hay chỉ muốn âm thầm thực hiện? Chị có đang cân nhắc huy động vốn qua tài chính xanh trong tương lai gần không?"
-    },
-    "packages": {
-      "title": "Các Gói Dịch vụ",
-      "contactUs": "Liên hệ chúng tôi",
-      "free": {
-        "title": "Nhận thức",
-        "subtitle": "Cho việc nâng cao nhận thức & các CEO tò mò",
-        "price": "0$",
-        "period": "/trọn đời",
-        "description": "Bắt đầu hành trình bền vững với sự hỗ trợ của AI. Khám phá các hành động đơn giản để giảm chi phí, hiểu dấu chân carbon và khám phá cơ hội mới. Không cần cam kết.",
-        "features": {
-          "chat": "Trợ lý AI ESG hội thoại (Agent GreenPulse)",
-          "footprint": "Nhận thức cơ bản về dấu chân carbon",
-          "wins": "Xác định các cải thiện nhanh (năng lượng, chất thải, chi phí)",
-          "tips": "Mẹo giáo dục về bền vững",
-          "marketing": "Khám phá cơ hội marketing xanh",
-          "instant": "⚡ Truy cập ngay—không cần thẻ tín dụng"
-        },
-        "cta": "Bắt đầu khám phá miễn phí",
-        "note": "💡 Hoàn hảo cho các hành động nhanh & đơn giản để tăng trưởng có ý thức"
-      },
-      "premium": {
-        "title": "Gói Premium",
-        "subtitle": "Cho tăng trưởng được thúc đẩy bởi ESG",
-        "badge": "Sắp Ra Mắt",
-        "description": "Tôi muốn sử dụng các hành động bền vững và xanh để thúc đẩy kinh doanh thông qua marketing xanh phù hợp, tránh tẩy xanh và có KPI vững chắc cho khách hàng.",
-        "features": {
-          "chat": "Nền tảng trò chuyện AI",
-          "tools": "Truy cập công cụ ESG với bảng điều khiển",
-          "import": "Nhập dữ liệu (tài liệu, giọng nói, hình ảnh)",
-          "analysis": "Phân tích dữ liệu và biểu đồ",
-          "plans": "Kế hoạch hành động tùy chỉnh"
-        }
-      },
-      "golden": {
-        "title": "Gói Golden",
-        "subtitle": "Cho tuân thủ ESG chính thức",
-        "badge": "Sắp Ra Mắt",
-        "description": "Tôi cần một báo cáo/hồ sơ/kiểm toán ESG chắc chắn và chính thức để chứng nhận ISO / xuất khẩu quốc tế / tiếp cận tài chính xanh.",
-        "features": {
-          "all": "Tất cả tính năng Premium",
-          "support": "Hỗ trợ tùy chỉnh cho tiêu chuẩn chính thức/quốc tế",
-          "replace": "Thay thế hoặc hỗ trợ người phụ trách ESG"
-        }
-      }
-    },
-    "cta": {
-      "title": "Sẵn sàng chuyển đổi hành trình bền vững của bạn?",
-      "description": "Bắt đầu sử dụng GreenPulse.AI ngay hôm nay và giải phóng tiềm năng xanh của bạn.",
-      "joinWaitlist": "Tham gia danh sách chờ",
-      "getStarted": "Bắt đầu",
-      "thankYou": "Cảm ơn bạn! Bạn sẽ được thông báo khi GreenPulse.AI ra mắt",
-      "loading": "Đang thêm vào danh sách chờ...",
-      "alreadyRegistered": "Email này đã được đăng ký!",
-      "error": "Đã xảy ra lỗi. Vui lòng thử lại."
-    },
-    "subtitle": "Trợ lý xanh mới của bạn",
     "heroFeatures": [
-      "Trích xuất dữ liệu thông minh",
-      "Chấm điểm ESG tức thì",
-      "Báo cáo tuân thủ tự động",
-      "Chuẩn bị tài chính xanh",
-      "Chiến lược tăng trưởng tùy chỉnh"
+      "Dữ liệu đáng tin cậy",
+      "AI tác nhân (Agentic AI)",
+      "Giải pháp tích hợp nhanh",
+      "Kế hoạch hành động khí hậu & MRV",
+      "Sẵn sàng xuất khẩu & tài chính xanh"
     ],
-    "challenge": {
-      "title": "Thế giới đang đối mặt với <strong>điều kiện thời tiết khắc nghiệt</strong> do biến đổi khí hậu. Các doanh nghiệp được thúc đẩy vượt ra ngoài kinh doanh thông thường và hướng tới tăng trưởng bền vững.",
-      "sealTitle": "Thách thức khủng hoảng khí hậu tại Đông Nam Á",
-      "challenges": [
-        "Nguồn lực hạn chế để thiết lập khung ESG vững chắc và chứng minh tác động khí hậu thực sự",
-        "Thiếu tài liệu có cấu trúc để đáp ứng yêu cầu ESG của nhà đầu tư để huy động vốn",
-        "Thiếu chuyên môn để điều hướng các tiêu chuẩn quốc tế (GRI, SFDR, CSRD) được yêu cầu bởi các nhà đầu tư tác động"
-      ]
-    },
-    "transformation": {
-      "title": "GreenPulse.AI dễ dàng chuyển đổi dữ liệu phức tạp thành chiến lược tác động",
-      "steps": {
-        "step1": {
-          "badge": "1",
-          "title": "Trò chuyện & tải lên"
-        },
-        "step2": {
-          "badge": "2",
-          "title": "Để GPA làm việc cho bạn"
-        },
-        "step3": {
-          "badge": "3",
-          "title": "Nhận chiến lược & KPI"
-        }
-      },
-      "features": [
+    "challenges": {
+      "title": "Những thách thức chúng tôi giải quyết",
+      "intro": "Quá trình chuyển đổi carbon thấp hiếm khi bị cản trở bởi thiếu công nghệ xanh. Rào cản nằm ở khả năng tiếp cận, dữ liệu, kỹ năng, nguồn vốn và bằng chứng về kết quả.",
+      "responseLabel": "Giải pháp của GP.A:",
+      "items": [
         {
-          "title": "Trích xuất và tập trung dữ liệu mạnh mẽ",
-          "description": "Giọng nói, hình ảnh và tích hợp liền mạch với phần mềm hiện có (ERP, CRM, Excel) để trích xuất dữ liệu tự động và điền trước."
+          "icon": "lucide:ShieldAlert",
+          "title": "Tẩy xanh và các tuyên bố không thể kiểm chứng",
+          "problem": "Những tuyên bố về môi trường không thể kiểm tra làm xói mòn niềm tin của người mua, ngân hàng và nhà đầu tư.",
+          "response": "Dữ liệu đáng tin cậy, tính minh bạch và đo lường, báo cáo và thẩm định (MRV)."
         },
         {
-          "title": "Phân tích ESG tức thì",
-          "description": "Đánh giá và chấm điểm thời gian thực cho dự án và danh mục đầu tư với tiêu chí ESG tùy chỉnh và khuyến nghị tức thì."
+          "icon": "lucide:Database",
+          "title": "Dữ liệu rời rạc, thiếu đầy đủ",
+          "problem": "Dữ liệu về năng lượng, sản xuất, chuỗi cung ứng và chất thải nằm rải rác trong hóa đơn, bảng tính và trong đầu mỗi người.",
+          "response": "GP.A biến hội thoại, tài liệu, hình ảnh và giọng nói thành dữ liệu có cấu trúc và điền trước vào các công cụ báo cáo của bạn."
         },
         {
-          "title": "Chiến lược và báo cáo tùy chỉnh",
-          "description": "Trợ lý AI hội thoại cho khuyến nghị cá nhân hóa và báo cáo tuân thủ (GRI, SFDR) phù hợp với nhu cầu của bạn."
-        }
-      ]
-    },
-    "problem": {
-      "title": "Tuân thủ ESG Không Nên Cản Trở Tăng trưởng Của Bạn",
-      "subtitle": "Bạn không đơn độc. <strong>98% doanh nghiệp SME tại Đông Nam Á</strong> không có quyền tiếp cận kiến thức ESG, trong khi người mua toàn cầu yêu cầu bằng chứng bền vững trước năm 2025.",
-      "problems": [
-        {
-          "title": "⏰ Nguồn Lực Hạn Chế",
-          "description": "Đội ngũ của bạn thiếu thời gian và chuyên môn để điều hướng các khung <strong>GRI, SFDR, CSRD</strong> trong khi quản lý hoạt động hàng ngày."
+          "icon": "lucide:Scale",
+          "title": "Quy định khó áp dụng",
+          "problem": "CBAM, CSRD, nghĩa vụ báo cáo và trách nhiệm mở rộng của nhà sản xuất (EPR) đến nhanh hơn khả năng diễn giải của doanh nghiệp.",
+          "response": "Hỗ trợ tuân thủ và triển khai EPR, phù hợp với các khung tiêu chuẩn mà người mua và cơ quan quản lý sử dụng."
         },
         {
-          "title": "💰 Rào Cản Tài Chính",
-          "description": "Ngân hàng yêu cầu tài liệu ESG mà bạn chưa có. Không có bằng chứng tuân thủ, <strong>vay xanh vẫn ngoài tầm với</strong>."
+          "icon": "lucide:Plug",
+          "title": "Doanh nghiệp SME khó tiếp cận công nghệ",
+          "problem": "Các công cụ cấp doanh nghiệp lớn quá tốn kém, quá phức tạp hoặc quá khó tích hợp.",
+          "response": "Giải pháp tích hợp nhanh, kết nối với hoạt động và công cụ hiện có của bạn, chỉ khi bạn cần."
         },
         {
-          "title": "🌍 Sẵn Sàng Xuất Khẩu",
-          "description": "Quy định EU (<strong>CSRD</strong>) hiện yêu cầu tính bền vững của chuỗi cung ứng. Không tuân thủ = mất cơ hội xuất khẩu."
+          "icon": "lucide:GraduationCap",
+          "title": "Thiếu kỹ năng kỹ thuật và chiến lược",
+          "problem": "Đội ngũ thiếu thời gian và chuyên môn để xây dựng chiến lược khí hậu trong khi vẫn phải vận hành hằng ngày.",
+          "response": "Nâng cao năng lực doanh nghiệp: hướng dẫn từng bước, kế hoạch hành động và học hỏi ngang hàng."
+        },
+        {
+          "icon": "lucide:Landmark",
+          "title": "Tài trợ cho quá trình chuyển đổi",
+          "problem": "Ngân hàng và nhà đầu tư yêu cầu hồ sơ xanh mà phần lớn SME chưa có.",
+          "response": "Sẵn sàng tiếp cận tài chính xanh: chấm điểm đủ điều kiện, xác định khoảng trống, lộ trình và dữ liệu khí hậu đạt chuẩn nhà đầu tư."
+        },
+        {
+          "icon": "lucide:Users",
+          "title": "Sự ngại thay đổi",
+          "problem": "Đội ngũ và các nhà quản lý ngần ngại thay đổi thói quen khi chưa thấy tiến triển rõ ràng trong ngắn hạn.",
+          "response": "Thay đổi hành vi và thu hút doanh nghiệp tham gia thông qua các cột mốc ngắn, mỗi cột mốc hiển thị bằng một đồng hồ tiến độ trực tiếp."
+        },
+        {
+          "icon": "lucide:Rocket",
+          "title": "Từ thí điểm đến triển khai",
+          "problem": "Các dự án thí điểm tốt thường chững lại trước khi mở rộng sang nhiều cơ sở, sản phẩm hoặc nhà cung cấp.",
+          "response": "Hỗ trợ triển khai để nhân rộng và mở rộng những gì đã hiệu quả."
         }
       ]
     },
-    "useCases": {
-      "title": "GreenPulse.AI có thể giúp hơn 900K doanh nghiệp SME như thế nào?",
-      "cases": [
+    "whyNow": {
+      "title": "Vì sao là bây giờ: bốn lực tác động đang hội tụ lên nền kinh tế Việt Nam",
+      "subtitle": "Một số tác động ngay lập tức và mang tính ràng buộc. Số khác tạo áp lực dần theo thời gian. GP.A giải quyết từng lực, bắt đầu từ nơi nhu cầu cấp thiết nhất.",
+      "changingLabel": "Điều đang thay đổi:",
+      "impactLabel": "Tác động đến doanh nghiệp:",
+      "responseLabel": "Giải pháp của GP.A:",
+      "forces": [
         {
-          "icon": "🏭",
-          "title": "SME sản xuất: giảm chi phí qua hiệu quả năng lượng",
-          "challenge": "Chi phí năng lượng cao, thiếu tài liệu ESG cho người mua quốc tế",
-          "solution": "Tính toán dấu chân carbon, xác định cơ hội tiết kiệm năng lượng (pin mặt trời, máy móc hiệu quả), đánh giá đủ điều kiện vay xanh",
-          "result": "Giảm chi phí năng lượng 20-35% tùy vào đầu tư ban đầu, cải thiện tiếp cận tài chính xanh, cung cấp báo cáo tuân thủ có thể kiểm toán cho người mua quốc tế",
-          "badges": ["Sản xuất", "Hiệu quả Năng lượng"]
+          "tag": "Tức thời",
+          "title": "CBAM & CSRD của EU",
+          "changing": "Thuế carbon biên giới của EU và các quy tắc công bố thông tin chuỗi cung ứng đã có hiệu lực đối với sắt, thép, nhôm, xi măng, phân bón và nhiều mặt hàng khác.",
+          "impact": "Các nhà xuất khẩu Việt Nam phải cung cấp dữ liệu phát thải đã được thẩm định, nếu không có nguy cơ mất hợp đồng và quyền tiếp cận thị trường EU.",
+          "response": "Đánh giá mức độ sẵn sàng xuất khẩu và dữ liệu có cấu trúc cho phần mềm báo cáo của bạn (ESG, GRI, phù hợp CSRD)."
         },
         {
-          "icon": "🍽️",
-          "title": "Nhà hàng: giảm chi phí và xây dựng hình ảnh xanh",
-          "challenge": "Hóa đơn điện cao, khó thu hút khách hàng ý thức môi trường khi không có chiến lược bền vững rõ ràng",
-          "solution": "Xác định cải thiện nhanh (đèn LED, cách nhiệt, đánh giá tiềm năng năng lượng mặt trời), hướng dẫn đối tác với nhà cung cấp địa phương, tối ưu hóa quản lý chất thải, loại bỏ nhựa dùng một lần",
-          "result": "Giảm chi phí năng lượng 25-40% tùy biện pháp thực hiện, giảm chất thải 40-60%, nâng cao định vị thương hiệu cho du lịch sinh thái và người tiêu dùng có ý thức, tiềm năng được công nhận 'Chứng nhận Xanh'",
-          "badges": [
-            "Từ nông trại đến bàn ăn",
-            "Marketing Xanh",
-            "Nhà bếp không rác thải",
-            "Ẩm thực bền vững"
+          "tag": "Ngắn hạn",
+          "title": "Báo cáo lan tỏa trong ASEAN",
+          "changing": "Sàn giao dịch carbon trong nước của Việt Nam đã vận hành ngày 29/06/2026 (HNX). Khoảng 150 cơ sở trong ngành điện, thép và xi măng hiện nắm giữ hạn ngạch có thể giao dịch.",
+          "impact": "Các doanh nghiệp này phải có báo cáo ESG và đang yêu cầu các nhà cung cấp SME cung cấp dữ liệu phát thải mà những nhà cung cấp này chưa từng theo dõi.",
+          "response": "Thu thập dữ liệu có hướng dẫn để nhà cung cấp trả lời yêu cầu của người mua bằng số liệu đáng tin cậy."
+        },
+        {
+          "tag": "Gia tăng",
+          "title": "Áp lực tín dụng xanh",
+          "changing": "Các hướng dẫn về tín dụng xanh của SBV đang được mở rộng.",
+          "impact": "Hồ sơ xanh ngày càng trở thành điều kiện để tiếp cận nguồn vốn, chứ không chỉ là điểm cộng, kể cả ngoài các ngành thuộc phạm vi ETS.",
+          "response": "Chấm điểm đủ điều kiện vay xanh, xác định khoảng trống, lộ trình và thời gian sẵn sàng ước tính."
+        },
+        {
+          "tag": "Trung hạn",
+          "title": "Triển khai đầy đủ ETS vào năm 2029",
+          "changing": "Giai đoạn thí điểm (2025-2028) sẽ mở rộng theo từng giai đoạn để tiến tới giao dịch có đấu giá từ năm 2029, theo lộ trình của chính Chính phủ.",
+          "impact": "Các ngành và quy mô doanh nghiệp hiện chưa thuộc phạm vi sẽ được đưa vào, với rất ít thời gian báo trước.",
+          "response": "Doanh nghiệp bắt đầu cấu trúc dữ liệu từ bây giờ sẽ sẵn sàng khi phạm vi được mở rộng."
+        }
+      ]
+    },
+    "solutions": {
+      "title": "Giải pháp của chúng tôi",
+      "intro": "Bốn nhóm năng lực, được cung cấp bởi một tác nhân duy nhất và kết nối với các công cụ bạn đang sử dụng.",
+      "note": "Các công cụ MRV giúp theo dõi, cấu trúc và báo cáo kết quả của bạn. Việc thẩm định độc lập vẫn là vai trò của đơn vị thẩm định hoặc tổ chức chứng nhận được công nhận.",
+      "families": [
+        {
+          "icon": "lucide:Gauge",
+          "title": "Chiến lược khí hậu & MRV",
+          "items": [
+            "Đánh giá dấu chân carbon, Phạm vi 1, 2 và 3",
+            "Kế hoạch hành động khí hậu và lộ trình tăng trưởng carbon thấp",
+            "Giảm phát thải công nghiệp và giảm thiểu rủi ro khí hậu",
+            "Đo lường, báo cáo và thẩm định (MRV) và theo dõi môi trường"
           ]
         },
         {
-          "icon": "🌾",
-          "title": "Kinh doanh nông nghiệp: nông nghiệp tái tạo cho tiếp cận tài chính và xuất khẩu",
-          "challenge": "Người mua EU / Mỹ và thậm chí Trung Quốc yêu cầu tài liệu bền vững tuân thủ và vững chắc",
-          "solution": "Hướng dẫn danh sách kiểm tra tuân thủ EU, tạo báo cáo ESG sẵn sàng xuất khẩu, phân tích khoảng cách và kế hoạch hành động",
-          "result": "Kiểm toán thành công với người mua quốc tế, duy trì hoặc mở rộng hợp đồng xuất khẩu, vị thế tốt hơn cho tài trợ bằng trái phiếu xanh, lợi thế cạnh tranh trong chuỗi cung ứng tập trung vào sức khỏe và bền vững",
-          "badges": [
-            "Nông nghiệp tái tạo",
-            "Tuân thủ Xuất khẩu",
-            "Tài chính Xanh",
-            "Nông nghiệp thích ứng khí hậu"
+          "icon": "lucide:Cpu",
+          "title": "AI, dữ liệu & tiếp cận công nghệ",
+          "items": [
+            "AI tác nhân trích xuất, cấu trúc và điền trước dữ liệu của bạn từ hội thoại, tài liệu, hình ảnh và giọng nói",
+            "Dữ liệu đáng tin cậy: kiểm tra chất lượng và truy xuất nguồn gốc",
+            "Giải pháp tích hợp nhanh kết nối với ERP, CRM và bảng tính của bạn",
+            "Các công cụ chuyên biệt cho chứng nhận, báo cáo hoặc truy xuất nguồn gốc, chỉ kết nối khi mục tiêu của bạn cần đến"
           ]
+        },
+        {
+          "icon": "lucide:GraduationCap",
+          "title": "Nâng cao năng lực doanh nghiệp & sẵn sàng xuất khẩu",
+          "items": [
+            "Kế hoạch hành động từng bước và nâng cao năng lực cho đội ngũ của bạn",
+            "Sẵn sàng xuất khẩu, trước khi giao hàng chứ không phải sau",
+            "Đồng hành chứng nhận: nhãn sinh thái (bao gồm Nhãn Xanh Việt Nam / VECC-MONRE), ISO và các tiêu chuẩn xuất khẩu. Chúng tôi cấu trúc hồ sơ bằng chứng của bạn; cơ quan chứng nhận vẫn giữ vai trò của mình",
+            "Phân tích khoảng trống và chiến lược để thu hẹp các khoảng trống còn lại"
+          ]
+        },
+        {
+          "icon": "lucide:Recycle",
+          "title": "Kinh tế tuần hoàn, tuân thủ & tài chính xanh",
+          "items": [
+            "Triển khai và báo cáo EPR",
+            "Kinh tế tuần hoàn ngay từ thiết kế và minh bạch vòng đời sản phẩm",
+            "Sẵn sàng tiếp cận tài chính xanh và dữ liệu khí hậu đạt chuẩn nhà đầu tư",
+            "Hỗ trợ nhân rộng và mở rộng từ thí điểm đến triển khai"
+          ]
+        }
+      ]
+    },
+    "howItWorks": {
+      "title": "GP.A hoạt động như thế nào",
+      "subtitle": "Từ đánh giá đến tác động: hướng dẫn, kết nối và thích ứng, để tăng trưởng carbon thấp đồng thời bền vững và toàn diện.",
+      "steps": [
+        {
+          "title": "Đánh giá & xác định mục tiêu",
+          "items": [
+            "Bối cảnh, nhu cầu và hạn chế của doanh nghiệp bạn",
+            "Mục tiêu rõ ràng, đo lường được"
+          ]
+        },
+        {
+          "title": "Xây dựng chiến lược & năng lực",
+          "items": ["Kế hoạch hành động từng bước", "Nâng cao năng lực cho đội ngũ của bạn"]
+        },
+        {
+          "title": "Cấu trúc & tự động điền dữ liệu",
+          "items": [
+            "Hội thoại trở thành dữ liệu có cấu trúc",
+            "Trích xuất dữ liệu giúp điền trước vào phần mềm đã kết nối của bạn"
+          ]
+        },
+        {
+          "title": "Phân tích kết quả, thích ứng & thu hẹp khoảng trống",
+          "items": ["Đọc kết quả và tiến độ", "Xác định khoảng trống và điều chỉnh kế hoạch"]
         }
       ],
-      "disclaimer": "*Kết quả thay đổi tùy theo điều kiện ban đầu, ngành và biện pháp thực hiện. GreenPulse cung cấp chiến lược và công cụ vững chắc; kết quả thực tế phụ thuộc vào hành động và đầu tư của khách hàng."
+      "repeat": "Lặp lại và cải thiện. Ra quyết định dựa trên dữ liệu, khi quy định, cơ hội và thị trường thay đổi.",
+      "tools": {
+        "title": "Kết nối công cụ bên ngoài khi cần",
+        "intro": "Kết nối GP.A với phần mềm phù hợp, theo nhu cầu.",
+        "items": [
+          {
+            "title": "Chứng nhận",
+            "example": "ví dụ: ISO"
+          },
+          {
+            "title": "Báo cáo",
+            "example": "ví dụ: ESG SaaS"
+          },
+          {
+            "title": "Tuân thủ & truy xuất nguồn gốc",
+            "example": "ví dụ: NDAChain"
+          },
+          {
+            "title": "Chấm điểm & theo dõi KPI",
+            "example": "ví dụ: SaaS chuyên biệt"
+          },
+          {
+            "title": "Các công cụ CNTT chuyên biệt khác",
+            "example": "tùy nhu cầu"
+          }
+        ]
+      },
+      "journey": {
+        "title": "Ngay từ ngày đầu",
+        "steps": [
+          {
+            "title": "Giới thiệu doanh nghiệp của bạn",
+            "description": "Không giả định: GP.A hỏi, bạn trả lời, và hồ sơ của bạn được thiết lập."
+          },
+          {
+            "title": "Xác định mục tiêu",
+            "description": "Tăng doanh thu, đạt chứng nhận (ISO, xuất khẩu, ESG), hoàn tất KYC/AML hoặc đảm bảo nguồn vốn. Bạn là người lựa chọn."
+          },
+          {
+            "title": "Chia nhỏ thành các bước",
+            "description": "Các cột mốc ngắn, trung và dài hạn, mỗi cột mốc hiển thị bằng một đồng hồ tiến độ trực tiếp."
+          },
+          {
+            "title": "Một công cụ, linh hoạt theo nhu cầu",
+            "description": "Kết nối hệ thống tuân thủ, công cụ xuất khẩu hoặc cổng thông tin của bên cho vay, chỉ khi mục tiêu của bạn cần đến."
+          },
+          {
+            "title": "Tiến bộ được cộng dồn",
+            "description": "Mỗi bước hoàn thành đưa bạn đến gần mục tiêu hơn, một cách bền vững."
+          }
+        ]
+      }
+    },
+    "useCases": {
+      "title": "Ứng dụng & tác động",
+      "labels": {
+        "challenge": "Thách thức",
+        "solution": "Giải pháp",
+        "result": "Kết quả mục tiêu"
+      },
+      "cases": [
+        {
+          "icon": "lucide:Factory",
+          "title": "Doanh nghiệp sản xuất xuất khẩu sang EU và Hoa Kỳ",
+          "challenge": "Giá năng lượng tăng và thiếu dữ liệu phát thải, trong khi người mua EU và Hoa Kỳ siết chặt yêu cầu.",
+          "solution": "GP.A cùng doanh nghiệp đặt mục tiêu, cấu trúc dữ liệu còn thiếu, chuẩn bị báo cáo Phạm vi 1, 2 và 3 và xác định các cơ hội giảm carbon ở cấp sản phẩm.",
+          "result": "Mục tiêu ước tính: +10% sản lượng xuất khẩu sang EU và Hoa Kỳ, +15% tiết kiệm năng lượng, +40% dòng sản phẩm đủ điều kiện xuất khẩu.",
+          "tags": ["Sản xuất", "Sẵn sàng xuất khẩu", "Phạm vi 1, 2, 3"]
+        },
+        {
+          "icon": "lucide:Wheat",
+          "title": "Doanh nghiệp nông nghiệp: tiếp cận xuất khẩu và tài chính xanh",
+          "challenge": "Người mua EU, Hoa Kỳ và Trung Quốc yêu cầu bằng chứng bền vững được lập thành văn bản.",
+          "solution": "Hướng dẫn theo danh mục kiểm tra tuân thủ EU, báo cáo sẵn sàng xuất khẩu, phân tích khoảng trống và kế hoạch hành động.",
+          "result": "Mục tiêu: vượt qua đánh giá của người mua, duy trì hoặc mở rộng hợp đồng xuất khẩu và cải thiện vị thế để tiếp cận tài chính xanh.",
+          "tags": ["Nông nghiệp", "Sẵn sàng xuất khẩu", "Tài chính xanh"]
+        },
+        {
+          "icon": "lucide:Landmark",
+          "title": "Ngân hàng hoặc quỹ: sẵn sàng tài chính xanh cho khách hàng của bạn",
+          "challenge": "Khách hàng thiếu dữ liệu khí hậu cần thiết để đủ điều kiện vay xanh.",
+          "solution": "GP.A white-label cung cấp cho mỗi khách hàng điểm đủ điều kiện, danh sách các khoảng trống và lộ trình.",
+          "result": "Khách hàng đến với dữ liệu khí hậu có cấu trúc, đạt chuẩn nhà đầu tư.",
+          "tags": ["White-label", "Sẵn sàng tài chính xanh"]
+        }
+      ],
+      "disclaimer": "Mục tiêu ước tính, sẽ được xác thực trong giai đoạn thí điểm. Kết quả thực tế phụ thuộc vào hiện trạng ban đầu, ngành nghề và các biện pháp mà doanh nghiệp triển khai."
     },
     "competitive": {
-      "title": "Tại sao GreenPulse Vượt trội hơn Phần mềm ESG Chung & Chatbot AI",
-      "cta": "Xem GreenPulse Hoạt động",
-      "ctaSubtitle": "Được thiết kế cho các SME Đông Nam Á cần kết quả, không phải sự phức tạp.",
+      "title": "Vì sao chọn GP.A thay vì phần mềm ESG thông thường hay chatbot AI phổ thông",
+      "cta": "Xem GP.A hoạt động",
+      "ctaSubtitle": "Được xây dựng cho doanh nghiệp cần kết quả thực tiễn, không cần sự phức tạp.",
       "headers": {
         "feature": "Tính năng",
         "greenpulse": "GreenPulse.AI",
         "software": "Phần mềm ESG",
-        "ai": "Nền tảng AI"
+        "ai": "Nền tảng AI phổ thông"
       },
       "rows": [
         {
-          "feature": "Loại Giao diện",
-          "greenpulse": "✅ Kết hợp (Bảng điều khiển + AI hội thoại)",
-          "software": "❌ Giao diện dự án tĩnh",
-          "ai": "❌ Chỉ hội thoại"
+          "feature": "Giao diện",
+          "greenpulse": "Bảng điều khiển và tác nhân hội thoại trong một",
+          "software": "Giao diện dự án tĩnh",
+          "ai": "Chỉ có hội thoại"
         },
         {
-          "feature": "Chuyên môn ESG",
-          "greenpulse": "✅ Khung quốc tế tích hợp (GRI, SFDR, SDG)",
-          "software": "✅ Danh sách kiểm tra tuân thủ thủ công",
-          "ai": "❌ Chung chung, nguy cơ ảo giác"
+          "feature": "Chuyên môn",
+          "greenpulse": "Xây dựng dựa trên các khung tiêu chuẩn quốc tế và quy định của Việt Nam (CBAM, CSRD, GRI, ISO, VECC-MONRE)",
+          "software": "Danh mục kiểm tra tuân thủ thủ công",
+          "ai": "Câu trả lời chung chung, có nguy cơ ảo giác (hallucination)"
         },
         {
-          "feature": "Thu thập Dữ liệu",
-          "greenpulse": "✅ Trích xuất AI giọng nói, ảnh, tài liệu tất cả trong một",
-          "software": "❌ Nhập thủ công hoặc bán tự động",
-          "ai": "✅ Nếu đăng ký nền tảng riêng"
+          "feature": "Thu thập dữ liệu",
+          "greenpulse": "Trích xuất từ giọng nói, hình ảnh và tài liệu tại một nơi",
+          "software": "Nhập thủ công hoặc bán tự động",
+          "ai": "Chỉ khi dùng thêm các nền tảng riêng"
         },
         {
-          "feature": "Theo dõi Dự án",
-          "greenpulse": "✅ Cập nhật tự động + bảng điều khiển thông minh",
-          "software": "✅ Quản lý dự án nhưng cập nhật thủ công",
-          "ai": "❌ Không có khả năng theo dõi"
+          "feature": "Theo dõi tiến độ",
+          "greenpulse": "Cập nhật tự động và đồng hồ tiến độ trực tiếp",
+          "software": "Quản lý dự án với cập nhật thủ công",
+          "ai": "Không có khả năng theo dõi"
         },
         {
-          "feature": "Tích hợp ERP/CRM",
-          "greenpulse": "✅ Đồng bộ một cú nhấp",
-          "software": "❌ Hoạt động riêng lẻ",
-          "ai": "✅ Hạn chế, tốn nhiều phát triển"
+          "feature": "Tích hợp",
+          "greenpulse": "Kết nối nhanh với ERP, CRM và bảng tính của bạn, cùng các công cụ chuyên biệt theo yêu cầu",
+          "software": "Các hệ thống đơn lẻ tách biệt",
+          "ai": "Hạn chế, đòi hỏi nhiều công sức lập trình"
         }
       ]
     },
-    "credibility": {
-      "title": "Được Công nhận bởi Lãnh đạo Ngành và Hỗ trợ bởi Chuyên môn",
-      "cards": [
-        {
-          "icon": "🎓",
-          "title": "Hợp tác Nghiên cứu Học thuật",
-          "description": "Hợp tác với viện nghiên cứu đại học hàng đầu Đông Nam Á về thông tin thị trường, phân tích khung pháp lý và xác nhận các phương pháp ESG tốt nhất."
-        },
-        {
-          "icon": "💼",
-          "title": "Mạng lưới Nhà đầu tư Tác động",
-          "description": "Được hỗ trợ bởi các nhà đầu tư tác động quản lý hơn 500 triệu USD tài sản tại Đông Nam Á, cung cấp tư vấn chiến lược về triển khai tài chính xanh và yêu cầu ESG danh mục đầu tư."
-        },
-        {
-          "icon": "🏦",
-          "title": "Góc nhìn Ngân hàng Khu vực",
-          "description": "Hợp tác với các chuyên gia tài chính xanh từ các ngân hàng lớn Đông Nam Á để đảm bảo nền tảng đáp ứng yêu cầu cho vay thực tế và tiêu chuẩn pháp lý."
-        },
-        {
-          "icon": "⚙️",
-          "title": "Công nghệ ESG Cấp Doanh nghiệp",
-          "description": "Được hỗ trợ bởi các giải pháp SaaS ESG đã được chứng minh và khung AI tiên tiến. Chúng tôi tích hợp các công cụ tuân thủ tốt nhất trực tiếp vào giao diện hội thoại dễ tiếp cận—mang phần mềm doanh nghiệp 50K$+ đến mọi SME."
-        }
-      ],
-      "teamNote": "Đội ngũ sáng lập kết hợp: 12+ năm kinh nghiệm chiến lược bền vững và tư vấn ESG, chuyên môn sâu về kỹ thuật AI/ML, và kinh nghiệm trực tiếp về khoảng cách tiếp cận mà các SME tại Đông Nam Á đang đối mặt."
+    "offers": {
+      "title": "Các gói dịch vụ",
+      "subtitle": "Nhiều hướng tiếp cận. Tác động lớn hơn. Một mô hình có thể mở rộng để thúc đẩy tăng trưởng carbon thấp tại ASEAN.",
+      "openTo": "Dành cho",
+      "whiteLabel": {
+        "title": "White-label + Cấp phép",
+        "description": "Cung cấp GP.A dưới thương hiệu của riêng bạn cho khách hàng, thành viên hoặc nhà cung cấp của bạn.",
+        "features": [
+          "Thương hiệu của bạn: logo, màu sắc, nhận diện hình ảnh và giao diện tùy chỉnh",
+          "Tính năng tùy chỉnh, xây dựng theo tiêu chuẩn của bạn",
+          "Quyền sở hữu dữ liệu",
+          "Giấy phép nền tảng"
+        ],
+        "audience": ["Ngân hàng", "Tập đoàn lớn", "Quỹ đầu tư", "Công ty tư vấn"],
+        "cta": "Trao đổi về hợp tác white-label"
+      },
+      "otherOptions": "Các lựa chọn khác",
+      "direct": {
+        "title": "Đăng ký trực tiếp",
+        "description": "Doanh nghiệp sử dụng GP.A trực tiếp, với ba gói.",
+        "plans": [
+          {
+            "name": "Awareness",
+            "status": "Miễn phí",
+            "description": "Tác nhân GP.A hội thoại, nhận thức đơn giản về dấu chân carbon và các cải thiện nhanh về năng lượng, chất thải và chi phí. Tài khoản miễn phí, không cần thẻ tín dụng."
+          },
+          {
+            "name": "Premium",
+            "status": "Sắp ra mắt",
+            "description": "Trò chuyện với AI, công cụ ESG kèm bảng điều khiển, nhập dữ liệu (tài liệu, giọng nói, hình ảnh), phân tích và biểu đồ, kế hoạch hành động tùy chỉnh."
+          },
+          {
+            "name": "PRO",
+            "status": "Sắp ra mắt",
+            "description": "Toàn bộ tính năng Premium cùng hỗ trợ tùy chỉnh cho các tiêu chuẩn chính thức và quốc tế: chứng nhận, xuất khẩu và tài chính xanh."
+          }
+        ],
+        "audience": ["Doanh nghiệp ASEAN", "Chủ doanh nghiệp SME"],
+        "cta": "Dùng thử GP.A miễn phí"
+      },
+      "ecosystem": {
+        "title": "Tích hợp hệ sinh thái",
+        "description": "Hai cách để kết nối GP.A với các nền tảng khác.",
+        "items": [
+          "License out: cấp phép API của GP.A cho các nền tảng khác",
+          "Route in: giới thiệu đối tác, chuyển dữ liệu khách hàng đến các đối tác tuân thủ"
+        ],
+        "audience": ["Nền tảng SaaS", "Đơn vị tổng hợp khu vực"],
+        "cta": "Trao đổi với chúng tôi về tích hợp"
+      }
     },
     "partnership": {
-      "title": "Cơ hội Đối tác",
-      "subtitle": "Giải pháp nhãn trắng & API cho doanh nghiệp của bạn",
-      "description": "",
+      "title": "Hợp tác",
+      "subtitle": "Ngân hàng, quỹ đầu tư, tập đoàn lớn, công ty tư vấn và nền tảng",
       "values": [
         {
-          "icon": "🎯",
-          "title": "Tối ưu hóa Thẩm định Danh mục Đầu tư",
+          "title": "Ngân hàng & quỹ đầu tư",
           "items": [
-            "Phân tích ESG đa tiêu chí (SDG, GRI, SFDR) với chấm điểm rủi ro tức thì",
-            "Sàng lọc dự án tự động tiết kiệm 40% thời gian thẩm định",
-            "Bảng điều khiển giám sát sức khỏe ESG danh mục đầu tư theo thời gian thực"
+            "Sẵn sàng tài chính xanh cho khách hàng và các công ty trong danh mục của bạn",
+            "Chấm điểm đủ điều kiện, xác định khoảng trống và lộ trình phù hợp với hướng dẫn tín dụng xanh",
+            "Dữ liệu khí hậu đạt chuẩn nhà đầu tư",
+            "Mô-đun bổ sung ở giai đoạn sau: thông tin rủi ro danh mục với tình trạng tuân thủ, mức độ phụ thuộc xuất khẩu và rủi ro thị trường, theo từng khách hàng"
           ]
         },
         {
-          "icon": "📊",
-          "title": "Giải pháp ESG Nhãn trắng",
+          "title": "Tập đoàn lớn & chuỗi cung ứng",
           "items": [
-            "Nền tảng tùy chỉnh cho khách hàng SME của bạn (ví dụ: \"Green [Ngân hàng của Bạn] powered by GreenPulse\")",
-            "Tích hợp liền mạch với quy trình xét duyệt khoản vay",
-            "Đánh giá đủ điều kiện vay xanh phù hợp với yêu cầu ngân hàng trung ương"
+            "Thu thập dữ liệu có hướng dẫn cho các nhà cung cấp SME của bạn (Phạm vi 3)",
+            "Sẵn sàng xuất khẩu cho nhà cung cấp, trước khi giao hàng chứ không phải sau",
+            "Giai đoạn tiếp theo: tiêu chuẩn riêng của bạn, được kiểm tra trước khi yêu cầu đến tay bạn"
           ]
         },
         {
-          "icon": "🚀",
-          "title": "Hỗ trợ Ươm tạo Dự án",
+          "title": "Công ty tư vấn & nền tảng",
           "items": [
-            "Trợ lý AI để chính thức hóa sản phẩm và phát triển lộ trình ESG",
-            "Theo dõi tuân thủ tự động cho các công ty trong danh mục đầu tư",
-            "Báo cáo tác động chuẩn hóa cho truyền thông LP"
+            "GP.A white-label dưới thương hiệu của riêng bạn",
+            "Giấy phép API cho nền tảng của bạn",
+            "Chuyển giới thiệu đối tác đến các đối tác tuân thủ"
           ]
         }
       ],
-      "cta": "Lên lịch Thảo luận Đối tác",
-      "ctaEmail": "partnerships@greenpulse.ai?subject=Yêu cầu Đối tác",
-      "note": "Thí điểm hiện tại: Ngân hàng hàng đầu Đông Nam Á, quỹ tác động quốc tế, máy gia tốc công nghệ khí hậu"
+      "cta": "Đặt lịch trao đổi hợp tác"
     },
     "press": {
-      "title": "Báo chí nói về chúng tôi",
+      "title": "Họ nói về chúng tôi",
       "vietstock": {
         "publication": "VietStock",
-        "date": "Tháng 11 năm 2025",
+        "date": "Tháng 11/2025",
         "title": "\"Tẩy xanh\" dưới góc nhìn của chuyên gia tư vấn ESG quốc tế",
         "quote": "Gần đây, chúng tôi đang thử nghiệm một ứng dụng có tên GreenPulse.AI. Đây là trợ lý trí tuệ nhân tạo (AI) giúp các doanh nghiệp SME tại Việt Nam và Đông Nam Á dễ dàng thực hành bền vững. Người dùng sẽ được hướng dẫn từng bước để giải quyết các vấn đề như giảm chi phí điện, đáp ứng yêu cầu xuất khẩu, với bảng điều khiển để theo dõi tiến độ. Nền tảng cũng tích hợp các công cụ báo cáo ESG tự động theo tiêu chuẩn quốc tế. Mục tiêu chính là giúp doanh nghiệp tránh bẫy 'tẩy xanh', chứng minh cải thiện có thể đo lường và mở rộng tiếp cận nhà đầu tư, khách hàng và thị trường quốc tế."
       }
     },
+    "credibility": {
+      "title": "Uy tín & kết quả đạt được",
+      "cards": [
+        {
+          "icon": "lucide:Rocket",
+          "title": "Sản phẩm đang hoạt động",
+          "description": "MVP của GP.A đã hoạt động: tác nhân hội thoại, ứng dụng web và trang quản trị. Ra mắt chính thức vào tháng 5/2026 với phiên bản miễn phí."
+        },
+        {
+          "icon": "lucide:GraduationCap",
+          "title": "Đối tác nghiên cứu và thể chế",
+          "description": "Thỏa thuận hợp tác được ký vào tháng 6/2026 với Viện Phát triển Kinh tế Tuần hoàn (ICED), Đại học Quốc gia TP.HCM, nhằm cùng phát triển, cùng nộp hồ sơ xin tài trợ, nâng cao năng lực và tăng uy tín thể chế."
+        },
+        {
+          "icon": "lucide:Mic",
+          "title": "Độ hiển thị",
+          "description": "Giới thiệu tại Sustainable Future 10 và Earth Day Vietnam 2026, do Green Leaders Community tổ chức. Được mời tham dự Asia Pacific Sustainable Business Summit 2026."
+        },
+        {
+          "icon": "lucide:Cpu",
+          "title": "Công nghệ",
+          "description": "AI được tinh chỉnh, lớp tích hợp cắm là chạy, công cụ chuyển từ khoảng trống thành chiến lược và chứng chỉ tương thích NDAChain. Tự chủ và mô-đun hóa ngay từ thiết kế."
+        }
+      ],
+      "team": {
+        "title": "Đội ngũ",
+        "intro": "Chuyên môn đa lĩnh vực hiếm có trong một đội ngũ: chiến lược tăng trưởng, mạng lưới thể chế và kỹ thuật AI.",
+        "members": [
+          {
+            "name": "Amber Seradni",
+            "role": "CEO & Đồng sáng lập",
+            "description": "Hơn 12 năm kinh nghiệm về chiến lược tăng trưởng bền vững tại các cơ quan chính phủ và khu vực tư nhân. Cố vấn Liên Hợp Quốc và tư vấn viên CSSO. Phụ trách tầm nhìn, chiến lược, định vị, hợp tác và định hướng sản phẩm."
+          },
+          {
+            "name": "Franck Dufournet",
+            "role": "CTO & Đồng sáng lập",
+            "description": "Hơn 7 năm kinh nghiệm kỹ thuật công nghệ: kiến trúc full-stack và bảo mật nền tảng, NLP, trích xuất dữ liệu và tích hợp mô hình AI. Phụ trách kiến trúc kỹ thuật và hạ tầng AI."
+          }
+        ]
+      }
+    },
     "faq": {
-      "title": "Câu hỏi Thường gặp",
+      "title": "Câu hỏi thường gặp",
       "questions": [
         {
-          "question": "GreenPulse khác gì so với ChatGPT hoặc các công cụ AI chung?",
-          "answer": "GreenPulse được thiết kế đặc biệt cho tuân thủ ESG và báo cáo bền vững. Khác với ChatGPT, chúng tôi được đào tạo trên các khung quốc tế (GRI, SFDR, CSRD, ISSB) và tích hợp với các nguồn dữ liệu hiện có của bạn (ERP, CRM, Excel). Chúng tôi cung cấp kết quả có cấu trúc đáp ứng yêu cầu pháp lý—không phải văn bản chung cần chỉnh sửa thủ công."
+          "question": "GreenPulse khác gì ChatGPT hay các công cụ AI phổ thông khác?",
+          "answer": "GP.A được xây dựng cho công việc về khí hậu và bền vững. GP.A được định hướng bởi các khung tiêu chuẩn quốc tế (GRI, CSRD, ISO) cùng yêu cầu của Việt Nam và EU, và kết nối với các nguồn dữ liệu của chính bạn. GP.A tạo ra các đầu ra có cấu trúc để đưa vào công cụ báo cáo của bạn, thay vì văn bản chung chung cần rà soát thủ công."
         },
         {
-          "question": "Dữ liệu của tôi có an toàn không? Bạn có chia sẻ với bên thứ ba không?",
-          "answer": "**GÓI MIỄN PHÍ:** Cuộc hội thoại của bạn sử dụng nhà cung cấp AI bên thứ ba (OpenAI, Anthropic). Dữ liệu được truyền đến máy chủ của họ (đặt tại Mỹ) để xử lý. Các nhà cung cấp này có thể sử dụng dữ liệu hội thoại để cải thiện mô hình trừ khi bạn từ chối. **GÓI PREMIUM & GOLDEN:** Chúng tôi cung cấp mô hình AI được lưu trữ cục bộ (Llama 3) triển khai tại Đông Nam Á. Dữ liệu của bạn không bao giờ rời khỏi cơ sở hạ tầng của chúng tôi—đảm bảo chủ quyền dữ liệu hoàn toàn, không chia sẻ với bên thứ ba, và tuân thủ yêu cầu lưu trữ dữ liệu địa phương. Tất cả dữ liệu được mã hóa khi truyền (HTTPS) và khi lưu trữ (AES-256)."
+          "question": "Dữ liệu của tôi có an toàn không? Các bạn có chia sẻ với bên thứ ba không?",
+          "answer": "GÓI MIỄN PHÍ: các cuộc hội thoại của bạn sử dụng nhà cung cấp AI bên thứ ba (OpenAI, Anthropic). Dữ liệu được truyền đến máy chủ của họ (đặt tại Hoa Kỳ) để xử lý. Các nhà cung cấp này có thể dùng dữ liệu hội thoại để cải thiện mô hình trừ khi bạn từ chối. GÓI PREMIUM & PRO: chúng tôi cung cấp các mô hình AI lưu trữ cục bộ (Llama 3) triển khai tại Đông Nam Á. Dữ liệu của bạn không bao giờ rời khỏi hạ tầng của chúng tôi, đảm bảo chủ quyền dữ liệu đầy đủ, không chia sẻ với bên thứ ba và tuân thủ các yêu cầu lưu trữ dữ liệu tại địa phương. Mọi dữ liệu đều được mã hóa khi truyền tải (HTTPS) và khi lưu trữ (AES-256)."
         },
         {
-          "question": "AI không tạo ra phát thải sao? Bạn xử lý điều này như thế nào?",
-          "answer": "Đúng, tính toán AI tạo ra phát thải—đó là lý do chúng tôi bù đắp 200% dấu chân carbon thông qua các dự án loại bỏ carbon đã được xác minh. Quan trọng hơn, tự động hóa của GreenPulse giảm nhu cầu di chuyển, báo cáo giấy và công việc thủ công dư thừa, mang lại tác động carbon ròng âm cho người dùng."
+          "question": "Các bạn có thay thế tổ chức chứng nhận hay kiểm toán viên không?",
+          "answer": "Không. GP.A cấu trúc hồ sơ bằng chứng của bạn, xác định các khoảng trống và giúp bạn chuẩn bị cho nhãn sinh thái (bao gồm Nhãn Xanh Việt Nam / VECC-MONRE), ISO và các tiêu chuẩn xuất khẩu. Cơ quan chứng nhận và đơn vị thẩm định độc lập nào vẫn giữ nguyên vai trò của mình."
         },
         {
-          "question": "GreenPulse có thể tích hợp với các công cụ hiện có không?",
-          "answer": "Hoàn toàn có thể. GreenPulse kết nối với các hệ thống ERP chính (SAP, Oracle), CRM (Salesforce, HubSpot) và nguồn dữ liệu (Excel, Google Sheets, CSV). API của chúng tôi cho phép tích hợp tùy chỉnh cho các hệ thống riêng. Hầu hết các triển khai hoạt động trong 2 tuần."
+          "question": "AI chẳng phải cũng tạo ra phát thải sao? Các bạn xử lý điều này như thế nào?",
+          "answer": "Có, việc tính toán của AI tạo ra phát thải, vì vậy chúng tôi bù trừ 200% dấu chân carbon của mình thông qua các dự án loại bỏ carbon được xác minh. Quan trọng hơn, tự động hóa của GreenPulse giúp giảm nhu cầu đi lại, báo cáo giấy và công việc thủ công trùng lặp, mang lại tác động carbon âm ròng cho người dùng của chúng tôi."
         },
         {
-          "question": "Điều gì xảy ra nếu GreenPulse mắc lỗi trong báo cáo tuân thủ?",
-          "answer": "GreenPulse cung cấp tính minh bạch trong tất cả kết quả—hiển thị khung và điểm dữ liệu nào được sử dụng cho mỗi khuyến nghị. Tất cả báo cáo bao gồm điểm kiểm tra con người trước khi hoàn thành. Chúng tôi cũng cung cấp nhật ký kiểm toán và kiểm soát phiên bản để đảm bảo sự tin cậy pháp lý."
+          "question": "GreenPulse có thể tích hợp với các công cụ hiện có của chúng tôi không?",
+          "answer": "Có. GP.A kết nối vào hoạt động hiện có của bạn: tích hợp với các hệ thống ERP lớn (SAP, Oracle), CRM (Salesforce, HubSpot) và các nguồn dữ liệu (Excel, Google Sheets, CSV). Các công cụ chuyên biệt cho chứng nhận, báo cáo hoặc truy xuất nguồn gốc chỉ được kết nối khi mục tiêu của bạn cần đến. API của chúng tôi cho phép tích hợp tùy chỉnh với các hệ thống riêng. Hầu hết các triển khai đi vào hoạt động trong vòng 2 tuần."
+        },
+        {
+          "question": "Nếu GreenPulse mắc lỗi trong báo cáo tuân thủ thì sao?",
+          "answer": "GreenPulse đảm bảo minh bạch trong mọi đầu ra, cho thấy khung tiêu chuẩn và điểm dữ liệu nào làm cơ sở cho từng khuyến nghị. Mọi báo cáo đều có các điểm kiểm tra có sự tham gia của con người (human-in-the-loop) trước khi hoàn tất. Chúng tôi cũng cung cấp nhật ký kiểm toán và kiểm soát phiên bản để đảm bảo sự tin cậy về mặt quy định."
         }
       ]
+    },
+    "cta": {
+      "title": "Sẵn sàng biến tham vọng khí hậu thành hành động đo lường được?",
+      "description": "Trao đổi với chúng tôi về thách thức của bạn, hoặc bắt đầu khám phá GP.A miễn phí.",
+      "discuss": "Trao đổi về thách thức của bạn",
+      "getStarted": "Dùng thử GP.A miễn phí"
     }
   }
 }

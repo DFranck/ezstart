@@ -2,11 +2,11 @@
   "careers": {
     "meta": {
       "title": "Carrières - Rejoignez GreenPulse.AI",
-      "description": "Rejoignez GreenPulse.AI dans la démocratisation de la conformité ESG pour les PME d'Asie du Sud-Est. Poste actuel : Support Business Development & Opérations."
+      "description": "Rejoignez GreenPulse.AI pour aider les entreprises du Vietnam et d'Asie du Sud-Est à accélérer leur croissance bas carbone. Poste actuel : Support Business Development & Opérations."
     },
     "hero": {
       "title": "Rejoignez-nous pour Construire l'Avenir de l'Entreprise Durable",
-      "subtitle": "GreenPulse.AI a pour mission de rendre la conformité ESG accessible à 1 million de PME à travers l'Asie du Sud-Est. Nous sommes une petite équipe axée sur l'impact, basée à Ho Chi Minh-Ville, travaillant à l'intersection de l'IA, de la durabilité et de la finance verte.",
+      "subtitle": "GreenPulse.AI a pour mission d'aider les entreprises du Vietnam et d'Asie du Sud-Est à accélérer leur croissance bas carbone grâce à des données fiables, à l'IA et à des solutions pratiques. Nous sommes une petite équipe axée sur l'impact, basée à Ho Chi Minh-Ville, travaillant à l'intersection de l'IA, de la durabilité et de la finance verte.",
       "description": "Si vous êtes passionné par l'action climatique, souhaitez travailler dans un environnement de startup dynamique et croyez que la technologie peut démocratiser l'accès à la finance verte - nous aimerions vous entendre."
     },
     "openings": {
@@ -19,7 +19,12 @@
       "type": "Arrangement contractuel flexible",
       "mission": "Mission axée sur l'impact",
       "summary": "Aidez-nous à développer la présence de GreenPulse en Asie du Sud-Est. Gérez les réponses aux appels d'offres, représentez-nous lors d'événements et établissez des partenariats stratégiques.",
-      "tags": ["Business Development", "Coordination de Projets", "Networking", "Pas de Background Technique Requis"],
+      "tags": [
+        "Business Development",
+        "Coordination de Projets",
+        "Networking",
+        "Pas de Background Technique Requis"
+      ],
       "sections": {
         "about": {
           "title": "À Propos du Poste",
@@ -117,7 +122,7 @@
             "items": [
               "**Mission d'abord :** Nous construisons cela pour résoudre un vrai problème, pas seulement pour des exits",
               "**Transparence :** Communication ouverte sur les défis, la stratégie et les progrès",
-              "**Flexibilité :** Nous respectons les limites, les niveaux d'énergie et l'équilibre vie professionnelle/personnelle (Amber est enceinte de 5 mois - nous appliquons ce que nous prêchons)",
+              "**Flexibilité :** Nous respectons les limites, les niveaux d'énergie et l'équilibre vie professionnelle/personnelle",
               "**Approche diplomatique :** Nous valorisons la construction de relations plutôt que les tactiques de vente agressives"
             ]
           }
@@ -143,15 +148,14 @@
       "title": "Pourquoi GreenPulse.AI ?",
       "ourMission": {
         "title": "Notre Mission",
-        "content": "Nous démocratisons la conformité ESG pour les 98% de PME d'Asie du Sud-Est qui n'ont aucun accès aux connaissances en durabilité. D'ici 2025, l'ETS du Vietnam réglementera 50% des émissions - 900+ PME vietnamiennes auront besoin de support ESG. Nous construisons l'agent IA qui rend cela accessible."
+        "content": "Nous aidons les entreprises vietnamiennes et d'Asie du Sud-Est à accélérer leur croissance bas carbone : renforcer leurs capacités, structurer des données fiables et transformer la pression réglementaire (CBAM et CSRD de l'UE, bourse carbone du Vietnam et déploiement de l'ETS jusqu'en 2029) en opportunités d'export et de financement. Nous construisons l'agent IA qui rend cela accessible."
       },
       "traction": {
         "title": "Notre Traction",
         "items": [
-          "MVP complété à 70%",
-          "5 partenaires beta (incluant des banques vietnamiennes de premier plan, instituts de recherche)",
-          "50+ startups dans le pipeline",
-          "Mis en avant dans VietStock, reconnu par des accélérateurs régionaux"
+          "MVP en ligne, version gratuite lancée en mai 2026",
+          "Partenariat signé avec l'ICED, Université nationale du Vietnam à HCMV (juin 2026)",
+          "Cité dans VietStock (novembre 2025)"
         ]
       },
       "values": {
@@ -171,7 +175,7 @@
         "**Customer Success & Support PME** (aider les clients à maximiser la valeur de GreenPulse)",
         "**Partnerships Manager** (dédié aux relations banques/fonds)",
         "**Marketing & Contenu** (thought leadership, études de cas, SEO)",
-        "**Analyste ESG** (pour le support clients Package Golden)"
+        "**Analyste ESG** (pour le support clients du plan PRO)"
       ],
       "cta": "Si vous êtes intéressé par l'un de ces domaines, n'hésitez pas à nous contacter avec une brève présentation - nous sommes toujours heureux de nous connecter avec des personnes alignées sur notre mission."
     },
@@ -184,7 +188,7 @@
     },
     "footer": {
       "eoe": "**GreenPulse.AI** est un employeur offrant l'égalité des chances. Nous célébrons la diversité et nous nous engageons à créer un environnement inclusif pour tous les membres de l'équipe.",
-      "updated": "Page mise à jour le : 8 décembre 2024"
+      "updated": "Page mise à jour le : octobre 2026"
     }
   }
 }

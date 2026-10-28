@@ -14,7 +14,7 @@
     "valueProps": {
       "assessment": {
         "title": "Évaluation ESG gratuite par IA",
-        "description": "Obtenez votre score de préparation ESG en quelques minutes avec notre assistant IA GP.A — sans inscription."
+        "description": "Obtenez votre score de préparation ESG en quelques minutes avec notre assistant IA GP.A, gratuitement."
       },
       "roadmap": {
         "title": "Feuille de route crédit vert",
@@ -22,15 +22,15 @@
       },
       "reporting": {
         "title": "Reporting ESG automatisé",
-        "description": "Générez des rapports conformes GRI, SFDR et CSRD automatiquement à partir de vos données."
+        "description": "Préparez des rapports alignés sur GRI et CSRD à partir de vos données. GP.A structure les données pour vous."
       }
     },
     "cta": {
       "start": "Commencer gratuitement avec GP.A",
       "promo": {
         "label": "Code promo",
-        "applied": "Code EARTHDAY2026 appliqué — 1 mois Pro gratuit au lancement !",
-        "default": "Entrez le code EARTHDAY2026 pour 1 mois Pro gratuit au lancement"
+        "applied": "Code EARTHDAY2026 appliqué — 1 mois PRO gratuit au lancement !",
+        "default": "Entrez le code EARTHDAY2026 pour 1 mois PRO gratuit au lancement"
       }
     },
     "signup": {
@@ -51,7 +51,7 @@
     "welcome": {
       "justJoined": "Bienvenue !",
       "back": "Bon retour !",
-      "promoApplied": "🎉 Code EARTHDAY2026 appliqué. Vous bénéficiez d'un mois d'essai gratuit sur la version Pro à venir.",
+      "promoApplied": "🎉 Code EARTHDAY2026 appliqué. Vous bénéficiez d'un mois d'essai gratuit sur la version PRO à venir.",
       "installHint": "Installez l'application pour un accès rapide et le mode hors ligne.",
       "installDescription": "Ajoutez GreenPulse.AI à votre écran d'accueil pour la meilleure expérience.",
       "installButton": "Installer l'application",

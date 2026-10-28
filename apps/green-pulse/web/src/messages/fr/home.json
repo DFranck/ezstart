@@ -1,333 +1,484 @@
 {
   "home": {
     "hero": {
-      "title": "GreenPulse.AI - Conformité ESG Propulsée par l'IA pour les PME d'Asie du Sud-Est",
-      "subtitle": "Un agent durable pour 1 million d'entreprises",
-      "typewriterText": "Transformez la croissance durable en opportunités de finance verte bancables",
-      "description": "Réduisez les coûts de 30% • Débloquez les prêts verts • Respectez les normes d'exportation • Croissance durable • Obtenez des KPI pour le marketing vert, SANS écoblanchiment",
-      "cta": "Commencer Gratuitement",
-      "ctaSecondary": "Explorer les Solutions d'Intégration",
-      "emailPlaceholder": "Votre adresse e-mail",
-      "notifyMe": "Prévenez-moi",
-      "getStarted": "Commencer Gratuitement"
+      "title": "GreenPulse.AI - Accélérer la croissance bas carbone grâce à des données fiables, à l'IA et à des solutions pratiques",
+      "tagline": "La première plateforme de renforcement des capacités propulsée par l'IA en ASEAN",
+      "subtitle": "Accélérer la croissance bas carbone grâce à des données fiables, à l'IA et à des solutions pratiques",
+      "description": "GreenPulse.AI aide les entreprises à renforcer leurs capacités, à améliorer leur performance environnementale et à transformer leurs ambitions climatiques en actions mesurables. Une progression mesurable, sans greenwashing.",
+      "ctaPrimary": "Parlons de vos défis",
+      "ctaSecondary": "Essayer GP.A gratuitement"
     },
-    "value": {
-      "intro": "Avec GreenPulse.AI, pas besoin d'être un expert environnemental ou d'en embaucher un. Grâce à une simple conversation avec votre assistant personnalisé, vous recevrez des conseils étape par étape pour :",
-      "points": {
-        "chat": "Discuter de votre situation actuelle et trouver des solutions simples",
-        "measure": "Mesurer votre empreinte carbone",
-        "improve": "Améliorer l'efficacité et économiser de l'argent",
-        "roadmap": "Élaborer des feuilles de route de durabilité avec des KPI",
-        "qualify": "Vous qualifier pour des prêts verts et des opportunités d'exportation"
-      }
-    },
-    "example": {
-      "title": "Exemple d'interaction",
-      "user": "Utilisateur :",
-      "userMessage": "Je gère 4 cliniques esthétiques à HCMC avec 15 employés et 10 machines. Je souhaite réduire mes factures d'électricité et attirer des clients exigeants en produits de qualité et amoureux de la nature. Pouvez-vous m'aider ?",
-      "ai": "GreenPulse.AI :",
-      "aiMessage": "Bonjour Mme Hang, oui je peux certainement vous aider dans vos objectifs de croissance durable. Passons en revue vos dépenses actuelles et vos inventaires de matériel. Pouvez-vous préciser si vous souhaitez faire du marketing avec vos actions ou simplement rester discret ? Envisagez-vous également une levée de fonds via la finance verte dans un futur proche ?"
-    },
-    "packages": {
-      "title": "Nos Offres",
-      "contactUs": "Nous contacter",
-      "free": {
-        "title": "Conscience",
-        "subtitle": "Pour la prise de conscience & les PDG curieux",
-        "price": "0$",
-        "period": "/à vie",
-        "description": "Commencez votre parcours de durabilité avec l'aide de l'IA. Découvrez des actions simples pour réduire les coûts, comprendre votre empreinte carbone et explorer de nouvelles opportunités. Aucun engagement requis.",
-        "features": {
-          "chat": "Assistant IA ESG conversationnel (Agent GreenPulse)",
-          "footprint": "Prise de conscience de l'empreinte carbone simple",
-          "wins": "Identification de gains rapides (énergie, déchets, coûts)",
-          "tips": "Conseils éducatifs sur la durabilité",
-          "marketing": "Explorer les opportunités de marketing vert",
-          "instant": "⚡ Accès instantané—aucune carte de crédit nécessaire"
-        },
-        "cta": "Commencer l'exploration gratuite",
-        "note": "💡 Parfait pour des actions rapides & simples pour une croissance consciente"
-      },
-      "premium": {
-        "title": "Package Premium",
-        "subtitle": "Pour une croissance stimulée par l'ESG",
-        "badge": "Bientôt Disponible",
-        "description": "Je veux utiliser des actions durables et vertes pour stimuler mon activité grâce à un marketing vert sur mesure, éviter le greenwashing et avoir des KPI solides pour mes clients.",
-        "features": {
-          "chat": "Plateforme de chat IA",
-          "tools": "Accès aux outils ESG avec tableau de bord",
-          "import": "Importation de données (docs, voix, images)",
-          "analysis": "Analyse de données et diagrammes",
-          "plans": "Plans d'action sur mesure"
-        }
-      },
-      "golden": {
-        "title": "Package Golden",
-        "subtitle": "Pour la conformité ESG officielle",
-        "badge": "Bientôt Disponible",
-        "description": "J'ai besoin d'un rapport/dossier/audit ESG solide et officiel pour la certification ISO / l'exportation internationale / l'accès à la finance verte.",
-        "features": {
-          "all": "Toutes les fonctionnalités Premium",
-          "support": "Support sur mesure pour normes officielles/internationales",
-          "replace": "Remplace ou soutient le responsable ESG"
-        }
-      }
-    },
-    "cta": {
-      "title": "Prêt à transformer votre parcours de durabilité ?",
-      "description": "Commencez à utiliser GreenPulse.AI dès aujourd'hui et libérez votre potentiel vert.",
-      "joinWaitlist": "Rejoignez la liste d'attente",
-      "getStarted": "Commencer",
-      "thankYou": "Merci ! Vous serez notifié dès le lancement de GreenPulse.AI",
-      "loading": "Ajout à la liste d'attente...",
-      "alreadyRegistered": "Cet email est déjà enregistré !",
-      "error": "Une erreur est survenue. Veuillez réessayer."
-    },
-    "subtitle": "Votre nouvel agent vert",
     "heroFeatures": [
-      "Extraction intelligente de données",
-      "Notation ESG instantanée",
-      "Rapports de conformité automatisés",
-      "Préparation finance verte",
-      "Stratégie de croissance sur mesure"
+      "Données fiables",
+      "IA agentique",
+      "Solutions prêtes à intégrer",
+      "Plans d'action climat & MRV",
+      "Préparation à l'export & à la finance verte"
     ],
-    "challenge": {
-      "title": "Le monde fait face à des <strong>conditions climatiques extrêmes</strong> en raison du changement climatique. Les entreprises sont poussées à aller au-delà du Business as Usual et à viser une croissance durable.",
-      "sealTitle": "Les défis de la crise climatique en Asie du Sud-Est",
-      "challenges": [
-        "Ressources limitées pour établir des cadres ESG robustes et démontrer un impact climatique réel",
-        "Manque de documentation structurée pour répondre aux exigences ESG des investisseurs pour la levée de fonds",
-        "Lacunes en expertise pour naviguer les normes internationales (GRI, SFDR, CSRD) requises par les investisseurs d'impact"
-      ]
-    },
-    "transformation": {
-      "title": "GreenPulse.AI transforme facilement des données complexes en stratégies d'impact",
-      "steps": {
-        "step1": {
-          "badge": "1",
-          "title": "Discutez & téléchargez"
-        },
-        "step2": {
-          "badge": "2",
-          "title": "Laissez GPA travailler pour vous"
-        },
-        "step3": {
-          "badge": "3",
-          "title": "Obtenez votre stratégie & KPIs"
-        }
-      },
-      "features": [
+    "challenges": {
+      "title": "Les défis que nous adressons",
+      "intro": "La transition bas carbone est rarement freinée par un manque de technologies vertes. Elle l'est par l'accès, les données, les compétences, le financement et la preuve des résultats.",
+      "responseLabel": "Réponse GP.A :",
+      "items": [
         {
-          "title": "Extraction et centralisation puissantes des données",
-          "description": "Voix, photo et intégration transparente avec les logiciels existants (ERP, CRM, Excel) pour l'extraction automatisée des données et le pré-remplissage."
+          "icon": "lucide:ShieldAlert",
+          "title": "Greenwashing et allégations invérifiables",
+          "problem": "Des déclarations environnementales impossibles à vérifier érodent la confiance des acheteurs, des banques et des investisseurs.",
+          "response": "Données fiables, transparence et mesure, reporting et vérification (MRV)."
         },
         {
-          "title": "Analyse ESG instantanée",
-          "description": "Évaluation et notation en temps réel des projets et portefeuilles avec des critères ESG personnalisables et des recommandations instantanées."
+          "icon": "lucide:Database",
+          "title": "Données fragmentées et incomplètes",
+          "problem": "Les données d'énergie, de production, de chaîne d'approvisionnement et de déchets se trouvent dans des factures, des tableurs et la tête des collaborateurs.",
+          "response": "GP.A transforme conversations, documents, photos et voix en données structurées et pré-remplit vos outils de reporting."
         },
         {
-          "title": "Stratégie et rapports sur mesure",
-          "description": "Agent IA conversationnel pour des recommandations personnalisées et des rapports conformes (GRI, SFDR) adaptés à vos besoins."
-        }
-      ]
-    },
-    "problem": {
-      "title": "La Conformité ESG ne Devrait pas Freiner Votre Croissance",
-      "subtitle": "Vous n'êtes pas seul. <strong>98% des PME en Asie du Sud-Est</strong> n'ont aucun accès aux connaissances ESG, tandis que les acheteurs mondiaux exigent des preuves de durabilité d'ici 2025.",
-      "problems": [
-        {
-          "title": "⏰ Ressources Limitées",
-          "description": "Votre équipe manque de temps et d'expertise pour naviguer les cadres <strong>GRI, SFDR, CSRD</strong> tout en gérant les opérations quotidiennes."
+          "icon": "lucide:Scale",
+          "title": "Une réglementation difficile à appliquer",
+          "problem": "CBAM, CSRD, obligations de reporting et obligations REP arrivent plus vite que les entreprises ne peuvent les interpréter.",
+          "response": "Accompagnement à la conformité et mise en œuvre de la REP, alignés sur les référentiels qu'utilisent vos acheteurs et vos régulateurs."
         },
         {
-          "title": "💰 Barrières de Financement",
-          "description": "Les banques exigent une documentation ESG que vous n'avez pas. Sans preuve de conformité, <strong>les prêts verts restent hors de portée</strong>."
+          "icon": "lucide:Plug",
+          "title": "Accès limité à la technologie pour les PME",
+          "problem": "Les outils de niveau entreprise sont trop coûteux, trop complexes ou trop difficiles à intégrer.",
+          "response": "Des solutions prêtes à intégrer, qui se branchent sur vos opérations et vos outils existants, uniquement quand vous en avez besoin."
         },
         {
-          "title": "🌍 Préparation à l'Export",
-          "description": "Les réglementations UE (<strong>CSRD</strong>) exigent désormais la durabilité de la chaîne d'approvisionnement. Non-conformité = opportunités d'exportation perdues."
+          "icon": "lucide:GraduationCap",
+          "title": "Manque de compétences techniques et stratégiques",
+          "problem": "Les équipes manquent de temps et d'expertise pour construire une stratégie climat tout en gérant les opérations quotidiennes.",
+          "response": "Renforcement des capacités des entreprises : accompagnement pas à pas, plans d'action et apprentissage entre pairs."
+        },
+        {
+          "icon": "lucide:Landmark",
+          "title": "Financer la transition",
+          "problem": "Les banques et les investisseurs demandent une documentation verte que la plupart des PME n'ont pas.",
+          "response": "Préparation à la finance verte : score d'éligibilité, écarts, feuille de route et données climat de qualité investisseur."
+        },
+        {
+          "icon": "lucide:Users",
+          "title": "Résistance au changement",
+          "problem": "Les équipes et les dirigeants hésitent à changer leurs habitudes sans progrès visibles à court terme.",
+          "response": "Changement de comportement et engagement de l'entreprise grâce à de courtes étapes, chacune affichée sur un cadran de progression en direct."
+        },
+        {
+          "icon": "lucide:Rocket",
+          "title": "Du pilote au déploiement",
+          "problem": "De bons projets pilotes s'essoufflent avant de passer à l'échelle sur plusieurs sites, produits ou fournisseurs.",
+          "response": "Accompagnement à la mise en œuvre pour étendre et amplifier ce qui fonctionne."
         }
       ]
     },
-    "useCases": {
-      "title": "Comment GreenPulse.AI peut aider plus de 900K PME ?",
-      "cases": [
+    "whyNow": {
+      "title": "Pourquoi maintenant : quatre forces convergent sur l'économie vietnamienne",
+      "subtitle": "Certaines sont immédiates et contraignantes. D'autres accumulent la pression avec le temps. GP.A répond à chacune, en commençant là où le besoin est le plus urgent.",
+      "changingLabel": "Ce qui change :",
+      "impactLabel": "Impact sur les entreprises :",
+      "responseLabel": "Réponse GP.A :",
+      "forces": [
         {
-          "icon": "🏭",
-          "title": "PME manufacturière : réduction des coûts grâce à l'efficacité énergétique",
-          "challenge": "Coûts énergétiques élevés, manque de documentation ESG pour les acheteurs internationaux",
-          "solution": "Calcul de l'empreinte carbone, identification d'opportunités d'économies d'énergie (panneaux solaires, machines efficaces), évaluation d'éligibilité aux prêts verts",
-          "result": "Réduction des coûts énergétiques de 20-35% selon les investissements initiaux, amélioration de l'accès au financement vert, fourniture de rapports de conformité auditables pour les acheteurs internationaux",
-          "badges": ["Manufacturing", "Efficacité Énergétique"]
+          "tag": "Immédiat",
+          "title": "CBAM & CSRD de l'UE",
+          "changing": "La taxe carbone aux frontières de l'UE et les règles de transparence sur la chaîne d'approvisionnement sont en vigueur pour le fer, l'acier, l'aluminium, le ciment, les engrais et plus encore.",
+          "impact": "Les exportateurs vietnamiens doivent fournir des données d'émissions vérifiées, sous peine de perdre des contrats et l'accès au marché de l'UE.",
+          "response": "Évaluation de la préparation à l'export et données structurées pour votre logiciel de reporting (ESG, GRI, alignées CSRD)."
         },
         {
-          "icon": "🍽️",
-          "title": "Restaurant : réduire les coûts tout en construisant une image verte",
-          "challenge": "Factures d'électricité élevées, difficulté à attirer les clients éco-responsables sans stratégie de durabilité claire",
-          "solution": "Identification de gains rapides (éclairage LED, isolation du bâtiment, évaluation du potentiel solaire), accompagnement vers des partenariats avec fournisseurs locaux, optimisation de la gestion des déchets, élimination du plastique à usage unique",
-          "result": "Réduction des coûts énergétiques de 25-40% selon les mesures mises en œuvre, réduction des déchets de 40-60%, positionnement de marque amélioré pour l'éco-tourisme et les consommateurs conscients, reconnaissance potentielle 'Certifié Vert'",
-          "badges": [
-            "Producteur-au-consommateur",
-            "Marketing Vert",
-            "Cuisine zéro-déchet",
-            "Gastronomie durable"
+          "tag": "Court terme",
+          "title": "Cascade de reporting en ASEAN",
+          "changing": "La bourse carbone nationale du Vietnam a démarré le 29 juin 2026 (HNX). Environ 150 installations de l'énergie, de l'acier et du ciment détiennent désormais des quotas échangeables.",
+          "impact": "Ces entreprises doivent produire un rapport ESG et pressent leurs fournisseurs PME de leur fournir des données d'émissions que ceux-ci n'ont jamais suivies.",
+          "response": "Collecte de données guidée pour que les fournisseurs puissent répondre aux demandes de leurs acheteurs avec des chiffres crédibles."
+        },
+        {
+          "tag": "Croissante",
+          "title": "Pression du crédit vert",
+          "changing": "Les lignes directrices de la SBV sur le crédit vert s'élargissent.",
+          "impact": "La documentation verte devient de plus en plus une condition d'accès au financement, et non un simple atout, même en dehors des secteurs couverts par l'ETS.",
+          "response": "Score d'éligibilité aux prêts verts, écarts, feuille de route et délai estimé de préparation."
+        },
+        {
+          "tag": "Moyen terme",
+          "title": "Déploiement complet de l'ETS en 2029",
+          "changing": "La phase pilote (2025-2028) s'étend par étapes vers un système d'échange avec mise aux enchères à partir de 2029, selon la feuille de route du gouvernement lui-même.",
+          "impact": "Des secteurs et des tailles d'entreprise non couverts aujourd'hui entreront dans le périmètre, avec peu de préavis.",
+          "response": "Les entreprises qui commencent dès maintenant à structurer leurs données seront déjà prêtes quand le périmètre s'élargira."
+        }
+      ]
+    },
+    "solutions": {
+      "title": "Nos solutions",
+      "intro": "Quatre familles de capacités, délivrées par un seul agent et branchées sur les outils que vous utilisez déjà.",
+      "note": "Les outils MRV suivent, structurent et rapportent vos résultats. La vérification indépendante reste le rôle du vérificateur accrédité ou de l'organisme certificateur.",
+      "families": [
+        {
+          "icon": "lucide:Gauge",
+          "title": "Stratégie climat & MRV",
+          "items": [
+            "Évaluation de l'empreinte carbone, Scopes 1, 2 et 3",
+            "Plans d'action climat et feuilles de route de croissance bas carbone",
+            "Décarbonation industrielle et atténuation des risques climatiques",
+            "Mesure, reporting et vérification (MRV) et suivi environnemental"
           ]
         },
         {
-          "icon": "🌾",
-          "title": "Agribusiness : agriculture régénérative pour l'accès au financement et à l'export",
-          "challenge": "Acheteurs UE / USA et même chinois exigeant une documentation de durabilité conforme et solide",
-          "solution": "Accompagnement sur la checklist de conformité UE, génération de rapports ESG prêts à l'export, analyse des écarts et plan d'action",
-          "result": "Audits réussis auprès d'acheteurs internationaux, maintien ou expansion des contrats d'exportation, meilleur positionnement pour le financement par obligations vertes, avantage concurrentiel dans les chaînes d'approvisionnement axées sur la santé et la durabilité",
-          "badges": [
-            "Agriculture régénérative",
-            "Conformité Export",
-            "Finance Verte",
-            "Agriculture résiliente au climat"
+          "icon": "lucide:Cpu",
+          "title": "IA, données & accès à la technologie",
+          "items": [
+            "IA agentique qui extrait, structure et pré-remplit vos données à partir de conversations, documents, photos et voix",
+            "Données fiables : contrôles qualité et traçabilité",
+            "Solutions prêtes à intégrer, connectées à votre ERP, votre CRM et vos tableurs",
+            "Outils spécialisés de certification, de reporting ou de traçabilité, branchés uniquement quand votre objectif l'exige"
           ]
+        },
+        {
+          "icon": "lucide:GraduationCap",
+          "title": "Renforcement des capacités des entreprises & préparation à l'export",
+          "items": [
+            "Plans d'action pas à pas et renforcement des capacités de vos équipes",
+            "Préparation à l'export, avant l'expédition et non après",
+            "Accompagnement à la certification : écolabels (dont Vietnam Green Label / VECC-MONRE), ISO et normes d'export. Nous structurons votre dossier de preuves ; l'autorité de certification conserve son rôle",
+            "Analyse des écarts et stratégie pour combler ceux qui restent"
+          ]
+        },
+        {
+          "icon": "lucide:Recycle",
+          "title": "Économie circulaire, conformité & finance verte",
+          "items": [
+            "Mise en œuvre et reporting de la REP",
+            "Économie circulaire dès la conception et transparence sur le cycle de vie des produits",
+            "Préparation à la finance verte et données climat de qualité investisseur",
+            "Accompagnement pour étendre et amplifier, du pilote au déploiement"
+          ]
+        }
+      ]
+    },
+    "howItWorks": {
+      "title": "Comment fonctionne GP.A",
+      "subtitle": "De l'évaluation à l'impact : guider, connecter et adapter, pour une croissance bas carbone à la fois durable et inclusive.",
+      "steps": [
+        {
+          "title": "Évaluer & identifier les objectifs",
+          "items": [
+            "Le contexte, les besoins et les contraintes de votre entreprise",
+            "Des objectifs clairs et mesurables"
+          ]
+        },
+        {
+          "title": "Construire la stratégie & les capacités",
+          "items": ["Un plan d'action pas à pas", "Renforcement des capacités de vos équipes"]
+        },
+        {
+          "title": "Structurer & pré-remplir les données",
+          "items": [
+            "Les conversations deviennent des données structurées",
+            "L'extraction de données pré-remplit vos logiciels connectés"
+          ]
+        },
+        {
+          "title": "Analyser les résultats, s'adapter & combler les écarts",
+          "items": ["Lire les résultats et les progrès", "Identifier les écarts et ajuster le plan"]
         }
       ],
-      "disclaimer": "*Les résultats varient selon les conditions initiales, le secteur et les mesures mises en œuvre. GreenPulse fournit des stratégies et des outils solides ; les résultats réels dépendent des actions et des investissements du client."
+      "repeat": "Répéter et s'améliorer. Des décisions fondées sur les données, à mesure que les réglementations, les opportunités et les marchés évoluent.",
+      "tools": {
+        "title": "Branchez des outils externes selon vos besoins",
+        "intro": "Connectez GP.A aux bons logiciels, à la demande.",
+        "items": [
+          {
+            "title": "Certification",
+            "example": "p. ex. ISO"
+          },
+          {
+            "title": "Reporting",
+            "example": "p. ex. SaaS ESG"
+          },
+          {
+            "title": "Conformité & traçabilité",
+            "example": "p. ex. NDAChain"
+          },
+          {
+            "title": "Scoring & suivi des KPI",
+            "example": "p. ex. SaaS spécialisé"
+          },
+          {
+            "title": "Autres outils informatiques spécialisés",
+            "example": "selon les besoins"
+          }
+        ]
+      },
+      "journey": {
+        "title": "Dès le premier jour",
+        "steps": [
+          {
+            "title": "Présentez votre entreprise",
+            "description": "Aucune supposition : GP.A pose les questions, vous répondez, et votre profil est créé."
+          },
+          {
+            "title": "Définissez votre objectif",
+            "description": "Augmenter le chiffre d'affaires, obtenir une certification (ISO, export, ESG), finaliser un KYC/AML ou sécuriser un financement. C'est vous qui choisissez."
+          },
+          {
+            "title": "Découpez-le en étapes",
+            "description": "Des jalons à court, moyen et long terme, chacun affiché sur un cadran de progression en direct."
+          },
+          {
+            "title": "Un seul outil, modulaire selon les besoins",
+            "description": "Branchez un système de conformité, un outil d'export ou un portail de prêteur, uniquement quand votre objectif l'exige."
+          },
+          {
+            "title": "Une progression qui s'accumule",
+            "description": "Chaque étape franchie vous rapproche de votre objectif, de manière durable."
+          }
+        ]
+      }
+    },
+    "useCases": {
+      "title": "Applications & impact",
+      "labels": {
+        "challenge": "Défi",
+        "solution": "Solution",
+        "result": "Résultat visé"
+      },
+      "cases": [
+        {
+          "icon": "lucide:Factory",
+          "title": "Fabricant exportant vers l'UE et les États-Unis",
+          "challenge": "Hausse des prix de l'énergie et données d'émissions manquantes, alors que les acheteurs de l'UE et des États-Unis durcissent leurs exigences.",
+          "solution": "GP.A définit les objectifs avec l'entreprise, structure les données manquantes, prépare le reporting des Scopes 1, 2 et 3 et identifie les réductions de carbone au niveau produit.",
+          "result": "Objectifs estimés : +10 % de volume d'export vers l'UE et les États-Unis, +15 % d'économies d'énergie, +40 % de lignes de produits éligibles à l'export.",
+          "tags": ["Industrie manufacturière", "Préparation à l'export", "Scopes 1, 2, 3"]
+        },
+        {
+          "icon": "lucide:Wheat",
+          "title": "Agro-industrie : accès à l'export et finance verte",
+          "challenge": "Les acheteurs de l'UE, des États-Unis et de Chine exigent des preuves de durabilité documentées.",
+          "solution": "Accompagnement sur la liste de contrôle de conformité de l'UE, reporting prêt pour l'export, analyse des écarts et plan d'action.",
+          "result": "Objectifs : réussir les audits des acheteurs, conserver ou étendre les contrats d'export et améliorer le positionnement pour le financement vert.",
+          "tags": ["Agriculture", "Préparation à l'export", "Finance verte"]
+        },
+        {
+          "icon": "lucide:Landmark",
+          "title": "Banque ou fonds : préparer vos clients à la finance verte",
+          "challenge": "Les clients n'ont pas les données climat nécessaires pour être éligibles aux prêts verts.",
+          "solution": "Un GP.A en marque blanche donne à chaque client un score d'éligibilité, une liste d'écarts et une feuille de route.",
+          "result": "Les clients se présentent avec des données climat structurées, de qualité investisseur.",
+          "tags": ["Marque blanche", "Préparation à la finance verte"]
+        }
+      ],
+      "disclaimer": "Objectifs estimés, à valider pendant la phase pilote. Les résultats réels dépendent de la situation de départ, du secteur et des mesures mises en œuvre par l'entreprise."
     },
     "competitive": {
-      "title": "Pourquoi GreenPulse Surpasse les Logiciels ESG Génériques & les Chatbots IA",
-      "cta": "Voir GreenPulse en Action",
-      "ctaSubtitle": "Conçu pour les PME d'Asie du Sud-Est qui ont besoin de résultats, pas de complexité.",
+      "title": "Pourquoi GP.A plutôt que les logiciels ESG génériques ou les chatbots IA",
+      "cta": "Voir GP.A en action",
+      "ctaSubtitle": "Conçu pour les entreprises qui ont besoin de résultats concrets, pas de complexité.",
       "headers": {
         "feature": "Fonctionnalité",
         "greenpulse": "GreenPulse.AI",
-        "software": "Logiciel ESG",
-        "ai": "Plateformes IA"
+        "software": "Logiciels ESG",
+        "ai": "Plateformes IA génériques"
       },
       "rows": [
         {
-          "feature": "Type d'Interface",
-          "greenpulse": "✅ Hybride (Tableau de bord + IA conversationnelle)",
-          "software": "❌ Interface de projet statique",
-          "ai": "❌ Conversationnel uniquement"
+          "feature": "Interface",
+          "greenpulse": "Tableau de bord et agent conversationnel en un seul outil",
+          "software": "Interface de projet statique",
+          "ai": "Conversationnel uniquement"
         },
         {
-          "feature": "Expertise ESG",
-          "greenpulse": "✅ Cadres internationaux natifs (GRI, SFDR, SDG)",
-          "software": "✅ Listes de contrôle de conformité manuelles",
-          "ai": "❌ Générique, risque d'hallucination"
+          "feature": "Expertise",
+          "greenpulse": "Construit autour des référentiels internationaux et de la réglementation vietnamienne (CBAM, CSRD, GRI, ISO, VECC-MONRE)",
+          "software": "Listes de contrôle de conformité manuelles",
+          "ai": "Réponses génériques, risque d'hallucination"
         },
         {
-          "feature": "Collecte de Données",
-          "greenpulse": "✅ Extraction IA voix, photo, doc tout-en-un",
-          "software": "❌ Saisie manuelle ou semi-automatisée",
-          "ai": "✅ Si abonné à des plateformes séparées"
+          "feature": "Collecte de données",
+          "greenpulse": "Extraction de la voix, des photos et des documents au même endroit",
+          "software": "Saisie manuelle ou semi-automatisée",
+          "ai": "Uniquement avec des plateformes séparées"
         },
         {
-          "feature": "Suivi de Projet",
-          "greenpulse": "✅ Mise à jour auto + tableau de bord intelligent",
-          "software": "✅ Gestion de projet mais mises à jour manuelles",
-          "ai": "❌ Aucune visibilité"
+          "feature": "Suivi des progrès",
+          "greenpulse": "Mises à jour automatiques et cadrans de progression en direct",
+          "software": "Gestion de projet avec mises à jour manuelles",
+          "ai": "Aucune visibilité"
         },
         {
-          "feature": "Intégration ERP/CRM",
-          "greenpulse": "✅ Synchronisation en un clic",
-          "software": "❌ Silos autonomes",
-          "ai": "✅ Limitée, lourd en développement"
+          "feature": "Intégration",
+          "greenpulse": "Connexion prête à intégrer à votre ERP, votre CRM et vos tableurs, plus des outils spécialisés à la demande",
+          "software": "Silos autonomes",
+          "ai": "Limitée, lourde en développement"
         }
       ]
     },
-    "credibility": {
-      "title": "Reconnu par les Leaders de l'Industrie et Soutenu par l'Expertise",
-      "cards": [
-        {
-          "icon": "🎓",
-          "title": "Partenariat de Recherche Académique",
-          "description": "Collaboration avec un institut de recherche universitaire leader en Asie du Sud-Est pour l'intelligence de marché, l'analyse des cadres réglementaires et la validation des meilleures pratiques ESG."
-        },
-        {
-          "icon": "💼",
-          "title": "Réseau d'Investisseurs d'Impact",
-          "description": "Soutenu par des investisseurs d'impact gérant plus de 500M$ d'actifs en Asie du Sud-Est, fournissant des conseils stratégiques sur le déploiement de la finance verte et les exigences ESG des portefeuilles."
-        },
-        {
-          "icon": "🏦",
-          "title": "Perspectives Bancaires Régionales",
-          "description": "Collaboration avec des spécialistes de la finance verte de grandes banques d'Asie du Sud-Est pour garantir que notre plateforme répond aux exigences réelles de prêt et aux normes réglementaires."
-        },
-        {
-          "icon": "⚙️",
-          "title": "Technologie ESG de Niveau Entreprise",
-          "description": "Propulsé par des solutions SaaS ESG éprouvées et des frameworks IA avancés. Nous intégrons les meilleurs outils de conformité directement dans une interface conversationnelle accessible—apportant des logiciels d'entreprise à 50K$+ à chaque PME."
-        }
-      ],
-      "teamNote": "Notre équipe fondatrice combine : 12+ ans en stratégie de durabilité et conseil ESG, une expertise approfondie en ingénierie IA/ML, et une expérience directe du fossé d'accessibilité auquel sont confrontées les PME en Asie du Sud-Est."
+    "offers": {
+      "title": "Offres",
+      "subtitle": "Plusieurs voies. Un impact plus grand. Un modèle évolutif pour accélérer la croissance bas carbone en ASEAN.",
+      "openTo": "Ouvert à",
+      "whiteLabel": {
+        "title": "Marque blanche + Licence",
+        "description": "Proposez GP.A sous votre propre marque à vos clients, membres ou fournisseurs.",
+        "features": [
+          "Votre image de marque : logo, couleurs, identité visuelle et interface personnalisée",
+          "Fonctionnalités sur mesure, conçues selon vos standards",
+          "Propriété des données",
+          "Licence de la plateforme"
+        ],
+        "audience": ["Banques", "Grandes entreprises", "Fonds", "Cabinets de conseil"],
+        "cta": "Discuter d'un partenariat en marque blanche"
+      },
+      "otherOptions": "Autres options",
+      "direct": {
+        "title": "Abonnement direct",
+        "description": "Les entreprises utilisent GP.A directement, avec trois formules.",
+        "plans": [
+          {
+            "name": "Awareness",
+            "status": "Gratuit",
+            "description": "Agent conversationnel GP.A, sensibilisation simple à l'empreinte carbone et gains rapides sur l'énergie, les déchets et les coûts. Compte gratuit, sans carte bancaire."
+          },
+          {
+            "name": "Premium",
+            "status": "Bientôt disponible",
+            "description": "Chat IA, outils ESG avec tableau de bord, import de données (documents, voix, images), analyses et graphiques, plans d'action sur mesure."
+          },
+          {
+            "name": "PRO",
+            "status": "Bientôt disponible",
+            "description": "Toutes les fonctionnalités Premium, plus un accompagnement sur mesure pour les normes officielles et internationales : certification, export et finance verte."
+          }
+        ],
+        "audience": ["Entreprises d'ASEAN", "Dirigeants de PME"],
+        "cta": "Essayer GP.A gratuitement"
+      },
+      "ecosystem": {
+        "title": "Intégrations d'écosystème",
+        "description": "Deux façons de brancher GP.A à d'autres plateformes.",
+        "items": [
+          "License out : licencier l'API de GP.A à d'autres plateformes",
+          "Route in : recommandation de partenaires, acheminement des données clients vers des partenaires de conformité"
+        ],
+        "audience": ["Plateformes SaaS", "Agrégateurs régionaux"],
+        "cta": "Parlez-nous des intégrations"
+      }
     },
     "partnership": {
-      "title": "Opportunités de Partenariat",
-      "subtitle": "Solutions en marque blanche & API pour votre entreprise",
-      "description": "",
+      "title": "Partenariats",
+      "subtitle": "Banques, fonds, grandes entreprises, cabinets de conseil et plateformes",
       "values": [
         {
-          "icon": "🎯",
-          "title": "Optimisez la Due Diligence de Votre Portefeuille",
+          "title": "Banques & fonds",
           "items": [
-            "Analyse ESG multi-critères (SDG, GRI, SFDR) avec notation de risque instantanée",
-            "Filtrage automatisé des projets économise 40% du temps de due diligence",
-            "Tableau de bord de surveillance de la santé ESG du portefeuille en temps réel"
+            "Préparation à la finance verte pour vos clients et vos sociétés en portefeuille",
+            "Scores d'éligibilité, écarts et feuilles de route alignés sur les lignes directrices du crédit vert",
+            "Données climat de qualité investisseur",
+            "Module complémentaire dans une phase ultérieure : intelligence des risques du portefeuille avec statut de conformité, exposition à l'export et risque de marché, client par client"
           ]
         },
         {
-          "icon": "📊",
-          "title": "Solutions ESG en Marque Blanche",
+          "title": "Grandes entreprises & chaînes d'approvisionnement",
           "items": [
-            "Plateforme personnalisée pour vos clients PME (ex: \"Green [VotreBanque] propulsé par GreenPulse\")",
-            "Intégration transparente avec vos flux de demande de prêt",
-            "Évaluation d'éligibilité aux prêts verts alignée sur les exigences de la banque centrale"
+            "Collecte de données guidée pour vos fournisseurs PME (Scope 3)",
+            "Préparation à l'export des fournisseurs, avant l'expédition et non après",
+            "Prochaine étape : vos propres standards, vérifiés avant que la demande ne vous parvienne"
           ]
         },
         {
-          "icon": "🚀",
-          "title": "Support d'Incubation de Projets",
+          "title": "Cabinets de conseil & plateformes",
           "items": [
-            "Agent IA pour formalisation des livrables et développement de feuilles de route ESG",
-            "Suivi automatisé de la conformité pour vos sociétés en portefeuille",
-            "Rapports d'impact standardisés pour communications LP"
+            "GP.A en marque blanche sous votre propre marque",
+            "Licence d'API pour votre propre plateforme",
+            "Acheminement de recommandations vers des partenaires de conformité"
           ]
         }
       ],
-      "cta": "Planifier une Discussion Partenariat",
-      "ctaEmail": "partnerships@greenpulse.ai?subject=Demande de Partenariat",
-      "note": "Pilotes actuels: Banques leaders d'Asie du Sud-Est, fonds d'impact internationaux, accélérateurs climate tech"
+      "cta": "Planifier une discussion de partenariat"
     },
     "press": {
       "title": "Ils parlent de nous",
       "vietstock": {
         "publication": "VietStock",
         "date": "Novembre 2025",
-        "title": "\"Écoblanchiment\" sous l'angle d'un consultant ESG international",
-        "quote": "Récemment, nous testons une application appelée GreenPulse.AI. Il s'agit d'un assistant d'intelligence artificielle (IA) qui aide les PME au Vietnam et en Asie du Sud-Est à pratiquer facilement la durabilité. Les utilisateurs seront guidés étape par étape pour résoudre des problèmes tels que la réduction des coûts d'électricité, le respect des exigences d'exportation, avec un tableau de bord pour suivre les progrès. La plateforme intègre également des outils de reporting ESG automatique selon les normes internationales. L'objectif principal est d'aider les entreprises à éviter le piège de 'l'écoblanchiment', à démontrer des améliorations mesurables et à élargir l'accès aux investisseurs, aux clients et aux marchés internationaux."
+        "title": "Le « greenwashing » vu par un consultant ESG international",
+        "quote": "Récemment, nous testons une application appelée GreenPulse.AI. Il s'agit d'un assistant d'intelligence artificielle (IA) qui aide les PME au Vietnam et en Asie du Sud-Est à pratiquer facilement la durabilité. Les utilisateurs seront guidés étape par étape pour résoudre des problèmes tels que la réduction des coûts d'électricité, le respect des exigences d'exportation, avec un tableau de bord pour suivre les progrès. La plateforme intègre également des outils de reporting ESG automatique selon les normes internationales. L'objectif principal est d'aider les entreprises à éviter le piège du « greenwashing », à démontrer des améliorations mesurables et à élargir l'accès aux investisseurs, aux clients et aux marchés internationaux."
+      }
+    },
+    "credibility": {
+      "title": "Crédibilité & traction",
+      "cards": [
+        {
+          "icon": "lucide:Rocket",
+          "title": "Produit en ligne",
+          "description": "Le MVP de GP.A est en ligne : agent conversationnel, application web et panneau d'administration. Lancement officiel en mai 2026 avec la version gratuite."
+        },
+        {
+          "icon": "lucide:GraduationCap",
+          "title": "Partenaire de recherche et institutionnel",
+          "description": "Partenariat signé en juin 2026 avec l'Institute for Circular Economy Development (ICED), Université nationale du Vietnam à HCMV, pour le co-développement, des candidatures conjointes à des financements, le renforcement des capacités et la crédibilité institutionnelle."
+        },
+        {
+          "icon": "lucide:Mic",
+          "title": "Visibilité",
+          "description": "Présenté à Sustainable Future 10 et à Earth Day Vietnam 2026, organisés par la Green Leaders Community. Invité à l'Asia Pacific Sustainable Business Summit 2026."
+        },
+        {
+          "icon": "lucide:Cpu",
+          "title": "Technologie",
+          "description": "IA affinée (fine-tuning), couche d'intégration plug-and-play, moteur « des écarts à la stratégie » et attestations compatibles NDAChain. Souveraine et modulaire par conception."
+        }
+      ],
+      "team": {
+        "title": "L'équipe",
+        "intro": "Une expertise transversale rare au sein d'une même équipe : stratégie de croissance, réseaux institutionnels et ingénierie IA.",
+        "members": [
+          {
+            "name": "Amber Seradni",
+            "role": "CEO & cofondatrice",
+            "description": "Plus de 12 ans en stratégie de croissance durable auprès d'organismes gouvernementaux et du secteur privé. Conseillère des Nations unies et consultante CSSO. Pilote la vision, la stratégie, le positionnement, les partenariats et la direction produit."
+          },
+          {
+            "name": "Franck Dufournet",
+            "role": "CTO & cofondateur",
+            "description": "Plus de 7 ans en ingénierie technologique : architecture full-stack et sécurité des plateformes, NLP, extraction de données et intégration de modèles d'IA. Pilote l'architecture technique et l'infrastructure IA."
+          }
+        ]
       }
     },
     "faq": {
-      "title": "FAQs",
+      "title": "FAQ",
       "questions": [
         {
-          "question": "En quoi GreenPulse diffère-t-il de ChatGPT ou d'autres outils IA généraux?",
-          "answer": "GreenPulse est spécialement conçu pour la conformité ESG et le reporting de durabilité. Contrairement à ChatGPT, nous sommes formés sur les cadres internationaux (GRI, SFDR, CSRD, ISSB) et nous nous intégrons à vos sources de données existantes (ERP, CRM, Excel). Nous fournissons des résultats structurés qui répondent aux exigences réglementaires—pas du texte générique nécessitant une révision manuelle."
+          "question": "En quoi GreenPulse diffère-t-il de ChatGPT ou d'autres outils d'IA généralistes ?",
+          "answer": "GP.A est conçu pour le travail sur le climat et la durabilité. Il s'appuie sur les référentiels internationaux (GRI, CSRD, ISO) et sur les exigences vietnamiennes et européennes, et se connecte à vos propres sources de données. Il produit des résultats structurés qui alimentent vos outils de reporting, et non du texte générique à relire manuellement."
         },
         {
-          "question": "Mes données sont-elles sécurisées? Les partagez-vous avec des tiers?",
-          "answer": "**FORFAIT GRATUIT :** Vos conversations utilisent des fournisseurs d'IA tiers (OpenAI, Anthropic). Les données sont transmises à leurs serveurs (basés aux États-Unis) pour traitement. Ces fournisseurs peuvent utiliser les données de conversation pour l'amélioration des modèles sauf opt-out. **FORFAITS PREMIUM & GOLDEN :** Nous proposons des modèles d'IA hébergés localement (Llama 3) déployés en Asie du Sud-Est. Vos données ne quittent jamais notre infrastructure—garantissant une souveraineté totale des données, aucun partage avec des tiers, et conformité aux exigences locales de résidence des données. Toutes les données sont chiffrées en transit (HTTPS) et au repos (AES-256)."
+          "question": "Mes données sont-elles sécurisées ? Les partagez-vous avec des tiers ?",
+          "answer": "FORMULE GRATUITE : vos conversations utilisent des fournisseurs d'IA tiers (OpenAI, Anthropic). Les données sont transmises à leurs serveurs (basés aux États-Unis) pour traitement. Ces fournisseurs peuvent utiliser les données de conversation pour l'amélioration des modèles, sauf opt-out. FORMULES PREMIUM & PRO : nous proposons des modèles d'IA hébergés localement (Llama 3) déployés en Asie du Sud-Est. Vos données ne quittent jamais notre infrastructure, ce qui garantit une souveraineté totale des données, aucun partage avec des tiers et la conformité aux exigences locales de résidence des données. Toutes les données sont chiffrées en transit (HTTPS) et au repos (AES-256)."
         },
         {
-          "question": "L'IA ne génère-t-elle pas des émissions? Comment gérez-vous cela?",
-          "answer": "Oui, le calcul IA génère des émissions—c'est pourquoi nous compensons 200% de notre empreinte carbone grâce à des projets vérifiés de suppression de carbone. Plus important encore, l'automatisation de GreenPulse réduit le besoin de voyages, rapports papier et travail manuel redondant, résultant en un impact carbone net négatif pour nos utilisateurs."
+          "question": "Remplacez-vous un organisme de certification ou un auditeur ?",
+          "answer": "Non. GP.A structure votre dossier de preuves, identifie les écarts et vous prépare aux écolabels (dont Vietnam Green Label / VECC-MONRE), à l'ISO et aux normes d'export. L'autorité de certification et tout vérificateur indépendant conservent leur rôle."
         },
         {
-          "question": "GreenPulse peut-il s'intégrer à nos outils existants?",
-          "answer": "Absolument. GreenPulse se connecte aux principaux systèmes ERP (SAP, Oracle), CRM (Salesforce, HubSpot) et sources de données (Excel, Google Sheets, CSV). Notre API permet des intégrations personnalisées pour les systèmes propriétaires. La plupart des implémentations sont opérationnelles en 2 semaines."
+          "question": "L'IA ne génère-t-elle pas des émissions ? Comment gérez-vous cela ?",
+          "answer": "Oui, le calcul de l'IA génère des émissions, c'est pourquoi nous compensons 200 % de notre empreinte carbone grâce à des projets vérifiés de captage du carbone. Plus important encore, l'automatisation de GreenPulse réduit le besoin de déplacements, de rapports papier et de travail manuel redondant, ce qui se traduit par un impact carbone net négatif pour nos utilisateurs."
         },
         {
-          "question": "Que se passe-t-il si GreenPulse fait une erreur dans le reporting de conformité?",
-          "answer": "GreenPulse offre de la transparence dans tous les résultats—montrant quels cadres et points de données informent chaque recommandation. Tous les rapports incluent des points de contrôle humain avant finalisation. Nous offrons également des pistes d'audit et un contrôle de version pour assurer la confiance réglementaire."
+          "question": "GreenPulse peut-il s'intégrer à nos outils existants ?",
+          "answer": "Oui. GP.A s'intègre à vos opérations existantes : il se connecte aux principaux systèmes ERP (SAP, Oracle), CRM (Salesforce, HubSpot) et sources de données (Excel, Google Sheets, CSV). Les outils spécialisés de certification, de reporting ou de traçabilité sont branchés uniquement quand votre objectif l'exige. Notre API permet des intégrations personnalisées pour les systèmes propriétaires. La plupart des implémentations sont opérationnelles en 2 semaines."
+        },
+        {
+          "question": "Que se passe-t-il si GreenPulse commet une erreur dans le reporting de conformité ?",
+          "answer": "GreenPulse offre de la transparence sur tous les résultats, en montrant quels référentiels et quelles données alimentent chaque recommandation. Tous les rapports comportent des points de contrôle humains avant finalisation. Nous proposons également des pistes d'audit et un contrôle de version pour assurer la confiance réglementaire."
         }
       ]
+    },
+    "cta": {
+      "title": "Prêt à transformer vos ambitions climatiques en actions mesurables ?",
+      "description": "Parlez-nous de vos défis, ou commencez à explorer GP.A gratuitement.",
+      "discuss": "Parlons de vos défis",
+      "getStarted": "Essayer GP.A gratuitement"
     }
   }
 }

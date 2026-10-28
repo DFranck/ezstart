@@ -6,6 +6,8 @@ export default function sitemap() {
     routes: [
       '/',
       '/chat', // Public AI chat interface
+      '/careers',
+      '/earthday',
     ],
   })
 }

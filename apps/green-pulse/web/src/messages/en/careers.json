@@ -2,11 +2,11 @@
   "careers": {
     "meta": {
       "title": "Careers - Join GreenPulse.AI",
-      "description": "Join GreenPulse.AI in democratizing ESG compliance for Southeast Asian SMEs. Current opening: Business Development & Operations Support."
+      "description": "Join GreenPulse.AI in helping businesses across Vietnam and Southeast Asia accelerate low-carbon growth. Current opening: Business Development & Operations Support."
     },
     "hero": {
       "title": "Join Us in Building the Future of Sustainable Business",
-      "subtitle": "GreenPulse.AI is on a mission to make ESG compliance accessible to 1 million SMEs across Southeast Asia. We're a small, impact-driven team based in Ho Chi Minh City, working at the intersection of AI, sustainability, and green finance.",
+      "subtitle": "GreenPulse.AI is on a mission to help businesses across Vietnam and Southeast Asia accelerate low-carbon growth with trusted data, AI and practical solutions. We're a small, impact-driven team based in Ho Chi Minh City, working at the intersection of AI, sustainability, and green finance.",
       "description": "If you're passionate about climate action, want to work in a fast-moving startup environment, and believe technology can democratize access to green finance - we'd love to hear from you."
     },
     "openings": {
@@ -19,7 +19,12 @@
       "type": "Flexible contractor arrangement",
       "mission": "Impact-driven mission",
       "summary": "Help us scale GreenPulse's presence in Southeast Asia. Handle tender responses, represent us at events, and build strategic partnerships.",
-      "tags": ["Business Development", "Project Coordination", "Networking", "No Tech Background Required"],
+      "tags": [
+        "Business Development",
+        "Project Coordination",
+        "Networking",
+        "No Tech Background Required"
+      ],
       "sections": {
         "about": {
           "title": "About the Role",
@@ -117,7 +122,7 @@
             "items": [
               "**Mission-first:** We're building this to solve a real problem, not just for exits",
               "**Transparency:** Open communication about challenges, strategy, and progress",
-              "**Flexibility:** We respect boundaries, energy levels, and work-life balance (Amber is 5 months pregnant - we walk the talk)",
+              "**Flexibility:** We respect boundaries, energy levels, and work-life balance",
               "**Diplomatic approach:** We value relationship-building over aggressive sales tactics"
             ]
           }
@@ -143,15 +148,14 @@
       "title": "Why GreenPulse.AI?",
       "ourMission": {
         "title": "Our Mission",
-        "content": "We're democratizing ESG compliance for the 98% of Southeast Asian SMEs who have zero access to sustainability knowledge. By 2025, Vietnam's ETS will regulate 50% of emissions - 900+ Vietnamese SMEs will need ESG support. We're building the AI agent that makes this accessible."
+        "content": "We help Vietnamese and Southeast Asian businesses accelerate low-carbon growth: building their capabilities, structuring trusted data and turning regulatory pressure (EU CBAM and CSRD, Vietnam's carbon exchange and the ETS roll-out to 2029) into export and financing opportunities. We're building the AI agent that makes this accessible."
       },
       "traction": {
         "title": "Our Traction",
         "items": [
-          "70% MVP complete",
-          "5 beta partners (including top Vietnamese banks, research institutes)",
-          "50+ startups in pipeline",
-          "Featured in VietStock, recognized by regional accelerators"
+          "MVP live, free version launched in May 2026",
+          "Partnership signed with ICED, Vietnam National University HCMC (June 2026)",
+          "Featured in VietStock (November 2025)"
         ]
       },
       "values": {
@@ -171,7 +175,7 @@
         "**Customer Success & SME Support** (helping clients maximize value from GreenPulse)",
         "**Partnerships Manager** (dedicated to bank/fund relationships)",
         "**Marketing & Content** (thought leadership, case studies, SEO)",
-        "**ESG Analyst** (for Golden Package client support)"
+        "**ESG Analyst** (for PRO plan client support)"
       ],
       "cta": "If you're interested in any of these areas, feel free to reach out with a brief intro - we're always happy to connect with mission-aligned people."
     },
@@ -184,7 +188,7 @@
     },
     "footer": {
       "eoe": "**GreenPulse.AI** is an equal opportunity employer. We celebrate diversity and are committed to creating an inclusive environment for all team members.",
-      "updated": "Page last updated: December 8, 2024"
+      "updated": "Page last updated: October 2026"
     }
   }
 }

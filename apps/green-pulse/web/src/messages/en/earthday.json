@@ -14,7 +14,7 @@
     "valueProps": {
       "assessment": {
         "title": "Free AI ESG Assessment",
-        "description": "Get your ESG readiness score in minutes with our AI assistant GP.A — no signup required."
+        "description": "Get your ESG readiness score in minutes with our AI assistant GP.A, for free."
       },
       "roadmap": {
         "title": "Green Loan Readiness Roadmap",
@@ -22,15 +22,15 @@
       },
       "reporting": {
         "title": "Automated ESG Reporting",
-        "description": "Generate GRI, SFDR, and CSRD-compliant reports automatically from your business data."
+        "description": "Prepare reports aligned with GRI and CSRD from your business data. GP.A structures the data for you."
       }
     },
     "cta": {
       "start": "Start Free with GP.A",
       "promo": {
         "label": "Promo code",
-        "applied": "Promo code EARTHDAY2026 applied — 1 free month of Pro at launch!",
-        "default": "Enter code EARTHDAY2026 for 1 free month of Pro at launch"
+        "applied": "Promo code EARTHDAY2026 applied — 1 free month of PRO at launch!",
+        "default": "Enter code EARTHDAY2026 for 1 free month of PRO at launch"
       }
     },
     "signup": {
@@ -51,7 +51,7 @@
     "welcome": {
       "justJoined": "Welcome aboard!",
       "back": "Welcome back!",
-      "promoApplied": "🎉 Code EARTHDAY2026 applied. You'll get a free trial month of Pro when we launch.",
+      "promoApplied": "🎉 Code EARTHDAY2026 applied. You'll get a free trial month of PRO when we launch.",
       "installHint": "Install the app for quick access and offline support.",
       "installDescription": "Add GreenPulse.AI to your home screen for the best experience.",
       "installButton": "Install App",

@@ -16,7 +16,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { Fragment } from 'react'
+import { contactMailto } from './contact'
 
 export function PartnershipSection() {
   const t = useTranslations('home')
@@ -27,52 +27,38 @@ export function PartnershipSection() {
         <H2 size="h3" className="text-center mb-4">
           {t('partnership.title')}
         </H2>
-        <H3 size="h5" className="text-center mb-12 text-muted-foreground">
+        <P className="text-xl text-center mb-12 text-muted-foreground">
           {t('partnership.subtitle')}
-        </H3>
+        </P>
 
-        <Div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 max-w-6xl mx-auto mb-8">
+        <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-8">
           {(
             t.raw('partnership.values') as Array<{
-              icon: string
               title: string
               items: string[]
             }>
-          ).map((value, index) => (
-            <Fragment key={index}>
-              <Card className="bg-gp-accent/10 dark:bg-gp-accent/5 border-gp-accent dark:border-gp-accent border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg w-full md:w-auto">
-                <CardHeader>
-                  <Div className="flex items-center gap-3 mb-4">
-                    <Div className="font-bold rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-xl bg-gp-primary text-primary-foreground">
-                      {index + 1}
-                    </Div>
-                    <H3 size="h5" className="text-gp-primary">
-                      {value.title}
-                    </H3>
-                  </Div>
-                </CardHeader>
-                <CardContent>
-                  <UL className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                    {value.items.map((item, itemIndex) => (
-                      <LI key={itemIndex}>{item}</LI>
-                    ))}
-                  </UL>
-                </CardContent>
-              </Card>
-              {index < 2 && (
-                <Div className="flex-shrink-0 text-4xl md:text-5xl font-bold text-gp-primary my-4 md:my-0">
-                  +
-                </Div>
-              )}
-            </Fragment>
+          ).map(value => (
+            <Card key={value.title} className="border-2 border-gp-primary/30">
+              <CardHeader>
+                <H3 size="h5" className="text-gp-primary">
+                  {value.title}
+                </H3>
+              </CardHeader>
+              <CardContent>
+                <UL className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                  {value.items.map(item => (
+                    <LI key={item}>{item}</LI>
+                  ))}
+                </UL>
+              </CardContent>
+            </Card>
           ))}
         </Div>
 
-        <Div className="text-center space-y-4">
+        <Div className="text-center mb-16">
           <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
-            <a href={`mailto:aseradni@nexora-venture.com`}>{t('partnership.cta')}</a>
+            <a href={contactMailto('Partnership')}>{t('partnership.cta')}</a>
           </Button>
-          <P className="text-sm text-muted-foreground italic">{t('partnership.note')}</P>
         </Div>
       </Div>
 

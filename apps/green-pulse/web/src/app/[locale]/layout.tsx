@@ -10,7 +10,7 @@ import { Gugi, K2D } from 'next/font/google'
 import { headers } from 'next/headers'
 import Script from 'next/script'
 import ClientLayout from './client-layout'
-import { faqSchema, organizationSchema, softwareApplicationSchema, websiteSchema } from './schemas'
+import { organizationSchema, softwareApplicationSchema, websiteSchema } from './schemas'
 
 const gugi = Gugi({ weight: '400', subsets: ['latin'], variable: '--font-gugi' })
 const k2d = K2D({
@@ -22,19 +22,23 @@ const k2d = K2D({
 export const metadata = createMetadata({
   appName: 'GreenPulse.AI',
   description:
-    'AI-powered ESG compliance platform for Southeast Asian SMEs. Reduce costs by 30%, access green finance, and meet export standards with automated GRI, SFDR, CSRD reporting.',
+    'GreenPulse.AI accelerates low-carbon growth through trusted data, agentic AI and practical solutions: carbon footprint and MRV, export readiness, green finance readiness and business capacity building in Vietnam and ASEAN.',
   domain: 'https://www.ai-greenpulse.com',
   keywords: [
-    'ESG compliance',
-    'SME sustainability',
-    'green finance',
-    'Southeast Asia',
-    'carbon tracking',
-    'sustainable business',
-    'AI ESG platform',
-    'GRI reporting',
+    'low-carbon growth',
+    'trusted data',
+    'agentic AI',
+    'MRV',
+    'climate action plan',
+    'industrial decarbonisation',
+    'export readiness',
+    'green finance readiness',
+    'business capacity building',
+    'CBAM',
     'CSRD',
-    'Vietnam green banking',
+    'EPR Vietnam',
+    'Vietnam',
+    'ASEAN',
   ],
   themeColor: '#10b981',
   ogImage: 'https://www.ai-greenpulse.com/logo.png',
@@ -54,7 +58,7 @@ export const viewport = createViewport('#10b981')
 const jsonLd = createJsonLd({
   appName: 'GreenPulse.AI',
   description:
-    'AI-powered ESG compliance platform for Southeast Asian SMEs. Automated sustainability reporting, carbon tracking, and green finance readiness.',
+    'Low-carbon growth through trusted data, agentic AI and practical solutions: carbon footprint, MRV, export readiness and green finance readiness for businesses in Vietnam and ASEAN.',
   url: 'https://www.ai-greenpulse.com',
   applicationCategory: 'BusinessApplication',
 })
@@ -107,11 +111,6 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
           id="json-ld-software"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
-        />
-        <Script
-          id="json-ld-faq"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
         <ErrorBoundary title="Something went wrong in GreenPulse">
           <Providers

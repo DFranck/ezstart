@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Div, H1, H2, P, Section, Span } from '@ezstart/ui/components'
+import { Button, Div, H1, H2, P, Section, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
@@ -36,6 +36,9 @@ export function HeroSection() {
         />
       </Div>
       <H1 className="sr-only">{t('hero.title')}</H1>
+      <P className="text-center text-xs uppercase tracking-widest text-muted-foreground">
+        {t('hero.tagline')}
+      </P>
       <Div layout={'center'} className="gap-6">
         <H2
           size={'h3'}
@@ -74,15 +77,11 @@ export function HeroSection() {
           }
         `}</style>
 
-        <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
-          {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map(
-            (feature: string, index: number) => (
-              <Badge key={index} size="lg" className="bg-gp-accent text-gp-accent-foreground">
-                {feature}
-              </Badge>
-            )
+        <P className="hidden lg:block text-center text-sm text-muted-foreground">
+          {(Array.isArray(t.raw('heroFeatures')) ? (t.raw('heroFeatures') as string[]) : []).join(
+            ' · '
           )}
-        </Div>
+        </P>
 
         <P className="text-base text-center text-foreground font-medium max-w-4xl">
           {t('hero.description')}
@@ -95,9 +94,7 @@ export function HeroSection() {
           size="lg"
           className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
         >
-          <Link href="/chat" target="_blank" rel="noopener noreferrer">
-            {t('hero.getStarted')}
-          </Link>
+          <Link href="#partnership">{t('hero.ctaPrimary')}</Link>
         </Button>
         <Button
           asChild
@@ -105,8 +102,11 @@ export function HeroSection() {
           variant="outline"
           className="bg-muted hover:bg-muted/80 border-foreground border text-foreground font-bold text-xl px-8 py-6"
         >
-          <Link href="#partnership">
-            {t('hero.ctaSecondary')} <Span className="ml-1">→</Span>
+          <Link href="/chat" target="_blank" rel="noopener noreferrer">
+            {t('hero.ctaSecondary')}{' '}
+            <Span className="ml-1" aria-hidden="true">
+              →
+            </Span>
           </Link>
         </Button>
       </Div>
