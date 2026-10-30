@@ -135,3 +135,5 @@ Contactez-nous pour :
 - une **modélisation SIG et carbone** pour chiffrer et valoriser vos actions.
 
 [Demander une étude ou un devis](/quote)
+
+**Pour aller plus loin :** le livre gratuit [Transplantation d'arbres & ODD](/fr/livre/retour-sur-la-transplantation) détaille la méthode, les résultats et les étapes d'un projet de transplantation.

@@ -41,7 +41,8 @@ export interface Article extends ArticleMeta {
   content: string
 }
 
-interface Frontmatter {
+/** Result of {@link parseFrontmatter}. */
+export interface Frontmatter {
   data: Record<string, string>
   content: string
 }
@@ -53,7 +54,7 @@ interface Frontmatter {
  * optional surrounding single/double quotes on the value, blank lines ignored.
  * Anything richer (nested objects, multiline values) is out of scope by design.
  */
-function parseFrontmatter(raw: string): Frontmatter {
+export function parseFrontmatter(raw: string): Frontmatter {
   const normalized = raw.replace(/\r\n/g, '\n')
   if (!normalized.startsWith('---\n')) {
     return { data: {}, content: normalized.trim() }
@@ -97,7 +98,7 @@ function parseTags(value: string | undefined): string[] {
 }
 
 /** Estimate reading time from the markdown body (min 1 minute). */
-function estimateReadingMinutes(content: string): number {
+export function estimateReadingMinutes(content: string): number {
   const words = content.split(/\s+/).filter(Boolean).length
   return Math.max(1, Math.round(words / WORDS_PER_MINUTE))
 }

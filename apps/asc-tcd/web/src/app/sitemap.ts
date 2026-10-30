@@ -1,8 +1,11 @@
 import { getAllArticleSlugs } from '@/lib/articles'
+import { getAllChapterSlugs } from '@/lib/book'
 import { createSitemap } from '@ezstart/seo-config/sitemap'
 
 export default function sitemap() {
   const articleRoutes = getAllArticleSlugs().map(slug => `/articles/${slug}`)
+
+  const chapterRoutes = getAllChapterSlugs().map(slug => `/livre/${slug}`)
 
   return createSitemap({
     app: 'asc-tcd',
@@ -12,6 +15,8 @@ export default function sitemap() {
       '/transplantation-d-arbres',
       '/articles',
       ...articleRoutes,
+      '/livre',
+      ...chapterRoutes,
       '/legal-notices',
     ],
   })

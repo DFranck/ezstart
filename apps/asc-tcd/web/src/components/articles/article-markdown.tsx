@@ -35,7 +35,8 @@ export interface ArticleMarkdownProps {
   className?: string
 }
 
-const components: Components = {
+/** GFM → `@ezstart/ui` element mapping, shared with the book renderer. */
+export const markdownComponents: Components = {
   h1: ({ children }) => (
     <H1 size="h2" className="mt-8 mb-4 first:mt-0 scroll-mt-20">
       {children}
@@ -114,10 +115,20 @@ const components: Components = {
   ),
 }
 
+/** French labels for the GFM footnotes section (default is English). */
+export const FOOTNOTE_LABELS = {
+  footnoteLabel: 'Notes',
+  footnoteBackLabel: 'Retour au texte',
+} as const
+
 export function ArticleMarkdown({ content, className }: ArticleMarkdownProps) {
   return (
     <Div className={cn('min-w-0 max-w-none break-words', className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        remarkRehypeOptions={FOOTNOTE_LABELS}
+        components={markdownComponents}
+      >
         {content}
       </ReactMarkdown>
     </Div>

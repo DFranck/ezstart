@@ -275,3 +275,5 @@ d'ouvrage dans l'identification, l'évaluation et la transplantation des arbres
 matures.
 
 [Étudier un projet avec ASC-TCD](/quote)
+
+**Pour aller plus loin :** le chapitre [Retour sur la transplantation d'arbres](/fr/livre/retour-sur-la-transplantation) du livre gratuit « Transplantation d'arbres & ODD » explique le fonctionnement, les résultats et les étapes de la transplantation.

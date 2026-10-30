@@ -25,6 +25,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     features,
     transplantation,
     articles,
+    livre,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -43,6 +44,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/features.json`),
     import(`../messages/${locale}/transplantation.json`),
     import(`../messages/${locale}/articles.json`),
+    import(`../messages/${locale}/livre.json`),
   ])
   const status = await import(`../messages/${locale}/status.json`)
 
@@ -62,6 +64,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       features.default,
       transplantation.default,
       articles.default,
+      livre.default,
       status.default,
     ]),
   }

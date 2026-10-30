@@ -4,6 +4,9 @@ export default createNextConfig({
   pwa: true,
   i18n: true,
   extend: {
+    async rewrites() {
+      return [{ source: '/livre/:slug.md', destination: '/raw/livre/:slug' }]
+    },
     images: {
       remotePatterns: [
         {
@@ -16,5 +19,5 @@ export default createNextConfig({
         },
       ],
     },
-  }
+  },
 })

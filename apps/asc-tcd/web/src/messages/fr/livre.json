@@ -1,0 +1,30 @@
+{
+  "livre": {
+    "meta": {
+      "title": "Transplantation d'arbres & ODD : le livre gratuit",
+      "description": "Livre gratuit d'Ambre Seradni (ASC-TCD) : méthode de transplantation d'arbres adultes, résultats, Plan Local de l'Arbre et contribution aux Objectifs de Développement Durable."
+    },
+    "eyebrow": "Livre gratuit · ASC-TCD",
+    "pitch": "Pourquoi couper un arbre adulte quand on peut le déplacer ? Un ouvrage pour les élus, agents, aménageurs et bailleurs qui veulent maîtriser la transplantation d'arbres et son rôle dans les Objectifs de Développement Durable.",
+    "byAuthor": "Par {author}",
+    "publisher": "Éditeur : {publisher}",
+    "downloadPdf": "Télécharger le PDF gratuit",
+    "startReading": "Commencer la lecture",
+    "tocTitle": "Sommaire",
+    "readChapter": "Lire le chapitre",
+    "readingTime": "{minutes} min de lecture",
+    "breadcrumb": {
+      "home": "Accueil",
+      "book": "Livre"
+    },
+    "backToBook": "Retour au sommaire",
+    "previous": "Chapitre précédent",
+    "next": "Chapitre suivant",
+    "updatedOn": "Mis à jour le {date}",
+    "aiNote": "Version texte brut de ce chapitre (Markdown) pour les outils d'IA et la lecture accessible :",
+    "rawMarkdown": "Lire en Markdown",
+    "ctaTitle": "Un projet de transplantation ?",
+    "ctaText": "ASC-TCD vous accompagne de l'étude préalable au suivi post-transplantation.",
+    "ctaButton": "Demander un devis"
+  }
+}
