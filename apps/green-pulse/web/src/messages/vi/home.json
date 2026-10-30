@@ -35,7 +35,7 @@
         {
           "icon": "lucide:Scale",
           "title": "Quy định khó áp dụng",
-          "problem": "CBAM, CSRD, nghĩa vụ báo cáo và trách nhiệm mở rộng của nhà sản xuất (EPR) đến nhanh hơn khả năng diễn giải của doanh nghiệp.",
+          "problem": "Các quy định quốc tế, nghĩa vụ báo cáo và trách nhiệm mở rộng của nhà sản xuất (EPR) xuất hiện nhanh hơn khả năng diễn giải của doanh nghiệp.",
           "response": "Hỗ trợ tuân thủ và triển khai EPR, phù hợp với các khung tiêu chuẩn mà người mua và cơ quan quản lý sử dụng."
         },
         {
@@ -71,7 +71,7 @@
       ]
     },
     "whyNow": {
-      "title": "Vì sao là bây giờ: bốn lực tác động đang hội tụ lên nền kinh tế Việt Nam",
+      "title": "Vì sao là bây giờ: bốn lực đẩy cùng tác động lên doanh nghiệp",
       "subtitle": "Một số tác động ngay lập tức và mang tính ràng buộc. Số khác tạo áp lực dần theo thời gian. GP.A giải quyết từng lực, bắt đầu từ nơi nhu cầu cấp thiết nhất.",
       "changingLabel": "Điều đang thay đổi:",
       "impactLabel": "Tác động đến doanh nghiệp:",
@@ -79,29 +79,29 @@
       "forces": [
         {
           "tag": "Tức thời",
-          "title": "CBAM & CSRD của EU",
-          "changing": "Thuế carbon biên giới của EU và các quy tắc công bố thông tin chuỗi cung ứng đã có hiệu lực đối với sắt, thép, nhôm, xi măng, phân bón và nhiều mặt hàng khác.",
-          "impact": "Các nhà xuất khẩu Việt Nam phải cung cấp dữ liệu phát thải đã được thẩm định, nếu không có nguy cơ mất hợp đồng và quyền tiếp cận thị trường EU.",
-          "response": "Đánh giá mức độ sẵn sàng xuất khẩu và dữ liệu có cấu trúc cho phần mềm báo cáo của bạn (ESG, GRI, phù hợp CSRD)."
+          "title": "Quy định quốc tế",
+          "changing": "Các thị trường xuất khẩu đang siết chặt yêu cầu công bố thông tin về carbon và chuỗi cung ứng đối với hàng hóa nhập khẩu.",
+          "impact": "Nhà xuất khẩu phải cung cấp dữ liệu phát thải đã được xác minh, nếu không có nguy cơ mất hợp đồng và khả năng tiếp cận thị trường.",
+          "response": "Đánh giá mức độ sẵn sàng xuất khẩu và dữ liệu có cấu trúc cho phần mềm báo cáo của bạn (báo cáo ESG, kiểm toán và báo cáo chính thức)."
         },
         {
           "tag": "Ngắn hạn",
-          "title": "Báo cáo lan tỏa trong ASEAN",
-          "changing": "Sàn giao dịch carbon trong nước của Việt Nam đã vận hành ngày 29/06/2026 (HNX). Khoảng 150 cơ sở trong ngành điện, thép và xi măng hiện nắm giữ hạn ngạch có thể giao dịch.",
-          "impact": "Các doanh nghiệp này phải có báo cáo ESG và đang yêu cầu các nhà cung cấp SME cung cấp dữ liệu phát thải mà những nhà cung cấp này chưa từng theo dõi.",
+          "title": "Hiệu ứng lan tỏa của báo cáo",
+          "changing": "Các doanh nghiệp lớn và ngành chịu quản lý hiện phải công bố báo cáo chính thức (ESG, kiểm toán, phát thải).",
+          "impact": "Họ gây áp lực lên các nhà cung cấp SME để lấy dữ liệu phát thải mà các nhà cung cấp này chưa từng theo dõi.",
           "response": "Thu thập dữ liệu có hướng dẫn để nhà cung cấp trả lời yêu cầu của người mua bằng số liệu đáng tin cậy."
         },
         {
           "tag": "Gia tăng",
           "title": "Áp lực tín dụng xanh",
-          "changing": "Các hướng dẫn về tín dụng xanh của SBV đang được mở rộng.",
-          "impact": "Hồ sơ xanh ngày càng trở thành điều kiện để tiếp cận nguồn vốn, chứ không chỉ là điểm cộng, kể cả ngoài các ngành thuộc phạm vi ETS.",
+          "changing": "Các ngân hàng đang mở rộng hướng dẫn tín dụng xanh.",
+          "impact": "Hồ sơ xanh ngày càng trở thành điều kiện để tiếp cận tài chính, chứ không chỉ là điểm cộng, kể cả ngoài các ngành chịu quản lý.",
           "response": "Chấm điểm đủ điều kiện vay xanh, xác định khoảng trống, lộ trình và thời gian sẵn sàng ước tính."
         },
         {
           "tag": "Trung hạn",
-          "title": "Triển khai đầy đủ ETS vào năm 2029",
-          "changing": "Giai đoạn thí điểm (2025-2028) sẽ mở rộng theo từng giai đoạn để tiến tới giao dịch có đấu giá từ năm 2029, theo lộ trình của chính Chính phủ.",
+          "title": "Phạm vi thị trường carbon mở rộng",
+          "changing": "Các cơ chế định giá và giao dịch carbon đang mở rộng theo từng giai đoạn tới toàn nền kinh tế.",
           "impact": "Các ngành và quy mô doanh nghiệp hiện chưa thuộc phạm vi sẽ được đưa vào, với rất ít thời gian báo trước.",
           "response": "Doanh nghiệp bắt đầu cấu trúc dữ liệu từ bây giờ sẽ sẵn sàng khi phạm vi được mở rộng."
         }
@@ -138,7 +138,7 @@
           "items": [
             "Kế hoạch hành động từng bước và nâng cao năng lực cho đội ngũ của bạn",
             "Sẵn sàng xuất khẩu, trước khi giao hàng chứ không phải sau",
-            "Đồng hành chứng nhận: nhãn sinh thái (bao gồm Nhãn Xanh Việt Nam / VECC-MONRE), ISO và các tiêu chuẩn xuất khẩu. Chúng tôi cấu trúc hồ sơ bằng chứng của bạn; cơ quan chứng nhận vẫn giữ vai trò của mình",
+            "Đồng hành chứng nhận: nhãn sinh thái, ISO và tiêu chuẩn xuất khẩu. Chúng tôi cấu trúc hồ sơ minh chứng của bạn; cơ quan chứng nhận vẫn giữ vai trò của mình",
             "Phân tích khoảng trống và chiến lược để thu hẹp các khoảng trống còn lại"
           ]
         },
@@ -254,7 +254,7 @@
           "icon": "lucide:Wheat",
           "title": "Doanh nghiệp nông nghiệp: tiếp cận xuất khẩu và tài chính xanh",
           "challenge": "Người mua EU, Hoa Kỳ và Trung Quốc yêu cầu bằng chứng bền vững được lập thành văn bản.",
-          "solution": "Hướng dẫn theo danh mục kiểm tra tuân thủ EU, báo cáo sẵn sàng xuất khẩu, phân tích khoảng trống và kế hoạch hành động.",
+          "solution": "Hướng dẫn danh mục tuân thủ theo thị trường mục tiêu, báo cáo sẵn sàng xuất khẩu, phân tích khoảng cách và kế hoạch hành động.",
           "result": "Mục tiêu: vượt qua đánh giá của người mua, duy trì hoặc mở rộng hợp đồng xuất khẩu và cải thiện vị thế để tiếp cận tài chính xanh.",
           "tags": ["Nông nghiệp", "Sẵn sàng xuất khẩu", "Tài chính xanh"]
         },
@@ -288,7 +288,7 @@
         },
         {
           "feature": "Chuyên môn",
-          "greenpulse": "Xây dựng dựa trên các khung tiêu chuẩn quốc tế và quy định của Việt Nam (CBAM, CSRD, GRI, ISO, VECC-MONRE)",
+          "greenpulse": "Xây dựng dựa trên tiêu chuẩn quốc tế và quy định địa phương (ISO, báo cáo ESG và kiểm toán)",
           "software": "Danh mục kiểm tra tuân thủ thủ công",
           "ai": "Câu trả lời chung chung, có nguy cơ ảo giác (hallucination)"
         },
@@ -346,11 +346,13 @@
           {
             "name": "PRO",
             "status": "Sắp ra mắt",
-            "description": "Toàn bộ tính năng Premium cùng hỗ trợ tùy chỉnh cho các tiêu chuẩn chính thức và quốc tế: chứng nhận, xuất khẩu và tài chính xanh."
+            "description": "Toàn bộ tính năng Premium cùng hỗ trợ tùy chỉnh cho các tiêu chuẩn chính thức và quốc tế: chứng nhận, xuất khẩu và tài chính xanh.",
+            "requestAccess": true
           }
         ],
         "audience": ["Doanh nghiệp ASEAN", "Chủ doanh nghiệp SME"],
-        "cta": "Dùng thử GP.A miễn phí"
+        "cta": "Dùng thử GP.A miễn phí",
+        "proCta": "Yêu cầu truy cập PRO"
       },
       "ecosystem": {
         "title": "Tích hợp hệ sinh thái",
@@ -410,12 +412,12 @@
         {
           "icon": "lucide:Rocket",
           "title": "Sản phẩm đang hoạt động",
-          "description": "MVP của GP.A đã hoạt động: tác nhân hội thoại, ứng dụng web và trang quản trị. Ra mắt chính thức vào tháng 5/2026 với phiên bản miễn phí."
+          "description": "MVP của GP.A đã hoạt động: trợ lý hội thoại, ứng dụng web và bảng quản trị. Phiên bản miễn phí đã mở cho những người dùng đầu tiên."
         },
         {
           "icon": "lucide:GraduationCap",
           "title": "Đối tác nghiên cứu và thể chế",
-          "description": "Thỏa thuận hợp tác được ký vào tháng 6/2026 với Viện Phát triển Kinh tế Tuần hoàn (ICED), Đại học Quốc gia TP.HCM, nhằm cùng phát triển, cùng nộp hồ sơ xin tài trợ, nâng cao năng lực và tăng uy tín thể chế."
+          "description": "Đã ký kết hợp tác với Viện Phát triển Kinh tế Tuần hoàn (ICED), Đại học Quốc gia TP.HCM, về đồng phát triển, cùng nộp hồ sơ tài trợ, nâng cao năng lực và uy tín thể chế."
         },
         {
           "icon": "lucide:Mic",
@@ -435,7 +437,7 @@
           {
             "name": "Amber Seradni",
             "role": "CEO & Đồng sáng lập",
-            "description": "Hơn 12 năm kinh nghiệm về chiến lược tăng trưởng bền vững tại các cơ quan chính phủ và khu vực tư nhân. Cố vấn Liên Hợp Quốc và tư vấn viên CSSO. Phụ trách tầm nhìn, chiến lược, định vị, hợp tác và định hướng sản phẩm."
+            "description": "Hơn 12 năm kinh nghiệm về chiến lược tăng trưởng bền vững với các cơ quan nhà nước và khu vực tư nhân. Phụ trách tầm nhìn, chiến lược, định vị, hợp tác và định hướng sản phẩm."
           },
           {
             "name": "Franck Dufournet",
@@ -450,19 +452,19 @@
       "questions": [
         {
           "question": "GreenPulse khác gì ChatGPT hay các công cụ AI phổ thông khác?",
-          "answer": "GP.A được xây dựng cho công việc về khí hậu và bền vững. GP.A được định hướng bởi các khung tiêu chuẩn quốc tế (GRI, CSRD, ISO) cùng yêu cầu của Việt Nam và EU, và kết nối với các nguồn dữ liệu của chính bạn. GP.A tạo ra các đầu ra có cấu trúc để đưa vào công cụ báo cáo của bạn, thay vì văn bản chung chung cần rà soát thủ công."
+          "answer": "GP.A được xây dựng cho công việc về khí hậu và bền vững. Nó dựa trên các tiêu chuẩn quốc tế (ISO, báo cáo ESG và kiểm toán) cùng quy định địa phương, và kết nối với nguồn dữ liệu của chính bạn. Nó tạo ra kết quả có cấu trúc để đưa vào công cụ báo cáo của bạn, thay vì văn bản chung chung cần rà soát thủ công."
         },
         {
           "question": "Dữ liệu của tôi có an toàn không? Các bạn có chia sẻ với bên thứ ba không?",
-          "answer": "GÓI MIỄN PHÍ: các cuộc hội thoại của bạn sử dụng nhà cung cấp AI bên thứ ba (OpenAI, Anthropic). Dữ liệu được truyền đến máy chủ của họ (đặt tại Hoa Kỳ) để xử lý. Các nhà cung cấp này có thể dùng dữ liệu hội thoại để cải thiện mô hình trừ khi bạn từ chối. GÓI PREMIUM & PRO: chúng tôi cung cấp các mô hình AI lưu trữ cục bộ (Llama 3) triển khai tại Đông Nam Á. Dữ liệu của bạn không bao giờ rời khỏi hạ tầng của chúng tôi, đảm bảo chủ quyền dữ liệu đầy đủ, không chia sẻ với bên thứ ba và tuân thủ các yêu cầu lưu trữ dữ liệu tại địa phương. Mọi dữ liệu đều được mã hóa khi truyền tải (HTTPS) và khi lưu trữ (AES-256)."
+          "answer": "GÓI MIỄN PHÍ: các cuộc trò chuyện của bạn sử dụng nhà cung cấp AI bên thứ ba (OpenAI, Anthropic). Dữ liệu được truyền tới máy chủ của họ (đặt tại Hoa Kỳ) để xử lý. Các nhà cung cấp này có thể dùng dữ liệu trò chuyện để cải thiện mô hình trừ khi bạn từ chối. GÓI PREMIUM VÀ PRO (sắp ra mắt): chúng tôi dự kiến cung cấp các mô hình AI đặt tại chỗ (Llama 3) triển khai ở Đông Nam Á, để dữ liệu của bạn luôn nằm trong hạ tầng của chúng tôi, không chia sẻ cho bên thứ ba và phù hợp với yêu cầu lưu trữ dữ liệu tại địa phương. Mọi dữ liệu đều được mã hóa khi truyền (HTTPS) và khi lưu trữ (AES-256)."
         },
         {
           "question": "Các bạn có thay thế tổ chức chứng nhận hay kiểm toán viên không?",
-          "answer": "Không. GP.A cấu trúc hồ sơ bằng chứng của bạn, xác định các khoảng trống và giúp bạn chuẩn bị cho nhãn sinh thái (bao gồm Nhãn Xanh Việt Nam / VECC-MONRE), ISO và các tiêu chuẩn xuất khẩu. Cơ quan chứng nhận và đơn vị thẩm định độc lập nào vẫn giữ nguyên vai trò của mình."
+          "answer": "Không. GP.A cấu trúc hồ sơ minh chứng của bạn, xác định các khoảng cách và giúp bạn chuẩn bị cho nhãn sinh thái, ISO và tiêu chuẩn xuất khẩu. Cơ quan chứng nhận và bên thẩm định độc lập vẫn giữ vai trò của họ."
         },
         {
           "question": "AI chẳng phải cũng tạo ra phát thải sao? Các bạn xử lý điều này như thế nào?",
-          "answer": "Có, việc tính toán của AI tạo ra phát thải, vì vậy chúng tôi bù trừ 200% dấu chân carbon của mình thông qua các dự án loại bỏ carbon được xác minh. Quan trọng hơn, tự động hóa của GreenPulse giúp giảm nhu cầu đi lại, báo cáo giấy và công việc thủ công trùng lặp, mang lại tác động carbon âm ròng cho người dùng của chúng tôi."
+          "answer": "Có, việc tính toán của AI tạo ra phát thải, vì vậy chúng tôi kiểm soát dấu chân carbon của chính mình. Tự động hóa của GreenPulse cũng nhằm giảm đi lại, báo cáo giấy và công việc thủ công lặp lại cho người dùng."
         },
         {
           "question": "GreenPulse có thể tích hợp với các công cụ hiện có của chúng tôi không?",
@@ -479,6 +481,30 @@
       "description": "Trao đổi với chúng tôi về thách thức của bạn, hoặc bắt đầu khám phá GP.A miễn phí.",
       "discuss": "Trao đổi về thách thức của bạn",
       "getStarted": "Dùng thử GP.A miễn phí"
+    },
+    "contact": {
+      "description": "Hãy cho chúng tôi biết về doanh nghiệp và nhu cầu của bạn. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.",
+      "company": "Tên công ty",
+      "companyPlaceholder": "Công ty của bạn",
+      "email": "Email",
+      "emailPlaceholder": "ten@congty.com",
+      "message": "Nhu cầu của bạn",
+      "messagePlaceholder": "Mô tả thách thức hoặc điều bạn muốn làm với GP.A",
+      "submit": "Gửi",
+      "sending": "Đang gửi...",
+      "cancel": "Hủy",
+      "success": "Cảm ơn bạn! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.",
+      "error": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "topics": {
+        "discuss": "Trao đổi về thách thức của bạn",
+        "white-label": "White-label + License",
+        "integrations": "Tích hợp hệ sinh thái",
+        "pro": "Yêu cầu truy cập PRO",
+        "general": "Liên hệ với chúng tôi",
+        "careers": "Ứng tuyển: Business Development & Operations Support"
+      },
+      "name": "Tên của bạn",
+      "namePlaceholder": "Họ và tên đầy đủ"
     }
   }
 }

@@ -21,6 +21,7 @@ import {
 import DOMPurify from 'isomorphic-dompurify'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
+import { ContactButton } from '../(home)/contact-button'
 
 /**
  * Render a translation string with markdown-style **bold** as <strong>,
@@ -269,18 +270,15 @@ export default function CareersPage() {
 
               {/* Apply CTA - Simplified */}
               <Div className="text-center pt-8 border-t">
-                <Button
-                  asChild
+                <ContactButton
+                  topic="careers"
                   size="lg"
                   className="bg-gp-primary hover:bg-gp-primary/80 text-white font-bold"
                 >
-                  <a href="mailto:aseradni@nexora-venture.com?subject=BD%20%26%20Operations%20-%20Application">
-                    {t('bdRole.sections.apply.cta')}
-                  </a>
-                </Button>
+                  {t('bdRole.sections.apply.cta')}
+                </ContactButton>
                 <P className="text-sm text-muted-foreground mt-4">
-                  Send your CV and a brief description to:{' '}
-                  <Strong>aseradni@nexora-venture.com</Strong>
+                  {t('bdRole.sections.apply.formNote')}
                 </P>
               </Div>
             </CardContent>
@@ -376,7 +374,6 @@ export default function CareersPage() {
               }}
             />
           </P>
-          <P className="text-sm text-muted-foreground italic">{t('footer.updated')}</P>
         </Div>
       </Section>
     </>

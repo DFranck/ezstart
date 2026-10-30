@@ -129,7 +129,6 @@
         },
         "apply": {
           "title": "How to Apply",
-          "instructions": "Send an email to **careers@greenpulse.ai** with:",
           "requirements": [
             "**Subject line:** \"BD & Operations - [Your Name]\"",
             "**Short cover letter** (max 300 words) explaining:",
@@ -140,7 +139,8 @@
             "**Optional:** One writing sample (business proposal, article, blog post - something that shows your communication skills)"
           ],
           "note": "We review applications on a rolling basis. First-round interviews are conversational - we want to understand your motivations and see if there's mutual fit.",
-          "cta": "Apply Now"
+          "cta": "Apply Now",
+          "formNote": "Use the form to introduce yourself and describe your experience. Add a link to your CV or portfolio if you have one."
         }
       }
     },
@@ -148,13 +148,13 @@
       "title": "Why GreenPulse.AI?",
       "ourMission": {
         "title": "Our Mission",
-        "content": "We help Vietnamese and Southeast Asian businesses accelerate low-carbon growth: building their capabilities, structuring trusted data and turning regulatory pressure (EU CBAM and CSRD, Vietnam's carbon exchange and the ETS roll-out to 2029) into export and financing opportunities. We're building the AI agent that makes this accessible."
+        "content": "We help Vietnamese and Southeast Asian businesses accelerate low-carbon growth: building their capabilities, structuring trusted data and turning the pressure of international markets and carbon policies into export and financing opportunities. We're building the AI agent that makes this accessible."
       },
       "traction": {
         "title": "Our Traction",
         "items": [
-          "MVP live, free version launched in May 2026",
-          "Partnership signed with ICED, Vietnam National University HCMC (June 2026)",
+          "MVP live, free version open to first users",
+          "Partnership signed with ICED, Vietnam National University HCMC",
           "Featured in VietStock (November 2025)"
         ]
       },
@@ -183,12 +183,10 @@
       "title": "Contact",
       "general": "General inquiries:",
       "partnership": "Partnership opportunities:",
-      "moreInfo": "More about us:",
-      "email": "aseradni@nexora-venture.com"
+      "moreInfo": "More about us:"
     },
     "footer": {
-      "eoe": "**GreenPulse.AI** is an equal opportunity employer. We celebrate diversity and are committed to creating an inclusive environment for all team members.",
-      "updated": "Page last updated: October 2026"
+      "eoe": "**GreenPulse.AI** is an equal opportunity employer. We celebrate diversity and are committed to creating an inclusive environment for all team members."
     }
   }
 }

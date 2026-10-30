@@ -4,6 +4,7 @@ import { Button, Div, H1, H2, P, Section, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
+import { ContactButton } from './contact-button'
 import { useEffect, useState } from 'react'
 
 export function HeroSection() {
@@ -89,13 +90,13 @@ export function HeroSection() {
       </Div>
 
       <Div layout={'grid'} className="gap-4">
-        <Button
-          asChild
+        <ContactButton
+          topic="discuss"
           size="lg"
           className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
         >
-          <Link href="#partnership">{t('hero.ctaPrimary')}</Link>
-        </Button>
+          {t('hero.ctaPrimary')}
+        </ContactButton>
         <Button
           asChild
           size="lg"

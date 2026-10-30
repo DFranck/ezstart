@@ -1297,6 +1297,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
+      '@ezstart/email-service':
+        specifier: workspace:*
+        version: link:../../../packages/email-service
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger

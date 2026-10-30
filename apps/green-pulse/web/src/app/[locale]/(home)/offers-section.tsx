@@ -17,12 +17,13 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { contactMailto } from './contact'
+import { ContactButton } from './contact-button'
 
 interface Plan {
   name: string
   status: string
   description: string
+  requestAccess?: boolean
 }
 
 function AudienceList({ label, items }: { label: string; items: string[] }) {
@@ -77,9 +78,9 @@ export function OffersSection() {
                 label={t('offers.openTo')}
                 items={t.raw('offers.whiteLabel.audience') as string[]}
               />
-              <Button asChild className="bg-gp-primary hover:bg-gp-primary/80">
-                <a href={contactMailto('White-label + License')}>{t('offers.whiteLabel.cta')}</a>
-              </Button>
+              <ContactButton topic="white-label" className="bg-gp-primary hover:bg-gp-primary/80">
+                {t('offers.whiteLabel.cta')}
+              </ContactButton>
             </Div>
           </Div>
         </Card>
@@ -101,6 +102,11 @@ export function OffersSection() {
                     {plan.name} <Span className="text-muted-foreground">({plan.status})</Span>
                   </P>
                   <P className="text-sm text-muted-foreground">{plan.description}</P>
+                  {plan.requestAccess && (
+                    <ContactButton topic="pro" variant="outline" size="sm" className="mt-2">
+                      {t('offers.direct.proCta')}
+                    </ContactButton>
+                  )}
                 </Div>
               ))}
               <AudienceList
@@ -130,9 +136,9 @@ export function OffersSection() {
                 label={t('offers.openTo')}
                 items={t.raw('offers.ecosystem.audience') as string[]}
               />
-              <Button asChild variant="outline" className="w-full">
-                <a href={contactMailto('Ecosystem integrations')}>{t('offers.ecosystem.cta')}</a>
-              </Button>
+              <ContactButton topic="integrations" variant="outline" className="w-full">
+                {t('offers.ecosystem.cta')}
+              </ContactButton>
             </CardContent>
           </Card>
         </Div>

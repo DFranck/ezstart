@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  Button,
   Card,
   CardContent,
   CardHeader,
@@ -16,7 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { contactMailto } from './contact'
+import { ContactButton } from './contact-button'
 
 export function PartnershipSection() {
   const t = useTranslations('home')
@@ -56,9 +55,9 @@ export function PartnershipSection() {
         </Div>
 
         <Div className="text-center mb-16">
-          <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
-            <a href={contactMailto('Partnership')}>{t('partnership.cta')}</a>
-          </Button>
+          <ContactButton topic="discuss" size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
+            {t('partnership.cta')}
+          </ContactButton>
         </Div>
       </Div>
 

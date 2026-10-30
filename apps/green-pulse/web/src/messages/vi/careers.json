@@ -129,7 +129,6 @@
         },
         "apply": {
           "title": "Cách Ứng Tuyển",
-          "instructions": "Gửi email đến **careers@greenpulse.ai** với:",
           "requirements": [
             "**Tiêu đề:** \"BD & Operations - [Tên Bạn]\"",
             "**Thư xin việc ngắn** (tối đa 300 từ) giải thích:",
@@ -140,7 +139,8 @@
             "**Tùy chọn:** Một mẫu viết (đề xuất kinh doanh, bài viết, blog post - thứ gì đó thể hiện kỹ năng giao tiếp)"
           ],
           "note": "Chúng tôi xem xét ứng tuyển liên tục. Phỏng vấn vòng đầu mang tính đối thoại - chúng tôi muốn hiểu động lực của bạn và xem có phù hợp đôi bên không.",
-          "cta": "Ứng tuyển Ngay"
+          "cta": "Ứng tuyển Ngay",
+          "formNote": "Hãy dùng biểu mẫu để giới thiệu bản thân và mô tả kinh nghiệm. Thêm liên kết tới CV hoặc portfolio nếu có."
         }
       }
     },
@@ -148,14 +148,14 @@
       "title": "Tại sao GreenPulse.AI?",
       "ourMission": {
         "title": "Sứ Mệnh",
-        "content": "Chúng tôi giúp doanh nghiệp Việt Nam và Đông Nam Á thúc đẩy tăng trưởng carbon thấp: nâng cao năng lực, cấu trúc dữ liệu đáng tin cậy và biến áp lực quy định (CBAM và CSRD của EU, sàn giao dịch carbon của Việt Nam và lộ trình triển khai ETS đến năm 2029) thành cơ hội xuất khẩu và tiếp cận nguồn vốn. Chúng tôi xây dựng trợ lý AI giúp điều này trở nên dễ tiếp cận."
+        "content": "Chúng tôi giúp các doanh nghiệp Việt Nam và Đông Nam Á đẩy nhanh tăng trưởng carbon thấp: nâng cao năng lực, cấu trúc dữ liệu đáng tin cậy và biến áp lực từ thị trường quốc tế và chính sách carbon thành cơ hội xuất khẩu và tài chính. Chúng tôi đang xây dựng trợ lý AI giúp điều này trở nên dễ tiếp cận."
       },
       "traction": {
         "title": "Kết Quả Đạt Được",
         "items": [
-          "MVP đã hoạt động, phiên bản miễn phí ra mắt vào tháng 5/2026",
-          "Ký thỏa thuận hợp tác với ICED, Đại học Quốc gia TP.HCM (tháng 6/2026)",
-          "Được giới thiệu trên VietStock (tháng 11/2025)"
+          "MVP đã hoạt động, phiên bản miễn phí mở cho những người dùng đầu tiên",
+          "Đã ký thỏa thuận hợp tác với ICED, Đại học Quốc gia TP.HCM",
+          "Được VietStock đề cập (tháng 11/2025)"
         ]
       },
       "values": {
@@ -183,12 +183,10 @@
       "title": "Liên hệ",
       "general": "Yêu cầu chung:",
       "partnership": "Cơ hội đối tác:",
-      "moreInfo": "Tìm hiểu thêm về chúng tôi:",
-      "email": "aseradni@nexora-venture.com"
+      "moreInfo": "Tìm hiểu thêm về chúng tôi:"
     },
     "footer": {
-      "eoe": "**GreenPulse.AI** là nhà tuyển dụng bình đẳng. Chúng tôi tôn vinh sự đa dạng và cam kết tạo môi trường hòa nhập cho tất cả thành viên.",
-      "updated": "Trang cập nhật lần cuối: tháng 10/2026"
+      "eoe": "**GreenPulse.AI** là nhà tuyển dụng bình đẳng. Chúng tôi tôn vinh sự đa dạng và cam kết tạo môi trường hòa nhập cho tất cả thành viên."
     }
   }
 }

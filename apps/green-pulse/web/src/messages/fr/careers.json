@@ -129,7 +129,6 @@
         },
         "apply": {
           "title": "Comment Postuler",
-          "instructions": "Envoyez un email à **careers@greenpulse.ai** avec :",
           "requirements": [
             "**Objet :** \"BD & Operations - [Votre Nom]\"",
             "**Courte lettre de motivation** (max 300 mots) expliquant :",
@@ -140,7 +139,8 @@
             "**Optionnel :** Un exemple de rédaction (proposition commerciale, article, blog post - quelque chose qui montre vos compétences en communication)"
           ],
           "note": "Nous examinons les candidatures au fur et à mesure. Les entretiens de premier tour sont conversationnels - nous voulons comprendre vos motivations et voir s'il y a une adéquation mutuelle.",
-          "cta": "Postuler Maintenant"
+          "cta": "Postuler Maintenant",
+          "formNote": "Utilisez le formulaire pour vous présenter et décrire votre expérience. Ajoutez un lien vers votre CV ou portfolio si vous en avez un."
         }
       }
     },
@@ -148,13 +148,13 @@
       "title": "Pourquoi GreenPulse.AI ?",
       "ourMission": {
         "title": "Notre Mission",
-        "content": "Nous aidons les entreprises vietnamiennes et d'Asie du Sud-Est à accélérer leur croissance bas carbone : renforcer leurs capacités, structurer des données fiables et transformer la pression réglementaire (CBAM et CSRD de l'UE, bourse carbone du Vietnam et déploiement de l'ETS jusqu'en 2029) en opportunités d'export et de financement. Nous construisons l'agent IA qui rend cela accessible."
+        "content": "Nous aidons les entreprises vietnamiennes et d'Asie du Sud-Est à accélérer une croissance bas carbone : renforcer leurs capacités, structurer des données fiables et transformer la pression des marchés internationaux et des politiques carbone en opportunités d'export et de financement. Nous construisons l'agent IA qui rend cela accessible."
       },
       "traction": {
         "title": "Notre Traction",
         "items": [
-          "MVP en ligne, version gratuite lancée en mai 2026",
-          "Partenariat signé avec l'ICED, Université nationale du Vietnam à HCMV (juin 2026)",
+          "MVP en ligne, version gratuite ouverte aux premiers utilisateurs",
+          "Partenariat signé avec l'ICED, Université nationale du Vietnam à HCMV",
           "Cité dans VietStock (novembre 2025)"
         ]
       },
@@ -183,12 +183,10 @@
       "title": "Contact",
       "general": "Demandes générales :",
       "partnership": "Opportunités de partenariat :",
-      "moreInfo": "En savoir plus sur nous :",
-      "email": "aseradni@nexora-venture.com"
+      "moreInfo": "En savoir plus sur nous :"
     },
     "footer": {
-      "eoe": "**GreenPulse.AI** est un employeur offrant l'égalité des chances. Nous célébrons la diversité et nous nous engageons à créer un environnement inclusif pour tous les membres de l'équipe.",
-      "updated": "Page mise à jour le : octobre 2026"
+      "eoe": "**GreenPulse.AI** est un employeur offrant l'égalité des chances. Nous célébrons la diversité et nous nous engageons à créer un environnement inclusif pour tous les membres de l'équipe."
     }
   }
 }

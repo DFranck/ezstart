@@ -20,6 +20,7 @@
     "@ezstart/ai-sdk": "workspace:*",
     "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/email-service": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "@green-pulse/types": "workspace:*",

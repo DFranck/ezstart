@@ -35,7 +35,7 @@
         {
           "icon": "lucide:Scale",
           "title": "Une réglementation difficile à appliquer",
-          "problem": "CBAM, CSRD, obligations de reporting et obligations REP arrivent plus vite que les entreprises ne peuvent les interpréter.",
+          "problem": "Les réglementations internationales, les obligations de reporting et de REP arrivent plus vite que les entreprises ne peuvent les interpréter.",
           "response": "Accompagnement à la conformité et mise en œuvre de la REP, alignés sur les référentiels qu'utilisent vos acheteurs et vos régulateurs."
         },
         {
@@ -71,7 +71,7 @@
       ]
     },
     "whyNow": {
-      "title": "Pourquoi maintenant : quatre forces convergent sur l'économie vietnamienne",
+      "title": "Pourquoi maintenant : quatre forces convergent sur les entreprises",
       "subtitle": "Certaines sont immédiates et contraignantes. D'autres accumulent la pression avec le temps. GP.A répond à chacune, en commençant là où le besoin est le plus urgent.",
       "changingLabel": "Ce qui change :",
       "impactLabel": "Impact sur les entreprises :",
@@ -79,29 +79,29 @@
       "forces": [
         {
           "tag": "Immédiat",
-          "title": "CBAM & CSRD de l'UE",
-          "changing": "La taxe carbone aux frontières de l'UE et les règles de transparence sur la chaîne d'approvisionnement sont en vigueur pour le fer, l'acier, l'aluminium, le ciment, les engrais et plus encore.",
-          "impact": "Les exportateurs vietnamiens doivent fournir des données d'émissions vérifiées, sous peine de perdre des contrats et l'accès au marché de l'UE.",
-          "response": "Évaluation de la préparation à l'export et données structurées pour votre logiciel de reporting (ESG, GRI, alignées CSRD)."
+          "title": "Réglementations internationales",
+          "changing": "Les marchés d'exportation durcissent les exigences de divulgation carbone et de chaîne d'approvisionnement pour les biens qu'ils importent.",
+          "impact": "Les exportateurs doivent fournir des données d'émissions vérifiées, sous peine de perdre des contrats et l'accès au marché.",
+          "response": "Évaluation de la préparation à l'export et données structurées pour votre logiciel de reporting (rapports ESG, d'audit et officiels)."
         },
         {
           "tag": "Court terme",
-          "title": "Cascade de reporting en ASEAN",
-          "changing": "La bourse carbone nationale du Vietnam a démarré le 29 juin 2026 (HNX). Environ 150 installations de l'énergie, de l'acier et du ciment détiennent désormais des quotas échangeables.",
-          "impact": "Ces entreprises doivent produire un rapport ESG et pressent leurs fournisseurs PME de leur fournir des données d'émissions que ceux-ci n'ont jamais suivies.",
+          "title": "Effet de cascade du reporting",
+          "changing": "Les grandes entreprises et les secteurs réglementés doivent désormais publier des rapports officiels (ESG, audit, émissions).",
+          "impact": "Elles demandent à leurs fournisseurs PME des données d'émissions que ceux-ci n'ont jamais suivies.",
           "response": "Collecte de données guidée pour que les fournisseurs puissent répondre aux demandes de leurs acheteurs avec des chiffres crédibles."
         },
         {
           "tag": "Croissante",
           "title": "Pression du crédit vert",
-          "changing": "Les lignes directrices de la SBV sur le crédit vert s'élargissent.",
-          "impact": "La documentation verte devient de plus en plus une condition d'accès au financement, et non un simple atout, même en dehors des secteurs couverts par l'ETS.",
+          "changing": "Les banques élargissent leurs lignes directrices de crédit vert.",
+          "impact": "La documentation verte devient de plus en plus une condition d'accès au financement, et non plus un simple bonus, même hors des secteurs réglementés.",
           "response": "Score d'éligibilité aux prêts verts, écarts, feuille de route et délai estimé de préparation."
         },
         {
           "tag": "Moyen terme",
-          "title": "Déploiement complet de l'ETS en 2029",
-          "changing": "La phase pilote (2025-2028) s'étend par étapes vers un système d'échange avec mise aux enchères à partir de 2029, selon la feuille de route du gouvernement lui-même.",
+          "title": "Périmètre élargi des marchés carbone",
+          "changing": "Les mécanismes de tarification et d'échange du carbone s'étendent par phases vers l'ensemble de l'économie.",
           "impact": "Des secteurs et des tailles d'entreprise non couverts aujourd'hui entreront dans le périmètre, avec peu de préavis.",
           "response": "Les entreprises qui commencent dès maintenant à structurer leurs données seront déjà prêtes quand le périmètre s'élargira."
         }
@@ -138,7 +138,7 @@
           "items": [
             "Plans d'action pas à pas et renforcement des capacités de vos équipes",
             "Préparation à l'export, avant l'expédition et non après",
-            "Accompagnement à la certification : écolabels (dont Vietnam Green Label / VECC-MONRE), ISO et normes d'export. Nous structurons votre dossier de preuves ; l'autorité de certification conserve son rôle",
+            "Accompagnement à la certification : écolabels, ISO et normes d'export. Nous structurons votre dossier de preuves ; l'autorité de certification garde son rôle",
             "Analyse des écarts et stratégie pour combler ceux qui restent"
           ]
         },
@@ -254,7 +254,7 @@
           "icon": "lucide:Wheat",
           "title": "Agro-industrie : accès à l'export et finance verte",
           "challenge": "Les acheteurs de l'UE, des États-Unis et de Chine exigent des preuves de durabilité documentées.",
-          "solution": "Accompagnement sur la liste de contrôle de conformité de l'UE, reporting prêt pour l'export, analyse des écarts et plan d'action.",
+          "solution": "Guide de conformité par marché cible, reporting prêt pour l'export, analyse des écarts et plan d'action.",
           "result": "Objectifs : réussir les audits des acheteurs, conserver ou étendre les contrats d'export et améliorer le positionnement pour le financement vert.",
           "tags": ["Agriculture", "Préparation à l'export", "Finance verte"]
         },
@@ -288,7 +288,7 @@
         },
         {
           "feature": "Expertise",
-          "greenpulse": "Construit autour des référentiels internationaux et de la réglementation vietnamienne (CBAM, CSRD, GRI, ISO, VECC-MONRE)",
+          "greenpulse": "Conçu autour des normes internationales et de la réglementation locale (ISO, rapports ESG et d'audit)",
           "software": "Listes de contrôle de conformité manuelles",
           "ai": "Réponses génériques, risque d'hallucination"
         },
@@ -346,11 +346,13 @@
           {
             "name": "PRO",
             "status": "Bientôt disponible",
-            "description": "Toutes les fonctionnalités Premium, plus un accompagnement sur mesure pour les normes officielles et internationales : certification, export et finance verte."
+            "description": "Toutes les fonctionnalités Premium, plus un accompagnement sur mesure pour les normes officielles et internationales : certification, export et finance verte.",
+            "requestAccess": true
           }
         ],
         "audience": ["Entreprises d'ASEAN", "Dirigeants de PME"],
-        "cta": "Essayer GP.A gratuitement"
+        "cta": "Essayer GP.A gratuitement",
+        "proCta": "Demander l'accès PRO"
       },
       "ecosystem": {
         "title": "Intégrations d'écosystème",
@@ -410,12 +412,12 @@
         {
           "icon": "lucide:Rocket",
           "title": "Produit en ligne",
-          "description": "Le MVP de GP.A est en ligne : agent conversationnel, application web et panneau d'administration. Lancement officiel en mai 2026 avec la version gratuite."
+          "description": "Le MVP de GP.A est en ligne : agent conversationnel, application web et panneau d'administration. La version gratuite est ouverte aux premiers utilisateurs."
         },
         {
           "icon": "lucide:GraduationCap",
           "title": "Partenaire de recherche et institutionnel",
-          "description": "Partenariat signé en juin 2026 avec l'Institute for Circular Economy Development (ICED), Université nationale du Vietnam à HCMV, pour le co-développement, des candidatures conjointes à des financements, le renforcement des capacités et la crédibilité institutionnelle."
+          "description": "Partenariat signé avec l'Institute for Circular Economy Development (ICED), Université nationale du Vietnam à HCMV, pour le co-développement, les candidatures à des financements conjoints, le renforcement des capacités et la crédibilité institutionnelle."
         },
         {
           "icon": "lucide:Mic",
@@ -435,7 +437,7 @@
           {
             "name": "Amber Seradni",
             "role": "CEO & cofondatrice",
-            "description": "Plus de 12 ans en stratégie de croissance durable auprès d'organismes gouvernementaux et du secteur privé. Conseillère des Nations unies et consultante CSSO. Pilote la vision, la stratégie, le positionnement, les partenariats et la direction produit."
+            "description": "Plus de 12 ans d'expérience en stratégie de croissance durable auprès d'organismes publics et du secteur privé. Porte la vision, la stratégie, le positionnement, les partenariats et la direction produit."
           },
           {
             "name": "Franck Dufournet",
@@ -450,19 +452,19 @@
       "questions": [
         {
           "question": "En quoi GreenPulse diffère-t-il de ChatGPT ou d'autres outils d'IA généralistes ?",
-          "answer": "GP.A est conçu pour le travail sur le climat et la durabilité. Il s'appuie sur les référentiels internationaux (GRI, CSRD, ISO) et sur les exigences vietnamiennes et européennes, et se connecte à vos propres sources de données. Il produit des résultats structurés qui alimentent vos outils de reporting, et non du texte générique à relire manuellement."
+          "answer": "GP.A est conçu pour le travail climat et durabilité. Il s'appuie sur les normes internationales (ISO, reporting ESG et d'audit) et sur la réglementation locale, et se connecte à vos propres sources de données. Il produit des sorties structurées qui alimentent vos outils de reporting, et non un texte générique à relire à la main."
         },
         {
           "question": "Mes données sont-elles sécurisées ? Les partagez-vous avec des tiers ?",
-          "answer": "FORMULE GRATUITE : vos conversations utilisent des fournisseurs d'IA tiers (OpenAI, Anthropic). Les données sont transmises à leurs serveurs (basés aux États-Unis) pour traitement. Ces fournisseurs peuvent utiliser les données de conversation pour l'amélioration des modèles, sauf opt-out. FORMULES PREMIUM & PRO : nous proposons des modèles d'IA hébergés localement (Llama 3) déployés en Asie du Sud-Est. Vos données ne quittent jamais notre infrastructure, ce qui garantit une souveraineté totale des données, aucun partage avec des tiers et la conformité aux exigences locales de résidence des données. Toutes les données sont chiffrées en transit (HTTPS) et au repos (AES-256)."
+          "answer": "OFFRE GRATUITE : vos conversations utilisent des fournisseurs d'IA tiers (OpenAI, Anthropic). Les données sont transmises à leurs serveurs (basés aux États-Unis) pour traitement. Ces fournisseurs peuvent utiliser les données de conversation pour améliorer leurs modèles, sauf opposition de votre part. OFFRES PREMIUM ET PRO (bientôt disponibles) : nous prévoyons de proposer des modèles d'IA hébergés localement (Llama 3) en Asie du Sud-Est, afin que vos données restent au sein de notre infrastructure, sans partage avec des tiers et conformément aux exigences locales de résidence des données. Toutes les données sont chiffrées en transit (HTTPS) et au repos (AES-256)."
         },
         {
           "question": "Remplacez-vous un organisme de certification ou un auditeur ?",
-          "answer": "Non. GP.A structure votre dossier de preuves, identifie les écarts et vous prépare aux écolabels (dont Vietnam Green Label / VECC-MONRE), à l'ISO et aux normes d'export. L'autorité de certification et tout vérificateur indépendant conservent leur rôle."
+          "answer": "Non. GP.A structure votre dossier de preuves, identifie les écarts et vous prépare aux écolabels, à l'ISO et aux normes d'export. L'autorité de certification et tout vérificateur indépendant gardent leur rôle."
         },
         {
           "question": "L'IA ne génère-t-elle pas des émissions ? Comment gérez-vous cela ?",
-          "answer": "Oui, le calcul de l'IA génère des émissions, c'est pourquoi nous compensons 200 % de notre empreinte carbone grâce à des projets vérifiés de captage du carbone. Plus important encore, l'automatisation de GreenPulse réduit le besoin de déplacements, de rapports papier et de travail manuel redondant, ce qui se traduit par un impact carbone net négatif pour nos utilisateurs."
+          "answer": "Oui, le calcul de l'IA génère des émissions, c'est pourquoi nous maîtrisons notre propre empreinte. L'automatisation de GreenPulse vise aussi à réduire les déplacements, les rapports papier et le travail manuel redondant pour nos utilisateurs."
         },
         {
           "question": "GreenPulse peut-il s'intégrer à nos outils existants ?",
@@ -479,6 +481,30 @@
       "description": "Parlez-nous de vos défis, ou commencez à explorer GP.A gratuitement.",
       "discuss": "Parlons de vos défis",
       "getStarted": "Essayer GP.A gratuitement"
+    },
+    "contact": {
+      "description": "Parlez-nous de votre entreprise et de vos besoins. Nous revenons vers vous dans les plus brefs délais.",
+      "company": "Nom de l'entreprise",
+      "companyPlaceholder": "Votre entreprise",
+      "email": "E-mail",
+      "emailPlaceholder": "nom@entreprise.com",
+      "message": "Vos besoins",
+      "messagePlaceholder": "Décrivez votre défi ou ce que vous souhaitez faire avec GP.A",
+      "submit": "Envoyer",
+      "sending": "Envoi en cours...",
+      "cancel": "Annuler",
+      "success": "Merci ! Nous revenons vers vous dans les plus brefs délais.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "topics": {
+        "discuss": "Parlons de vos défis",
+        "white-label": "White-label + License",
+        "integrations": "Intégrations écosystème",
+        "pro": "Demander l'accès PRO",
+        "general": "Nous contacter",
+        "careers": "Candidature : Business Development & Operations Support"
+      },
+      "name": "Votre nom",
+      "namePlaceholder": "Votre nom complet"
     }
   }
 }

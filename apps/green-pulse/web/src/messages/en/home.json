@@ -35,7 +35,7 @@
         {
           "icon": "lucide:Scale",
           "title": "Regulation that is hard to apply",
-          "problem": "CBAM, CSRD, reporting duties and EPR obligations arrive faster than businesses can interpret them.",
+          "problem": "International regulations, reporting duties and EPR obligations arrive faster than businesses can interpret them.",
           "response": "Compliance support and EPR implementation, aligned with the frameworks your buyers and regulators use."
         },
         {
@@ -71,7 +71,7 @@
       ]
     },
     "whyNow": {
-      "title": "Why now: four forces converging on the Vietnamese economy",
+      "title": "Why now: four forces converging on businesses",
       "subtitle": "Some are immediate and binding. Others build pressure over time. GP.A addresses each one, starting where the need is most urgent.",
       "changingLabel": "What is changing:",
       "impactLabel": "Impact on businesses:",
@@ -79,29 +79,29 @@
       "forces": [
         {
           "tag": "Immediate",
-          "title": "EU CBAM & CSRD",
-          "changing": "The EU carbon border tax and supply chain disclosure rules are in force for iron, steel, aluminium, cement, fertiliser and more.",
-          "impact": "Vietnamese exporters must supply verified emissions data or risk losing EU contracts and market access.",
-          "response": "Export readiness assessment and structured data for your reporting software (ESG, GRI, CSRD-aligned)."
+          "title": "International regulations",
+          "changing": "Export markets are tightening carbon and supply chain disclosure requirements for the goods they import.",
+          "impact": "Exporters must supply verified emissions data or risk losing contracts and market access.",
+          "response": "Export readiness assessment and structured data for your reporting software (ESG, audit and official reports)."
         },
         {
           "tag": "Near-term",
-          "title": "Reporting cascade in ASEAN",
-          "changing": "Vietnam's domestic carbon exchange went live on 29 June 2026 (HNX). About 150 facilities in power, steel and cement now hold tradable quotas.",
-          "impact": "These companies must have an ESG report and are pressing their SME suppliers for emissions data those suppliers have never tracked.",
+          "title": "Reporting cascade",
+          "changing": "Large companies and regulated sectors now have to publish official reports (ESG, audit, emissions).",
+          "impact": "They press their SME suppliers for emissions data those suppliers have never tracked.",
           "response": "Guided data collection so suppliers can answer buyer requests with credible numbers."
         },
         {
           "tag": "Growing",
           "title": "Green credit pressure",
-          "changing": "SBV green credit guidelines are expanding.",
-          "impact": "Green documentation is increasingly a gate to financing, not just a bonus, even outside the sectors covered by the ETS.",
+          "changing": "Banks are expanding their green credit guidelines.",
+          "impact": "Green documentation is increasingly a gate to financing, not just a bonus, even outside regulated sectors.",
           "response": "Green loan eligibility scoring, gaps, a roadmap and an estimated readiness timeline."
         },
         {
           "tag": "Mid-term",
-          "title": "Full ETS rollout in 2029",
-          "changing": "The pilot phase (2025-2028) expands in phases to trading with auctioning from 2029, according to the government's own roadmap.",
+          "title": "Wider carbon-market scope",
+          "changing": "Carbon pricing and trading schemes are expanding in phases toward economy-wide coverage.",
           "impact": "Sectors and company sizes not covered today will come into scope, with little warning.",
           "response": "Businesses that start structuring their data now will already be prepared when the scope widens."
         }
@@ -138,7 +138,7 @@
           "items": [
             "Step-by-step action plans and capacity building for your teams",
             "Export readiness, before the shipment and not after",
-            "Certification accompaniment: eco-labels (including Vietnam Green Label / VECC-MONRE), ISO and export standards. We structure your evidence file; the certifying authority keeps its role",
+            "Certification accompaniment: eco-labels, ISO and export standards. We structure your evidence file; the certifying authority keeps its role",
             "Gap analysis and a strategy to close the remaining gaps"
           ]
         },
@@ -251,7 +251,7 @@
           "icon": "lucide:Wheat",
           "title": "Agribusiness: export access and green finance",
           "challenge": "EU, US and Chinese buyers require documented sustainability evidence.",
-          "solution": "EU compliance checklist guidance, export-ready reporting, gap analysis and an action plan.",
+          "solution": "Compliance checklist guidance for target markets, export-ready reporting, gap analysis and an action plan.",
           "result": "Targets: pass buyer audits, keep or expand export contracts and improve positioning for green financing.",
           "tags": ["Agriculture", "Export readiness", "Green finance"]
         },
@@ -285,7 +285,7 @@
         },
         {
           "feature": "Expertise",
-          "greenpulse": "Built around international frameworks and Vietnamese regulation (CBAM, CSRD, GRI, ISO, VECC-MONRE)",
+          "greenpulse": "Built around international standards and local regulation (ISO, ESG and audit reports)",
           "software": "Manual compliance checklists",
           "ai": "Generic answers, risk of hallucination"
         },
@@ -343,11 +343,13 @@
           {
             "name": "PRO",
             "status": "Coming soon",
-            "description": "All Premium features plus tailored support for official and international standards: certification, export and green finance."
+            "description": "All Premium features plus tailored support for official and international standards: certification, export and green finance.",
+            "requestAccess": true
           }
         ],
         "audience": ["ASEAN companies", "SME owners"],
-        "cta": "Try GP.A for free"
+        "cta": "Try GP.A for free",
+        "proCta": "Request PRO access"
       },
       "ecosystem": {
         "title": "Ecosystem integrations",
@@ -407,12 +409,12 @@
         {
           "icon": "lucide:Rocket",
           "title": "Live product",
-          "description": "The GP.A MVP is live: conversational agent, web app and admin panel. Official launch in May 2026 with the free version."
+          "description": "The GP.A MVP is live: conversational agent, web app and admin panel. The free version is open to first users."
         },
         {
           "icon": "lucide:GraduationCap",
           "title": "Research and institutional partner",
-          "description": "Partnership signed in June 2026 with the Institute for Circular Economy Development (ICED), Vietnam National University HCMC, for co-development, joint funding applications, capacity building and institutional credibility."
+          "description": "Partnership signed with the Institute for Circular Economy Development (ICED), Vietnam National University HCMC, for co-development, joint funding applications, capacity building and institutional credibility."
         },
         {
           "icon": "lucide:Mic",
@@ -432,7 +434,7 @@
           {
             "name": "Amber Seradni",
             "role": "CEO & Co-founder",
-            "description": "12+ years in sustainable growth strategy across governmental bodies and the private sector. United Nations advisor and CSSO consultant. Owns vision, strategy, positioning, partnerships and product direction."
+            "description": "12+ years in sustainable growth strategy across governmental bodies and the private sector. Owns vision, strategy, positioning, partnerships and product direction."
           },
           {
             "name": "Franck Dufournet",
@@ -447,19 +449,19 @@
       "questions": [
         {
           "question": "How is GreenPulse different from ChatGPT or other general AI tools?",
-          "answer": "GP.A is built for climate and sustainability work. It is guided by international frameworks (GRI, CSRD, ISO) and by Vietnamese and EU requirements, and it connects to your own data sources. It produces structured outputs that feed your reporting tools, not generic text that needs manual review."
+          "answer": "GP.A is built for climate and sustainability work. It is guided by international standards (ISO, ESG and audit reporting) and by local regulation, and it connects to your own data sources. It produces structured outputs that feed your reporting tools, not generic text that needs manual review."
         },
         {
           "question": "Is my data secure? Do you share it with third parties?",
-          "answer": "FREE PLAN: your conversations use third-party AI providers (OpenAI, Anthropic). Data is transmitted to their servers (US-based) for processing. These providers may use conversation data for model improvement unless opted-out. PREMIUM & PRO PLANS: we offer locally-hosted AI models (Llama 3) deployed in Southeast Asia. Your data never leaves our infrastructure, ensuring full data sovereignty, zero third-party sharing, and compliance with local data residency requirements. All data is encrypted in transit (HTTPS) and at rest (AES-256)."
+          "answer": "FREE PLAN: your conversations use third-party AI providers (OpenAI, Anthropic). Data is transmitted to their servers (US-based) for processing. These providers may use conversation data for model improvement unless opted-out. PREMIUM & PRO PLANS (coming soon): we plan to offer locally-hosted AI models (Llama 3) deployed in Southeast Asia, so that your data stays within our infrastructure, with no third-party sharing and in line with local data residency requirements. All data is encrypted in transit (HTTPS) and at rest (AES-256)."
         },
         {
           "question": "Do you replace a certifying body or an auditor?",
-          "answer": "No. GP.A structures your evidence file, identifies gaps and prepares you for eco-labels (including Vietnam Green Label / VECC-MONRE), ISO and export standards. The certifying authority and any independent verifier keep their role."
+          "answer": "No. GP.A structures your evidence file, identifies gaps and prepares you for eco-labels, ISO and export standards. The certifying authority and any independent verifier keep their role."
         },
         {
           "question": "Doesn't AI generate emissions? How do you manage this?",
-          "answer": "Yes, AI computing does generate emissions, which is why we offset 200% of our carbon footprint through verified carbon removal projects. More importantly, GreenPulse's automation reduces the need for travel, paper reports, and redundant manual work, resulting in a net-negative carbon impact for our users."
+          "answer": "Yes, AI computing does generate emissions, which is why we keep our own footprint in check. GreenPulse's automation also aims to reduce travel, paper reports and redundant manual work for our users."
         },
         {
           "question": "Can GreenPulse integrate with our existing tools?",
@@ -476,6 +478,30 @@
       "description": "Discuss your challenges with us, or start exploring with GP.A for free.",
       "discuss": "Discuss your challenges",
       "getStarted": "Try GP.A for free"
+    },
+    "contact": {
+      "description": "Tell us about your company and your needs. We will get back to you shortly.",
+      "company": "Company name",
+      "companyPlaceholder": "Your company",
+      "email": "Email",
+      "emailPlaceholder": "name@company.com",
+      "message": "Your needs",
+      "messagePlaceholder": "Describe your challenge or what you would like to do with GP.A",
+      "submit": "Send",
+      "sending": "Sending...",
+      "cancel": "Cancel",
+      "success": "Thank you! We will get back to you shortly.",
+      "error": "Something went wrong. Please try again.",
+      "topics": {
+        "discuss": "Discuss your challenges",
+        "white-label": "White-label + License",
+        "integrations": "Ecosystem integrations",
+        "pro": "Request PRO access",
+        "general": "Contact us",
+        "careers": "Apply: Business Development & Operations Support"
+      },
+      "name": "Your name",
+      "namePlaceholder": "Your full name"
     }
   }
 }

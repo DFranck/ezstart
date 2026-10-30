@@ -33,7 +33,7 @@ export const organizationSchema: WithContext<Thing> = {
   },
   contactPoint: {
     '@type': 'ContactPoint',
-    email: 'aseradni@nexora-venture.com',
+    url: 'https://www.ai-greenpulse.com/#partnership',
     contactType: 'Customer Service',
   },
   sameAs: ['https://www.linkedin.com/company/greenpulse-ai', 'https://twitter.com/greenpulseai'],
